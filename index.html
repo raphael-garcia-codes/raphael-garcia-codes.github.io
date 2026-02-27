@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currículo - Raphael Garcia</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #2980b9;
+            --text-color: #333333;
+            --bg-color: #f4f7f6;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--white);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        header {
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            color: var(--secondary-color);
+            font-size: 0.95em;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+            margin-top: 30px;
+        }
+
+        .job-card {
+            margin-bottom: 25px;
+        }
+
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .job-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: var(--accent-color);
+        }
+
+        .company-name {
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        .job-date {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin-top: 5px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+            .job-header {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Raphael Garcia</h1>
+        <div class="contact-info">
+            <span>Brasileiro, 25 anos - Solteiro</span>
+            <span>Rua Maria Alice Ancies, 65, Imirim, São Paulo - SP</span>
+            <span>Cel: 11 5701-1179</span>
+            <span>Email: raphael.garcia.sp@gmail.com</span>
+        </div>
+    </header>
+
+    <section>
+        <h2>Qualificações e Habilidades</h2>
+        <ul>
+            <li>Possuo um perfil objetivo e estrategista, de comunicação clara e grande capacidade de trabalhar em equipe.</li>
+            <li>Experiência na área de desenvolvimento de sistemas, operação e infraestrutura em empresas de grande porte nos seguimentos Financeiro, Comercial e Telecomunicações.</li>
+            <li>Experiência na análise e reestruturação de rotinas para o ambiente de produção em plataformas distribuídas, criando, implantando, documentando e executando cargas de processamento.</li>
+            <li>Habilidades em organização, criatividade, administração de tempo, atenção, análise de problemas e capacidade de aprender a me tornar um profissional autodidata.</li>
+            <li>Seis anos de experiência no mercado Financeiro e de Telecomunicações.</li>
+            <li>Conhecimentos sólidos do negócio nas áreas de Seguros e Billing (arrecadação e cobrança).</li>
+            <li>Implantação de grandes projetos no mercado Financeiro, como o Descasamento de Base entre Corretora e Seguradora.</li>
+            <li>Implantação de grandes projetos de telecomunicações, incluindo Histórico Fácil, SMP11 Anatel e normas FEBRABAN.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>Experiência Profissional</h2>
+
+        <div class="job-card">
+            <div class="job-header">
+                <div>
+                    <span class="company-name">TELVENT GLOBAL SERVICE (Outsourcing SANTANDER)</span>
+                    <br>
+                    <span class="job-title">Consultor de Sistemas Sr</span>
+                </div>
+                <span class="job-date">Dezembro de 2010 até os dias atuais</span>
+            </div>
+            <ul>
+                <li>Atuação no Sistema de Seguros e Financeira, realizando gestão de projetos, análise funcional e elaboração de especificações.</li>
+                <li>Desenvolvimento e manutenção utilizando Forms 6i, Reports 6.0, PL/SQL e Oracle Designer 6i.</li>
+                <li>Atividades realizadas nos módulos de Pagamento de Comissões, Sinistros, Contabilidade, Emissão de Propostas e Cobrança.</li>
+            </ul>
+        </div>
+
+        <div class="job-card">
+            <div class="job-header">
+                <div>
+                    <span class="company-name">DBA ENJOY YOUR BUSINESS (Outsourcing VIVO)</span>
+                    <br>
+                    <span class="job-title">Analista de Sistemas Sr</span>
+                </div>
+                <span class="job-date">Fevereiro de 2008 até Dezembro de 2010</span>
+            </div>
+            <ul>
+                <li>Atuação no sistema de faturamento pós-pago (BILLING), responsável por relatórios usando regras de negócio complexas.</li>
+                <li>Identificação de melhorias de performance em storage procedures, packages e functions aplicando polimorfismo nos scripts SQL e shellscript's schedulados no Control-M.</li>
+                <li>Suporte de 3º nível realizando análise de chamados e problemas.</li>
+            </ul>
+        </div>
+
+        <div class="job-card">
+            <div class="job-header">
+                <div>
+                    <span class="company-name">TIVIT TERCERIZAO (Outsourcing OESP)</span>
+                    <br>
+                    <span class="job-title">Analista de Produção</span>
+                </div>
+                <span class="job-date">Maio de 2007 até Fevereiro de 2008</span>
+            </div>
+            <ul>
+                <li>Criação, schedulagem, monitoração e tratamentos de erros via Control-M/for sap e Workload.</li>
+                <li>Tratamento de erro de shellscripts, batchs e jobs no sap.</li>
+                <li>Garantia de qualidade dos produtos e insumos dos sistemas.</li>
+                <li>Criação de relatórios operacionais e análise de dados para decisões preventivas e corretivas.</li>
+                <li>Suporte operacional e abertura de chamados para áreas internas.</li>
+            </ul>
+        </div>
+
+        <div class="job-card">
+            <div class="job-header">
+                <div>
+                    <span class="company-name">CHIPTEK (Outsourcing VIVO)</span>
+                    <br>
+                    <span class="job-title">Operador de Computador</span>
+                </div>
+                <span class="job-date">Janeiro de 2006 até Maio de 2007</span>
+            </div>
+            <ul>
+                <li>Controle de versão, operacionalização de jobs, liberação de ativos e monitoramento.</li>
+                <li>Monitoramento de backup e restore (netbackup,
