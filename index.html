@@ -102,6 +102,30 @@
             gap: 20px;
         }
 
+        /* Estilos para o botão do DevToolKit */
+        .btn-toolkit {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: var(--white);
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-toolkit:hover {
+            background-color: var(--primary-color);
+        }
+
+        .projects-section {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid var(--accent-color);
+        }
+
         @media (max-width: 600px) {
             .skills-grid {
                 grid-template-columns: 1fr;
@@ -118,9 +142,9 @@
     <header>
         <h1>Raphael Garcia</h1>
         <div class="contact-info">
-            <span>Brasileiro, 39 anos - Casado</span>
-            <span>São Paulo - SP</span>
-            <span>Cel: (11) 95701-1179</span>
+            <span>Brasileiro, 25 anos - Solteiro</span>
+            <span>Rua Maria Alice Ancies, 65, Imirim, São Paulo - SP</span>
+            <span>Cel: 11 5701-1179</span>
             <span>Email: raphael.garcia.sp@gmail.com</span>
         </div>
     </header>
@@ -203,5 +227,22 @@
             </div>
             <ul>
                 <li>Controle de versão, operacionalização de jobs, liberação de ativos e monitoramento.</li>
+                <li>Monitoramento de backup e restore (netbackup).</li>
+            </ul>
+        </div>
+    </section>
 
-                <li>Monitoramento de backup e restore (netbackup,
+    <!-- INÍCIO DA SESSÃO DO DEVTOOLKIT -->
+    <section class="projects-section">
+        <h2 style="border: none; margin-top: 0; padding-bottom: 0;">Meus Projetos</h2>
+        <p>Conheça também meu kit de ferramentas voltado para desenvolvedores:</p>
+        <a href="DevToolKit.html" target="_blank" class="btn-toolkit">
+            Acessar DevToolKit
+        </a>
+    </section>
+    <!-- FIM DA SESSÃO DO DEVTOOLKIT -->
+
+</div>
+
+</body>
+</html>
