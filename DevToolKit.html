@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevToolKit — Ferramentas para Desenvolvedores</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{--bg-0:#09090B;--bg-1:#0F0F12;--bg-2:#18181B;--bg-3:#27272A;--bg-4:#3F3F46;--text-0:#FAFAFA;--text-1:#D4D4D8;--text-2:#A1A1AA;--text-3:#71717A;--accent:#FBBF24;--accent-dim:rgba(251,191,36,0.08);--accent-hover:#F59E0B;--success:#34D399;--error:#F87171;--info:#2DD4BF}
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Space Grotesk',sans-serif;background:var(--bg-0);color:var(--text-0);overflow-x:hidden}
+        .font-mono{font-family:'JetBrains Mono',monospace}
+        ::-webkit-scrollbar{width:6px;height:6px}
+        ::-webkit-scrollbar-track{background:transparent}
+        ::-webkit-scrollbar-thumb{background:var(--bg-4);border-radius:3px}
+        ::-webkit-scrollbar-thumb:hover{background:var(--text-3)}
+        #sidebar{transition:transform .3s cubic-bezier(.4,0,.2,1)}
+        #sidebar.open{transform:translateX(0)!important}
+        .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;transition:all .15s;color:var(--text-2);font-size:13px;font-weight:500}
+        .nav-item:hover{background:var(--bg-3);color:var(--text-0)}
+        .nav-item.active{background:var(--accent-dim);color:var(--accent);border-left:2px solid var(--accent)}
+        .nav-item i{width:18px;text-align:center;font-size:12px}
+        .cat-header{display:flex;align-items:center;gap:8px;padding:10px 12px 6px;cursor:pointer;color:var(--text-3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;user-select:none}
+        .cat-header i.chevron{font-size:8px;transition:transform .2s}
+        .cat-header.collapsed i.chevron{transform:rotate(-90deg)}
+        .cat-tools{overflow:hidden;transition:max-height .3s ease}
+        .cat-tools.collapsed{max-height:0!important}
+        .tool-label{display:block;font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:6px}
+        .tool-textarea,.tool-input{width:100%;background:var(--bg-2);border:1px solid var(--bg-4);border-radius:10px;padding:12px 14px;color:var(--text-0);font-family:'JetBrains Mono',monospace;font-size:13px;resize:vertical;outline:none;transition:border-color .2s}
+        .tool-textarea:focus,.tool-input:focus{border-color:var(--accent)}
+        .tool-textarea::placeholder,.tool-input::placeholder{color:var(--text-3)}
+        .tool-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:'Space Grotesk',sans-serif}
+        .tool-btn.primary{background:var(--accent);color:#000}
+        .tool-btn.primary:hover{background:var(--accent-hover);transform:translateY(-1px)}
+        .tool-btn.primary:active{transform:translateY(0)}
+        .tool-btn.secondary{background:var(--bg-3);color:var(--text-1)}
+        .tool-btn.secondary:hover{background:var(--bg-4);color:var(--text-0)}
+        .tool-btn.small{padding:6px 12px;font-size:12px;border-radius:8px}
+        .tool-output{background:var(--bg-2);border:1px solid var(--bg-4);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:13px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;position:relative}
+        .tool-output .copy-btn{position:absolute;top:8px;right:8px;background:var(--bg-3);border:none;color:var(--text-2);padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;transition:all .15s;font-family:'Space Grotesk',sans-serif}
+        .tool-output .copy-btn:hover{background:var(--bg-4);color:var(--text-0)}
+        .syn-key{color:#7DD3FC}.syn-str{color:#86EFAC}.syn-num{color:#FDE68A}.syn-bool{color:#FCA5A5}.syn-null{color:#C4B5FD}.syn-kw{color:#FBBF24;font-weight:600}.syn-fn{color:#7DD3FC}.syn-cm{color:var(--text-3);font-style:italic}.syn-tag{color:#7DD3FC}.syn-attr{color:#FBBF24}
+        .diff-line{padding:2px 12px;border-left:3px solid transparent}
+        .diff-equal{color:var(--text-2)}.diff-added{background:rgba(52,211,153,.08);border-left-color:var(--success);color:var(--success)}.diff-removed{background:rgba(248,113,113,.08);border-left-color:var(--error);color:var(--error)}
+        .diff-line-num{display:inline-block;width:40px;text-align:right;margin-right:16px;color:var(--text-3);user-select:none}
+        .dash-card{background:var(--bg-2);border:1px solid var(--bg-4);border-radius:14px;padding:20px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+        .dash-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);transform:scaleX(0);transition:transform .3s;transform-origin:left}
+        .dash-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 30px rgba(251,191,36,.08)}
+        .dash-card:hover::before{transform:scaleX(1)}
+        .dash-card .card-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--accent-dim);color:var(--accent);font-size:16px;margin-bottom:12px}
+        .toast{display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:500;transform:translateX(120%);transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:0 8px 30px rgba(0,0,0,.4);min-width:220px}
+        .toast.show{transform:translateX(0)}
+        .toast-success{background:#064E3B;color:#6EE7B7;border:1px solid #065F46}
+        .toast-error{background:#450A0A;color:#FCA5A5;border:1px solid #7F1D1D}
+        .toast-info{background:#042F2E;color:#5EEAD4;border:1px solid #134E4A}
+        .regex-match{background:rgba(251,191,36,.25);border-radius:2px;padding:0 1px}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        .fade-up{animation:fadeUp .35s ease-out}
+        .bg-grid{background-image:radial-gradient(circle,var(--bg-4) 1px,transparent 1px);background-size:32px 32px}
+        .toggle{position:relative;width:40px;height:22px;cursor:pointer;display:inline-block}
+        .toggle input{display:none}
+        .toggle-slider{position:absolute;inset:0;background:var(--bg-4);border-radius:11px;transition:.2s}
+        .toggle-slider::before{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:var(--text-2);top:3px;left:3px;transition:.2s}
+        .toggle input:checked+.toggle-slider{background:var(--accent)}
+        .toggle input:checked+.toggle-slider::before{transform:translateX(18px);background:#000}
+        .strength-bar{height:4px;border-radius:2px;background:var(--bg-4);overflow:hidden}
+        .strength-fill{height:100%;border-radius:2px;transition:all .3s}
+        .color-swatch{width:100%;height:120px;border-radius:12px;border:1px solid var(--bg-4);transition:background .2s}
+        input[type="range"]{-webkit-appearance:none;width:100%;height:6px;border-radius:3px;background:var(--bg-4);outline:none}
+        input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--bg-0)}
+        .md-h1{font-size:2em;font-weight:700;margin:1em 0 .5em;color:var(--text-0);border-bottom:2px solid var(--bg-4);padding-bottom:.3em}
+        .md-h2{font-size:1.5em;font-weight:700;margin:.8em 0 .4em;color:var(--text-0)}
+        .md-h3{font-size:1.25em;font-weight:600;margin:.6em 0 .3em;color:var(--text-1)}
+        .md-h4{font-size:1.1em;font-weight:600;margin:.5em 0 .25em;color:var(--text-1)}
+        .md-h5,.md-h6{font-size:1em;font-weight:600;margin:.4em 0 .2em;color:var(--text-2)}
+        .md-p{margin:.5em 0;line-height:1.7;color:var(--text-1)}
+        .md-code-block{background:var(--bg-0);border:1px solid var(--bg-4);border-radius:10px;padding:16px;overflow-x:auto;margin:1em 0;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6}
+        .md-inline-code{background:var(--bg-3);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.9em;color:var(--accent)}
+        .md-blockquote{border-left:3px solid var(--accent);padding:8px 16px;margin:.8em 0;background:var(--accent-dim);border-radius:0 8px 8px 0;color:var(--text-2)}
+        .md-list{padding-left:1.5em;margin:.5em 0}.md-list li{margin:.3em 0;line-height:1.6;color:var(--text-1)}.md-list li::marker{color:var(--accent)}
+        .md-hr{border:none;border-top:1px solid var(--bg-4);margin:1.5em 0}
+        .md-link{color:var(--accent);text-decoration:underline;text-underline-offset:2px}.md-link:hover{color:var(--accent-hover)}
+        .md-table{width:100%;border-collapse:collapse;margin:1em 0}
+        .md-table th{background:var(--bg-3);padding:10px 14px;text-align:left;font-size:13px;font-weight:600;color:var(--text-1);border-bottom:2px solid var(--bg-4)}
+        .md-table td{padding:8px 14px;font-size:13px;color:var(--text-2);border-bottom:1px solid var(--bg-4)}
+        .md-table tr:hover td{background:var(--bg-2)}
+        .md-preview strong{color:var(--text-0);font-weight:700}.md-preview em{color:var(--text-1)}.md-preview del{color:var(--text-3)}
+        .split-panel{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+        @media(max-width:768px){.split-panel{grid-template-columns:1fr}}
+        @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+    </style>
+</head>
+<body>
+    <div id="toasts" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
+    <div id="sidebar-overlay" class="lg:hidden fixed inset-0 bg-black/60 z-30 hidden" onclick="toggleSidebar()"></div>
+    <button id="menu-toggle" onclick="toggleSidebar()" class="lg:hidden fixed top-4 left-4 z-40 w-10 h-10 rounded-lg flex items-center justify-center bg-[var(--bg-2)] border border-[var(--bg-4)] text-[var(--text-1)]" aria-label="Menu"><i class="fas fa-bars text-sm"></i></button>
+    <aside id="sidebar" class="fixed left-0 top-0 h-full w-[272px] bg-[var(--bg-1)] border-r border-[var(--bg-4)] z-30 flex flex-col -translate-x-full lg:translate-x-0">
+        <div class="p-5 border-b border-[var(--bg-4)] flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-[var(--accent-dim)] flex items-center justify-center"><i class="fas fa-terminal text-[var(--accent)] text-sm"></i></div>
+            <div><h1 class="text-base font-bold tracking-tight">DevToolKit</h1><p class="text-[10px] text-[var(--text-3)] font-medium tracking-wide uppercase">Ferramentas Dev</p></div>
+        </div>
+        <div class="p-3"><div class="relative"><i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-3)] text-xs"></i><input id="sidebar-search" type="text" placeholder="Buscar... Ctrl+K" class="w-full bg-[var(--bg-2)] border border-[var(--bg-4)] rounded-lg pl-8 pr-3 py-2 text-xs text-[var(--text-0)] placeholder:text-[var(--text-3)] focus:outline-none focus:border-[var(--accent)]" oninput="filterSidebar(this.value)"></div></div>
+        <button onclick="showDashboard()" class="nav-item mx-3 mb-1 bg-[var(--accent-dim)]" id="nav-home"><i class="fas fa-th-large"></i> Dashboard</button>
+        <nav id="sidebar-nav" class="flex-1 overflow-y-auto px-3 pb-4"></nav>
+        <div class="p-3 border-t border-[var(--bg-4)] text-[10px] text-[var(--text-3)] text-center">18 ferramentas disponiveis</div>
+    </aside>
+    <main id="main" class="lg:ml-[272px] min-h-screen bg-grid"></main>
+
+<script>
+/* ===== CATEGORIAS ===== */
+var categories = [
+    {name:'Codificacao & Decodificacao',icon:'fa-code',tools:['jwt-decode','base64-encode','base64-decode','url-encode-decode']},
+    {name:'Formatacao',icon:'fa-align-left',tools:['json-formatter','sql-formatter','xml-formatter','markdown-viewer']},
+    {name:'Analise & Validacao',icon:'fa-magnifying-glass-chart',tools:['regex-validator','text-compare','hash-generator','yaml-validator']},
+    {name:'Geradores',icon:'fa-wand-magic-sparkles',tools:['uuid-generator','lorem-ipsum','password-generator']},
+    {name:'Conversores',icon:'fa-arrows-rotate',tools:['timestamp-converter','color-converter','number-converter']}
+];
+
+/* ===== FERRAMENTAS ===== */
+var tools = {};
+
+tools['jwt-decode']={name:'Decodificar JWT',desc:'Inspirecione header, payload e validade de tokens JWT.',icon:'fa-key',_t:null,
+render:function(){return '<div class="space-y-4"><label class="tool-label">Token JWT</label><textarea id="jwt-input" class="tool-textarea" rows="5" placeholder="Cole seu token JWT aqui..."></textarea><button onclick="decodeJWT()" class="tool-btn primary"><i class="fas fa-unlock"></i> Decodificar</button><div id="jwt-output"></div></div>';},
+init:function(){var self=this;document.getElementById('jwt-input').addEventListener('input',function(){clearTimeout(self._t);self._t=setTimeout(decodeJWT,300);});}};
+
+tools['base64-encode']={name:'Codificar Base64',desc:'Converta texto para Base64 com suporte a UTF-8.',icon:'fa-lock',_t:null,
+render:function(){return '<div class="space-y-4"><label class="tool-label">Texto Original</label><textarea id="b64e-input" class="tool-textarea" rows="5" placeholder="Digite o texto para codificar..."></textarea><button onclick="b64Encode()" class="tool-btn primary"><i class="fas fa-arrow-right"></i> Codificar</button><div id="b64e-output"></div></div>';},
+init:function(){var self=this;document.getElementById('b64e-input').addEventListener('input',function(){clearTimeout(self._t);self._t=setTimeout(b64Encode,200);});}};
+
+tools['base64-decode']={name:'Decodificar Base64',desc:'Converta Base64 de volta para texto UTF-8.',icon:'fa-lock-open',_t:null,
+render:function(){return '<div class="space-y-4"><label class="tool-label">Texto Base64</label><textarea id="b64d-input" class="tool-textarea" rows="5" placeholder="Cole o texto Base64 aqui..."></textarea><button onclick="b64Decode()" class="tool-btn primary"><i class="fas fa-arrow-left"></i> Decodificar</button><div id="b64d-output"></div></div>';},
+init:function(){var self=this;document.getElementById('b64d-input').addEventListener('input',function(){clearTimeout(self._t);self._t=setTimeout(b64Decode,200);});}};
+
+tools['url-encode-decode']={name:'URL Encode / Decode',desc:'Codifique ou decodifique componentes de URL.',icon:'fa-link',
+render:function(){return '<div class="space-y-4"><label class="tool-label">Texto</label><textarea id="url-input" class="tool-textarea" rows="4" placeholder="https://exemplo.com/?q=ola mundo&foo=bar+baz"></textarea><div class="flex gap-2 flex-wrap"><button onclick="urlEncode()" class="tool-btn primary"><i class="fas fa-arrow-right"></i> Encode</button><button onclick="urlDecode()" class="tool-btn secondary"><i class="fas fa-arrow-left"></i> Decode</button></div><div id="url-output"></div></div>';}};
+
+tools['json-formatter']={name:'Formatador JSON',desc:'Valide, formate e destaque a sintaxe de JSON.',icon:'fa-brackets-curly',
+render:function(){return '<div class="space-y-4"><label class="tool-label">JSON</label><textarea id="json-input" class="tool-textarea" rows="8" placeholder=\'{"nome":"Joao","idade":30,"ativo":true}\'></textarea><div class="flex gap-2 flex-wrap items-center"><button onclick="formatJSON()" class="tool-btn primary"><i class="fas fa-wand-magic-sparkles"></i> Formatador</button><button onclick="minifyJSON()" class="tool-btn secondary"><i class="fas fa-compress"></i> Minificar</button><select id="json-indent" class="tool-input" style="width:auto;padding:8px 12px;font-size:12px;"><option value="2">2 espacos</option><option value="4">4 espacos</option><option value="tab">Tab</option></select></div><div id="json-output"></div></div>';}};
+
+tools['sql-formatter']={name:'Formatador SQL',desc:'Beautifier SQL com indentacao e capitalizacao de keywords.',icon:'fa-database',
+render:function(){return '<div class="space-y-4"><label class="tool-label">Consulta SQL</label><textarea id="sql-input" class="tool-textarea" rows="10" placeholder="select u.nome, count(p.id) as total from usuarios u inner join pedidos p on u.id = p.usuario_id where u.ativo = true group by u.nome having count(p.id) > 5 order by total desc limit 10"></textarea><button onclick="formatSQL()" class="tool-btn primary"><i class="fas fa-wand-magic-sparkles"></i> Formatador</button><div id="sql-output"></div></div>';}};
+
+tools['xml-formatter']={name:'Formatador XML',desc:'Valide, formate e destaque a sintaxe de XML.',icon:'fa-file-code',
+render:function(){return '<div class="space-y-4"><label class="tool-label">XML</label><textarea id="xml-input" class="tool-textarea" rows="10" placeholder=\'<?xml version="1.0"?><root><item id="1"><name>Teste</name></item></root>\'></textarea><div class="flex gap-2 flex-wrap"><button onclick="formatXML()" class="tool-btn primary"><i class="fas fa-wand-magic-sparkles"></i> Formatador</button><button onclick="minifyXML()" class="tool-btn secondary"><i class="fas fa-compress"></i> Minificar</button></div><div id="xml-output"></div></div>';}};
+
+tools['markdown-viewer']={name:'Visualizador Markdown',desc:'Renderize Markdown com preview em tempo real.',icon:'fa-file-lines',_t:null,
+render:function(){return '<div class="split-panel"><div><label class="tool-label">Markdown</label><textarea id="md-input" class="tool-textarea" rows="20" placeholder="Escreva seu markdown aqui...">'+'# Exemplo de Markdown\n\n## Formatacao de Texto\n\nEste e um paragrafo com **texto em negrito**, *texto em italico* e ~~texto riscado~~.\n\nTambem podemos ter `codigo inline`.\n\n### Lista nao ordenada\n\n- Item 1\n- Item 2\n  - Sub-item 2.1\n  - Sub-item 2.2\n- Item 3\n\n### Lista ordenada\n\n1. Primeiro\n2. Segundo\n3. Terceiro\n\n### Bloco de Codigo\n\n```javascript\nfunction ola() {\n    console.log("Ola, mundo!");\n}\n```\n\n### Tabela\n\n| Nome | Idade | Cidade |\n|------|-------|--------|\n| Joao | 30    | SP     |\n| Maria | 25   | RJ     |\n\n> Esta e uma citacao importante.\n\n---\n\n[Link para exemplo](https://exemplo.com)\n'+'</textarea></div><div><label class="tool-label">Preview</label><div id="md-preview" class="md-preview tool-output" style="min-height:400px;max-height:600px;overflow-y:auto;white-space:normal;"></div></div></div>';},
+init:function(){var self=this;document.getElementById('md-input').addEventListener('input',function(){clearTimeout(self._t);self._t=setTimeout(renderMarkdown,150);});renderMarkdown();}};
+
+tools['regex-validator']={name:'Validador de Regex',desc:'Teste expressoes regulares com highlight em tempo real.',icon:'fa-asterisk',
+render:function(){return '<div class="space-y-4"><div class="flex gap-2 items-end flex-wrap"><div class="flex-1 min-w-[200px]"><label class="tool-label">Expressao Regular</label><input type="text" id="regex-pattern" class="tool-input" placeholder="\\b[A-Z][a-z]+\\b"></div><div class="w-20"><label class="tool-label">Flags</label><input type="text" id="regex-flags" class="tool-input" placeholder="gi" value="g"></div></div><label class="tool-label">Texto de Teste</label><textarea id="regex-text" class="tool-textarea" rows="6" placeholder="O Joao e a Maria foram ao mercado comprar frutas."></textarea><div id="regex-output"></div></div>';},
+init:function(){var run=function(){validateRegex();};document.getElementById('regex-pattern').addEventListener('input',run);document.getElementById('regex-flags').addEventListener('input',run);document.getElementById('regex-text').addEventListener('input',run);}};
+
+tools['text-compare']={name:'Comparar Textos',desc:'Compare dois textos com diff baseado em LCS.',icon:'fa-code-compare',
+render:function(){return '<div class="space-y-4"><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label class="tool-label">Texto Original</label><textarea id="diff-left" class="tool-textarea" rows="10" placeholder="Texto original..."></textarea></div><div><label class="tool-label">Texto Modificado</label><textarea id="diff-right" class="tool-textarea" rows="10" placeholder="Texto modificado..."></textarea></div></div><button onclick="compareTexts()" class="tool-btn primary"><i class="fas fa-code-compare"></i> Comparar</button><div id="diff-output"></div></div>';}};
+
+tools['hash-generator']={name:'Gerador de Hash',desc:'Gere hashes SHA-1, SHA-256, SHA-384 e SHA-512.',icon:'fa-hashtag',_t:null,
+render:function(){return '<div class="space-y-4"><label class="tool-label">Texto</label><textarea id="hash-input" class="tool-textarea" rows="4" placeholder="Digite o texto para gerar o hash..."></textarea><button onclick="generateHashes()" class="tool-btn primary"><i class="fas fa-rotate"></i> Gerar Hashes</button><div id="hash-output"></div></div>';},
+init:function(){var self=this;document.getElementById('hash-input').addEventListener('input',function(){clearTimeout(self._t);self._t=setTimeout(generateHashes,300);});}};
+
+tools['yaml-validator']={name:'Validador YAML',desc:'Valide YAML e visualize o resultado como JSON estruturado.',icon:'fa-file-lines',_t:null,
+render:function(){return '<div class="space-y-4"><label class="tool-label">YAML</label><textarea id="yaml-input" class="tool-textarea" rows="12" placeholder="nome: Joao\nidade: 30\nativo: true\nemails:\n  - joao@email.com\n  - joao.work@email.com\nendereco:\n  rua: Rua Exemplo\n  numero: 123\n  cidade: Sao Paulo"></textarea><button onclick="validateYAML()" class="tool-btn primary"><i class="fas fa-check-circle"></i> Validar</button><div id="yaml-output"></div></div>';},
+init:function(){var self=this;document.getElementById('yaml-input').addEventListener('input',function(){clearTimeout(self._t);self._t=setTimeout(validateYAML,400);});}};
+
+tools['uuid-generator']={name:'Gerador de UUID',desc:'Gere UUIDs v4 criptograficamente aleatorios.',icon:'fa-fingerprint',
+render:function(){return '<div class="space-y-4"><div class="flex items-center gap-4 flex-wrap"><label class="tool-label mb-0">Quantidade</label><input type="number" id="uuid-count" class="tool-input" style="width:80px;" value="1" min="1" max="100"><label class="flex items-center gap-2 text-sm text-[var(--text-2)] cursor-pointer"><span class="toggle"><input type="checkbox" id="uuid-upper"><span class="toggle-slider"></span></span> Uppercase</label><label class="flex items-center gap-2 text-sm text-[var(--text-2)] cursor-pointer"><span class="toggle"><input type="checkbox" id="uuid-no-dash"><span class="toggle-slider"></span></span> Sem tracos</label></div><button onclick="generateUUIDs()" class="tool-btn primary"><i class="fas fa-rotate"></i> Gerar</button><div id="uuid-output"></div></div>';}};
+
+tools['lorem-ipsum']={name:'Gerador Lorem Ipsum',desc:'Gere texto placeholder Lorem Ipsum.',icon:'fa-paragraph',
+render:function(){return '<div class="space-y-4"><div class="flex gap-4 flex-wrap items-end"><div><label class="tool-label">Tipo</label><select id="lorem-type" class="tool-input" style="width:130px;"><option value="paragraphs">Paragrafos</option><option value="sentences">Frases</option><option value="words">Palavras</option></select></div><div><label class="tool-label">Quantidade</label><input type="number" id="lorem-count" class="tool-input" style="width:80px;" value="3" min="1" max="100"></div></div><button onclick="generateLorem()" class="tool-btn primary"><i class="fas fa-rotate"></i> Gerar</button><div id="lorem-output"></div></div>';}};
+
+tools['password-generator']={name:'Gerador de Senhas',desc:'Gere senhas fortes com opcoes personalizaveis.',icon:'fa-shield-halved',
+render:function(){return '<div class="space-y-5"><div id="pw-display" class="tool-output font-mono text-center tracking-widest py-6" style="font-size:20px;cursor:pointer;" onclick="copyText(this.textContent)" title="Clique para copiar">Clique em Gerar</div><div><div class="flex justify-between mb-2"><label class="tool-label mb-0">Comprimento: <span id="pw-len-val">16</span></label></div><input type="range" id="pw-length" min="4" max="128" value="16" oninput="document.getElementById(\'pw-len-val\').textContent=this.value"></div><div class="grid grid-cols-2 gap-3"><label class="flex items-center gap-2 text-sm text-[var(--text-2)] cursor-pointer"><span class="toggle"><input type="checkbox" id="pw-upper" checked><span class="toggle-slider"></span></span> Maiusculas (A-Z)</label><label class="flex items-center gap-2 text-sm text-[var(--text-2)] cursor-pointer"><span class="toggle"><input type="checkbox" id="pw-lower" checked><span class="toggle-slider"></span></span> Minusculas (a-z)</label><label class="flex items-center gap-2 text-sm text-[var(--text-2)] cursor-pointer"><span class="toggle"><input type="checkbox" id="pw-numbers" checked><span class="toggle-slider"></span></span> Numeros (0-9)</label><label class="flex items-center gap-2 text-sm text-[var(--text-2)] cursor-pointer"><span class="toggle"><input type="checkbox" id="pw-symbols" checked><span class="toggle-slider"></span></span> Simbolos (!@#)</label></div><div><div class="flex justify-between mb-1"><span class="text-xs text-[var(--text-3)]">Forca</span><span id="pw-str-label" class="text-xs font-semibold"></span></div><div class="strength-bar"><div id="pw-str-bar" class="strength-fill" style="width:0%"></div></div></div><button onclick="generatePassword()" class="tool-btn primary w-full justify-center"><i class="fas fa-rotate"></i> Gerar Senha</button></div>';}};
+
+tools['timestamp-converter']={name:'Conversor de Timestamp',desc:'Converta entre Unix timestamp e data legivel.',icon:'fa-clock',_interval:null,
+render:function(){return '<div class="space-y-5"><div class="p-4 rounded-xl bg-[var(--bg-2)] border border-[var(--bg-4)] text-center"><p class="text-xs text-[var(--text-3)] mb-1">Timestamp Atual</p><p id="ts-now" class="font-mono text-2xl font-bold text-[var(--accent)]"></p></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div class="space-y-3"><label class="tool-label">Unix Timestamp (segundos)</label><input type="text" id="ts-input" class="tool-input" placeholder="1700000000"><button onclick="tsToDate()" class="tool-btn primary w-full justify-center"><i class="fas fa-arrow-right"></i> Para Data</button><div id="ts-date-output"></div></div><div class="space-y-3"><label class="tool-label">Data e Hora</label><input type="datetime-local" id="ts-date-input" class="tool-input" step="1"><button onclick="dateToTs()" class="tool-btn primary w-full justify-center"><i class="fas fa-arrow-left"></i> Para Timestamp</button><div id="ts-ts-output"></div></div></div></div>';},
+init:function(){var el=document.getElementById('ts-now');var update=function(){el.textContent=Math.floor(Date.now()/1000);};update();tools['timestamp-converter']._interval=setInterval(update,1000);},
+cleanup:function(){if(tools['timestamp-converter']._interval){clearInterval(tools['timestamp-converter']._interval);tools['timestamp-converter']._interval=null;}}};
+
+tools['color-converter']={name:'Conversor de Cores',desc:'Converta entre HEX, RGB e HSL com preview visual.',icon:'fa-palette',
+render:function(){return '<div class="space-y-5"><div class="color-swatch" id="color-swatch" style="background:#FBBF24;"></div><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div><label class="tool-label">HEX</label><input type="text" id="color-hex" class="tool-input" value="#FBBF24" oninput="colorFromHex()"></div><div><label class="tool-label">RGB</label><input type="text" id="color-rgb" class="tool-input" value="rgb(251, 191, 36)" oninput="colorFromRGB()"></div><div><label class="tool-label">HSL</label><input type="text" id="color-hsl" class="tool-input" value="hsl(45, 96%, 56%)" oninput="colorFromHSL()"></div></div><input type="color" id="color-picker" value="#FBBF24" class="w-full h-10 rounded-lg cursor-pointer border border-[var(--bg-4)]" oninput="colorFromPicker()"></div>';}};
+
+tools['number-converter']={name:'Conversor de Bases',desc:'Converta numeros entre Binario, Octal, Decimal e Hexadecimal.',icon:'fa-calculator',
+render:function(){return '<div class="space-y-4"><label class="tool-label">Valor</label><input type="text" id="num-input" class="tool-input" placeholder="255 ou 0xFF ou 0b11111111" oninput="convertNumber()"><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label class="tool-label">Binario (Base 2)</label><div id="num-bin" class="tool-output text-sm" style="min-height:40px;">&mdash;</div></div><div><label class="tool-label">Octal (Base 8)</label><div id="num-oct" class="tool-output text-sm" style="min-height:40px;">&mdash;</div></div><div><label class="tool-label">Decimal (Base 10)</label><div id="num-dec" class="tool-output text-sm" style="min-height:40px;">&mdash;</div></div><div><label class="tool-label">Hexadecimal (Base 16)</label><div id="num-hex" class="tool-output text-sm" style="min-height:40px;">&mdash;</div></div></div></div>';}};
+
+/* ===== ESTADO ===== */
+var currentTool = null;
+
+/* ===== SIDEBAR ===== */
+function buildSidebar(){
+    var nav=document.getElementById('sidebar-nav');var html='';
+    for(var c=0;c<categories.length;c++){var cat=categories[c];
+        html+='<div class="cat-group"><div class="cat-header" onclick="toggleCategory(this)"><i class="fas fa-chevron-down chevron"></i><i class="fas '+cat.icon+'" style="font-size:10px;"></i> '+cat.name+'</div><div class="cat-tools" style="max-height:500px;">';
+        for(var t=0;t<cat.tools.length;t++){var id=cat.tools[t];var tool=tools[id];
+            html+='<div class="nav-item" data-tool="'+id+'" onclick="openTool(\''+id+'\')"><i class="fas '+tool.icon+'"></i> '+tool.name+'</div>';}
+        html+='</div></div>';}
+    nav.innerHTML=html;
+}
+function toggleCategory(h){h.classList.toggle('collapsed');h.nextElementSibling.classList.toggle('collapsed');}
+function filterSidebar(q){q=q.toLowerCase().trim();var gs=document.querySelectorAll('.cat-group');
+    for(var g=0;g<gs.length;g++){var gr=gs[g];var it=gr.querySelectorAll('.nav-item[data-tool]');var any=false;
+        for(var i=0;i<it.length;i++){var item=it[i];var tl=tools[item.dataset.tool];var m=!q||tl.name.toLowerCase().indexOf(q)!==-1||tl.desc.toLowerCase().indexOf(q)!==-1;item.style.display=m?'':'none';if(m)any=true;}
+        gr.style.display=any?'':'none';if(q&&any){gr.querySelector('.cat-header').classList.remove('collapsed');gr.querySelector('.cat-tools').classList.remove('collapsed');}}}
+function toggleSidebar(){var sb=document.getElementById('sidebar');var ov=document.getElementById('sidebar-overlay');sb.classList.toggle('open');ov.classList.toggle('hidden');}
+function setActiveTool(id){var items=document.querySelectorAll('.nav-item[data-tool]');for(var i=0;i<items.length;i++){items[i].classList.toggle('active',items[i].dataset.tool===id);}document.getElementById('nav-home').classList.toggle('active',!id);}
+
+/* ===== DASHBOARD ===== */
+function showDashboard(){
+    if(currentTool&&tools[currentTool]&&tools[currentTool].cleanup)tools[currentTool].cleanup();
+    currentTool=null;setActiveTool(null);
+    var main=document.getElementById('main');var html='<div class="p-6 lg:p-10 fade-up"><div class="mb-8"><h2 class="text-3xl font-bold tracking-tight mb-2">Dashboard</h2><p class="text-[var(--text-2)] text-sm">Selecione uma ferramenta para comecar.</p></div>';
+    for(var c=0;c<categories.length;c++){var cat=categories[c];
+        html+='<div class="mb-8"><h3 class="text-xs font-bold uppercase tracking-widest text-[var(--text-3)] mb-4 flex items-center gap-2"><i class="fas '+cat.icon+' text-[var(--accent)]" style="font-size:11px;"></i> '+cat.name+'</h3><div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">';
+        for(var t=0;t<cat.tools.length;t++){var id=cat.tools[t];var tl=tools[id];
+            html+='<div class="dash-card" onclick="openTool(\''+id+'\')"><div class="card-icon"><i class="fas '+tl.icon+'"></i></div><h4 class="font-semibold text-sm mb-1">'+tl.name+'</h4><p class="text-xs text-[var(--text-3)] leading-relaxed">'+tl.desc+'</p></div>';}
+        html+='</div></div>';}
+    html+='</div>';main.innerHTML=html;
+    if(window.innerWidth<1024){var sb=document.getElementById('sidebar');if(sb.classList.contains('open'))toggleSidebar();}
+}
+
+/* ===== ABRIR FERRAMENTA ===== */
+function openTool(id){
+    var tool=tools[id];if(!tool)return;
+    if(currentTool&&tools[currentTool]&&tools[currentTool].cleanup)tools[currentTool].cleanup();
+    currentTool=id;setActiveTool(id);
+    var main=document.getElementById('main');
+    var html='<div class="p-6 lg:p-10 fade-up"><button onclick="showDashboard()" class="flex items-center gap-2 text-xs text-[var(--text-3)] hover:text-[var(--text-1)] mb-5 transition-colors"><i class="fas fa-arrow-left"></i> Voltar ao Dashboard</button><div class="mb-6"><div class="flex items-center gap-3 mb-2"><div class="w-9 h-9 rounded-lg bg-[var(--accent-dim)] flex items-center justify-center"><i class="fas '+tool.icon+' text-[var(--accent)] text-sm"></i></div><h2 class="text-2xl font-bold tracking-tight">'+tool.name+'</h2></div><p class="text-sm text-[var(--text-2)]">'+tool.desc+'</p></div><div class="max-w-5xl w-full">'+tool.render()+'</div></div>';
+    main.innerHTML=html;if(tool.init)tool.init();
+    if(window.innerWidth<1024){var sb=document.getElementById('sidebar');if(sb.classList.contains('open'))toggleSidebar();}
+}
+
+/* ===== UTILITARIOS ===== */
+function copyText(t){if(!t||t==='Clique em Gerar'||t==='\u2014')return;navigator.clipboard.writeText(t).then(function(){showToast('Copiado!');}).catch(function(){showToast('Erro ao copiar.','error');});}
+function outputHTML(t,id){return '<div class="tool-output"><button class="copy-btn" onclick="copyText(document.getElementById(\''+id+'\').textContent)"><i class="far fa-copy"></i> Copiar</button><span id="'+id+'">'+t+'</span></div>';}
+function errorHTML(m){return '<div class="tool-output" style="border-color:var(--error);"><span class="text-[var(--error)]"><i class="fas fa-exclamation-triangle mr-2"></i>'+m+'</span></div>';}
+function showToast(m,type){type=type||'success';var c=document.getElementById('toasts');var t=document.createElement('div');var ic={success:'check-circle',error:'exclamation-circle',info:'info-circle'};t.className='toast toast-'+type;t.innerHTML='<i class="fas fa-'+(ic[type]||ic.info)+'"></i><span>'+m+'</span>';c.appendChild(t);requestAnimationFrame(function(){t.classList.add('show');});setTimeout(function(){t.classList.remove('show');setTimeout(function(){t.remove();},300);},2500);}
+function escHTML(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function syntaxHL(json){return escHTML(json).replace(/("(\\u[\da-fA-F]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,function(m){var c='syn-num';if(/^"/.test(m))c=/:$/.test(m)?'syn-key':'syn-str';else if(/true|false/.test(m))c='syn-bool';else if(/null/.test(m))c='syn-null';return '<span class="'+c+'">'+m+'</span>';});}
+
+/* ===== 1. JWT ===== */
+function decodeJWT(){
+    var input=document.getElementById('jwt-input').value.trim();var out=document.getElementById('jwt-output');if(!input){out.innerHTML='';return;}
+    var parts=input.split('.');if(parts.length!==3){out.innerHTML=errorHTML('Token JWT invalido. Deve conter 3 partes.');return;}
+    try{function bd(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return decodeURIComponent(Array.from(atob(s),function(c){return '%'+('00'+c.charCodeAt(0).toString(16)).slice(-2);}).join(''));}
+        var header=JSON.parse(bd(parts[0]));var payload=JSON.parse(bd(parts[1]));var now=Math.floor(Date.now()/1000);var expInfo='';
+        if(payload.exp){var diff=payload.exp-now;if(diff>0){var h=Math.floor(diff/3600);var m=Math.floor((diff%3600)/60);expInfo='<div class="mt-2 p-2 rounded-lg text-xs" style="background:rgba(52,211,153,0.1);color:var(--success);"><i class="fas fa-check-circle mr-1"></i> Valido \u2014 expira em '+h+'h '+m+'m</div>';}else{expInfo='<div class="mt-2 p-2 rounded-lg text-xs" style="background:rgba(248,113,113,0.1);color:var(--error);"><i class="fas fa-times-circle mr-1"></i> Expirado ha '+Math.abs(Math.floor((-diff)/3600))+'h</div>';}}
+        out.innerHTML='<div class="space-y-3"><div><p class="text-xs font-bold text-[var(--text-3)] uppercase mb-1">Header</p>'+outputHTML(syntaxHL(JSON.stringify(header,null,2)),'jwt-h')+'</div><div><p class="text-xs font-bold text-[var(--text-3)] uppercase mb-1">Payload</p>'+outputHTML(syntaxHL(JSON.stringify(payload,null,2)),'jwt-p')+'</div>'+expInfo+'<div><p class="text-xs font-bold text-[var(--text-3)] uppercase mb-1">Signature</p><div class="tool-output text-xs break-all" style="color:var(--text-3);">'+escHTML(parts[2])+'</div></div></div>';
+    }catch(e){out.innerHTML=errorHTML('Erro ao decodificar: '+e.message);}
+}
+
+/* ===== 2. BASE64 ENCODE ===== */
+function b64Encode(){var i=document.getElementById('b64e-input').value;var o=document.getElementById('b64e-output');if(!i){o.innerHTML='';return;}try{var e=btoa(encodeURIComponent(i).replace(/%([0-9A-F]{2})/g,function(_,p){return String.fromCharCode(parseInt(p,16));}));o.innerHTML=outputHTML(escHTML(e),'b64e-r');}catch(e){o.innerHTML=errorHTML(e.message);}}
+
+/* ===== 3. BASE64 DECODE ===== */
+function b64Decode(){var i=document.getElementById('b64d-input').value.trim();var o=document.getElementById('b64d-output');if(!i){o.innerHTML='';return;}try{var d=decodeURIComponent(Array.from(atob(i),function(c){return '%'+('00'+c.charCodeAt(0).toString(16)).slice(-2);}).join(''));o.innerHTML=outputHTML(escHTML(d),'b64d-r');}catch(e){o.innerHTML=errorHTML('Base64 invalido: '+e.message);}}
+
+/* ===== 4. URL ENCODE/DECODE ===== */
+function urlEncode(){var i=document.getElementById('url-input').value;var o=document.getElementById('url-output');if(!i){o.innerHTML='';return;}o.innerHTML=outputHTML(escHTML(encodeURIComponent(i)),'url-r');}
+function urlDecode(){var i=document.getElementById('url-input').value.trim();var o=document.getElementById('url-output');if(!i){o.innerHTML='';return;}try{o.innerHTML=outputHTML(escHTML(decodeURIComponent(i)),'url-r');}catch(e){o.innerHTML=errorHTML('URL invalida: '+e.message);}}
+
+/* ===== 5. JSON ===== */
+function formatJSON(){var i=document.getElementById('json-input').value.trim();var o=document.getElementById('json-output');if(!i){o.innerHTML='';return;}try{var obj=JSON.parse(i);var ind=document.getElementById('json-indent').value;var sp=ind==='tab'?'\t':parseInt(ind);o.innerHTML=outputHTML(syntaxHL(JSON.stringify(obj,null,sp)),'json-r');}catch(e){o.innerHTML=errorHTML('JSON invalido: '+e.message);}}
+function minifyJSON(){var i=document.getElementById('json-input').value.trim();var o=document.getElementById('json-output');if(!i){o.innerHTML='';return;}try{var obj=JSON.parse(i);o.innerHTML=outputHTML(escHTML(JSON.stringify(obj)),'json-r');}catch(e){o.innerHTML=errorHTML('JSON invalido: '+e.message);}}
+
+/* ===== 6. SQL FORMATTER (Beautifier) ===== */
+var SQL_MULTIWORD=['LEFT OUTER JOIN','RIGHT OUTER JOIN','FULL OUTER JOIN','INNER JOIN','LEFT JOIN','RIGHT JOIN','FULL JOIN','CROSS JOIN','GROUP BY','ORDER BY','INSERT INTO','DELETE FROM','CREATE TABLE','ALTER TABLE','DROP TABLE','UNION ALL','IS NOT NULL','IS NULL','NOT IN','NOT LIKE','NOT EXISTS','NOT BETWEEN'];
+var SQL_CLAUSES=['SELECT','FROM','WHERE','GROUP BY','ORDER BY','HAVING','LIMIT','OFFSET','INSERT INTO','UPDATE','DELETE FROM','SET','VALUES','CREATE TABLE','ALTER TABLE','DROP TABLE','UNION','UNION ALL','INTERSECT','EXCEPT','INNER JOIN','LEFT JOIN','RIGHT JOIN','FULL JOIN','CROSS JOIN','LEFT OUTER JOIN','RIGHT OUTER JOIN','FULL OUTER JOIN'];
+var SQL_SUBCLAUSES=['AND','OR','ON'];
+var SQL_FUNCTIONS=['COUNT','SUM','AVG','MIN','MAX','COALESCE','IFNULL','NULLIF','CAST','CONVERT','CONCAT','UPPER','LOWER','TRIM','LTRIM','RTRIM','LENGTH','LEN','SUBSTRING','SUBSTR','REPLACE','INSTR','CHARINDEX','POSITION','LEFT','RIGHT','REVERSE','NOW','CURDATE','CURTIME','DATE','YEAR','MONTH','DAY','HOUR','MINUTE','SECOND','DATEDIFF','DATE_ADD','DATE_SUB','ROUND','FLOOR','CEIL','CEILING','ABS','MOD','POWER','SQRT','RAND','ROW_NUMBER','RANK','DENSE_RANK','LEAD','LAG','FIRST_VALUE','LAST_VALUE','NTILE','GROUP_CONCAT','STRING_AGG','ARRAY_AGG','NVL','DECODE','TRUNC','SYSDATE','TO_DATE','TO_CHAR','TO_NUMBER','LISTAGG','WM_CONCAT','NEXTVAL','CURRVAL','CHR','ASCII','OVER','PARTITION'];
+var SQL_SUBQUERY_INTRODUCERS=['FROM','WHERE','HAVING','SET','VALUES'];
+
+function isSQLKW(w){return SQL_CLAUSES.indexOf(w.toUpperCase())!==-1||SQL_SUBCLAUSES.indexOf(w.toUpperCase())!==-1||['AS','IN','LIKE','BETWEEN','EXISTS','DISTINCT','ALL','ASC','DESC','NULL','TRUE','FALSE','NOT','JOIN','INTO','CASE','WHEN','THEN','ELSE','END','IF','BEGIN','COMMIT','ROLLBACK','GRANT','REVOKE','INDEX','VIEW','TRIGGER','PROCEDURE','FUNCTION','RETURN','DECLARE','PRIMARY','KEY','FOREIGN','REFERENCES','CHECK','DEFAULT','CONSTRAINT','UNIQUE','AUTO_INCREMENT','WITH','RECURSIVE','TOP','PERCENT','OUTPUT','MERGE','MATCHED','USING','NATURAL','ANY','SOME','OVER','PARTITION','ROW','ROWS','RANGE','UNBOUNDED','PRECEDING','FOLLOWING','CURRENT','FETCH','FIRST','NEXT','ONLY','ACTION','CASCADE','RESTRICT','LATERAL','NO'].indexOf(w.toUpperCase())!==-1;}
+function isSQLFn(w){return SQL_FUNCTIONS.indexOf(w.toUpperCase())!==-1;}
+
+function formatSQL(){
+    var input=document.getElementById('sql-input').value.trim();var out=document.getElementById('sql-output');if(!input){out.innerHTML='';return;}
+    try{
+        /* Passo 1: substituir multi-word keywords por placeholders */
+        var sql=input;var phs=[];
+        for(var p=0;p<SQL_MULTIWORD.length;p++){var kw=SQL_MULTIWORD[p];var ph='\x01'+String.fromCharCode(65+p)+'\x01';var rx=new RegExp('\\b'+kw.replace(/\s+/g,'\\s+')+'\\b','gi');sql=sql.replace(rx,ph);phs.push({ph:ph,kw:kw.toUpperCase()});}
+
+        /* Passo 2: tokenizar */
+        var tokens=[];var pos=0;var len=sql.length;
+        while(pos<len){
+            if(/\s/.test(sql[pos])){pos++;continue;}
+            /* String */
+            if(sql[pos]==="'"){var s=pos;pos++;while(pos<len){if(sql[pos]=="'"&&pos+1<len&&sql[pos+1]==="'"){pos+=2;continue;}if(sql[pos]==="'"){pos++;break;}pos++;}tokens.push({type:'string',value:sql.substring(s,pos)});continue;}
+            /* Number */
+            if(/\d/.test(sql[pos])){var s=pos;while(pos<len&&/[\d.]/.test(sql[pos]))pos++;tokens.push({type:'number',value:sql.substring(s,pos)});continue;}
+            /* Operators */
+            if('<>=!'.indexOf(sql[pos])!==-1){var op=sql[pos];pos++;if(pos<len&&'<>=!'.indexOf(sql[pos])!==-1){op+=sql[pos];pos++;}tokens.push({type:'operator',value:op});continue;}
+            /* Placeholder */
+            if(sql[pos]==='\x01'){var s=pos;pos++;while(pos<len&&sql[pos]!=='\x01')pos++;if(pos<len)pos++;var phStr=sql.substring(s,pos);for(var j=0;j<phs.length;j++){if(phs[j].ph===phStr){tokens.push({type:'keyword',value:phs[j].kw});break;}}continue;}
+            /* Punctuation */
+            if('(),;*+-/'.indexOf(sql[pos])!==-1){
+                if(sql[pos]==='/'&&pos+1<len&&sql[pos+1]==='*'){var s=pos;pos+=2;while(pos<len&&!(sql[pos]==='*'&&pos+1<len&&sql[pos+1]==='/'))pos++;if(pos<len)pos+=2;tokens.push({type:'comment',value:sql.substring(s,pos)});continue;}
+                if(sql[pos]==='-'&&pos+1<len&&sql[pos+1]==='-'){var s=pos;pos+=2;while(pos<len&&sql[pos]!=='\n')pos++;tokens.push({type:'comment',value:sql.substring(s,pos)});continue;}
+                tokens.push({type:'punctuation',value:sql[pos]});pos++;continue;}
+            /* Word */
+            if(/[a-zA-Z_`]/.test(sql[pos])){
+                if(sql[pos]==='`'){var s=pos;pos++;while(pos<len&&sql[pos]!=='`')pos++;if(pos<len)pos++;tokens.push({type:'identifier',value:sql.substring(s,pos)});continue;}
+                var s=pos;while(pos<len&&/[a-zA-Z0-9_]/.test(sql[pos]))pos++;var w=sql.substring(s,pos);tokens.push({type:(isSQLKW(w)||isSQLFn(w))?'keyword':'identifier',value:w});continue;}
+            tokens.push({type:'other',value:sql[pos]});pos++;
+        }
+
+        /* Passo 3: formatar com indentacao */
+        var indent=0;var lines=[''];var li=0;var prev=null;var parenDepth=0;
+        function cLine(){return lines[li];}
+        function append(t){lines[li]+=t;}
+        function nLine(extra){var sp='  '.repeat(indent+(extra||0));li++;lines[li]=sp;}
+
+        for(var i=0;i<tokens.length;i++){
+            var t=tokens[i];var val=(t.type==='keyword')?t.value.toUpperCase():t.value;var upper=val.toUpperCase();
+
+            if(t.value==='('){
+                var isSubquery=false;
+                if(prev&&(prev.type==='keyword')&&SQL_SUBQUERY_INTRODUCERS.indexOf(prev.value.toUpperCase())!==-1){isSubquery=true;}
+                if(isSubquery){append('(');indent++;nLine();}
+                else{append('(');indent++;nLine();}
+                parenDepth++;prev=t;continue;
+            }
+            if(t.value===')'){
+                indent=Math.max(0,indent-1);parenDepth=Math.max(0,parenDepth-1);nLine();append(')');prev=t;continue;
+            }
+            if(t.value===','){append(',');nLine();prev=t;continue;}
+            if(t.value===';'){append(';');indent=0;nLine();prev=t;continue;}
+
+            /* Clausula principal */
+            if(t.type==='keyword'&&SQL_CLAUSES.indexOf(upper)!==-1){
+                if(parenDepth===0)indent=0;nLine();append(val);prev=t;continue;
+            }
+            /* Sub-clausula */
+            if(t.type==='keyword'&&SQL_SUBCLAUSES.indexOf(upper)!==-1){nLine(1);append(val);prev=t;continue;}
+            /* CASE */
+            if(t.type==='keyword'&&upper==='CASE'){append('CASE');prev=t;continue;}
+            /* WHEN */
+            if(t.type==='keyword'&&upper==='WHEN'){nLine(1);append('WHEN');prev=t;continue;}
+            /* THEN */
+            if(t.type==='keyword'&&upper==='THEN'){append(' THEN');prev=t;continue;}
+            /* ELSE */
+            if(t.type==='keyword'&&upper==='ELSE'){nLine(1);append('ELSE');prev=t;continue;}
+            /* END */
+            if(t.type==='keyword'&&upper==='END'){nLine();append('END');prev=t;continue;}
+
+            /* Default */
+            var cl=cLine();
+            if(cl.length>0&&cl[cl.length-1]!==' '&&cl[cl.length-1]!=='('&&cl[cl.length-1]!=='\n'){append(' ');}
+            append(val);prev=t;
+        }
+
+        var formatted=lines.join('\n').trim();
+
+        /* Passo 4: syntax highlight */
+        var hl=escHTML(formatted);
+        hl=hl.replace(/'([^']*(?:''[^']*)*)'/g,"<span class=\"syn-str\">'$1'</span>");
+        /* Funcoes primeiro (mais especifico) */
+        for(var f=0;f<SQL_FUNCTIONS.length;f++){var fn=SQL_FUNCTIONS[f];hl=hl.replace(new RegExp('\\b('+fn+')\\b','gi'),'<span class="syn-fn">$1</span>');}
+        /* Keywords */
+        var hlKws=SQL_CLAUSES.concat(SQL_SUBCLAUSES,['AS','IN','LIKE','BETWEEN','EXISTS','DISTINCT','ALL','ASC','DESC','NULL','TRUE','FALSE','NOT','CASE','WHEN','THEN','ELSE','END','SET','INTO','VALUES','UPDATE','DELETE']);
+        for(var k=0;k<hlKws.length;k++){var kw=hlKws[k];hl=hl.replace(new RegExp('\\b('+kw.replace(/\s+/g,'\\s+')+')\\b','gi'),'<span class="syn-kw">$1</span>');}
+        hl=hl.replace(/\b(\d+(?:\.\d+)?)\b/g,'<span class="syn-num">$1</span>');
+        hl=hl.replace(/(\/\*[\s\S]*?\*\/|--[^\n]*)/g,'<span class="syn-cm">$1</span>');
+
+        out.innerHTML=outputHTML(hl,'sql-r');
+    }catch(e){out.innerHTML=errorHTML('Erro ao formatar: '+e.message);}
+}
+
+/* ===== 7. XML FORMATTER ===== */
+function formatXML(){
+    var input=document.getElementById('xml-input').value.trim();var out=document.getElementById('xml-output');if(!input){out.innerHTML='';return;}
+    if(input.indexOf('<')===-1){out.innerHTML=errorHTML('XML invalido.');return;}
+    try{
+        var xml=input.replace(/>\s+</g,'><').trim();
+        var result='';var indent=0;var tab='  ';var i=0;
+        while(i<xml.length){
+            if(xml[i]==='<'){
+                /* Comentario */
+                if(xml.substr(i,4)==='<!--'){var ce=xml.indexOf('-->',i);if(ce===-1)break;result+=tab.repeat(indent)+xml.substring(i,ce+3)+'\n';i=ce+3;continue;}
+                /* PI */
+                if(xml.substr(i,2)==='<?'){var pe=xml.indexOf('?>',i);if(pe===-1)break;result+=tab.repeat(indent)+xml.substring(i,pe+2)+'\n';i=pe+2;continue;}
+                var te=xml.indexOf('>',i);if(te===-1)break;var tag=xml.substring(i,te+1);
+                if(tag.indexOf('</')===0){indent=Math.max(0,indent-1);result+=tab.repeat(indent)+tag+'\n';i=te+1;continue;}
+                if(tag.indexOf('/>')!==-1){result+=tab.repeat(indent)+tag+'\n';i=te+1;continue;}
+                /* Tag de abertura - verificar se fecha na mesma linha */
+                var tn=tag.match(/<(\w[\w\-:]*)/);
+                if(tn){var ct='</'+tn[1]+'>';var ci=xml.indexOf(ct,te+1);
+                    if(ci!==-1){var content=xml.substring(te+1,ci).trim();if(content.indexOf('<')===-1){result+=tab.repeat(indent)+tag+content+ct+'\n';i=ci+ct.length;continue;}}}
+                result+=tab.repeat(indent)+tag+'\n';indent++;i=te+1;continue;
+            }
+            var nt=xml.indexOf('<',i);if(nt===-1)nt=xml.length;var txt=xml.substring(i,nt).trim();if(txt){result+=tab.repeat(indent)+txt+'\n';}i=nt;
+        }
+        var hl=escHTML(result.trim());
+        hl=hl.replace(/(&lt;!--[\s\S]*?--&gt;)/g,'<span class="syn-cm">$1</span>');
+        hl=hl.replace(/(&lt;\?[\s\S]*?\?&gt;)/g,'<span class="syn-kw">$1</span>');
+        hl=hl.replace(/(&lt;\/?)([\w\-:]+)/g,'$1<span class="syn-tag">$2</span>');
+        hl=hl.replace(/(\/?&gt;)/g,'<span class="syn-kw">$1</span>');
+        hl=hl.replace(/\s([\w\-:]+)(=)(&quot;|")/g,' <span class="syn-attr">$1</span><span class="syn-kw">$2</span>$3');
+        hl=hl.replace(/(&quot;)(.*?)(&quot;)/g,'<span class="syn-str">$1$2$3</span>');
+        out.innerHTML=outputHTML(hl,'xml-r');
+    }catch(e){out.innerHTML=errorHTML('Erro ao formatar XML: '+e.message);}
+}
+function minifyXML(){var i=document.getElementById('xml-input').value.trim();var o=document.getElementById('xml-output');if(!i){o.innerHTML='';return;}try{var m=i.replace(/>\s+</g,'><').replace(/\s{2,}/g,' ').trim();o.innerHTML=outputHTML(escHTML(m),'xml-r');}catch(e){o.innerHTML=errorHTML(e.message);}}
+
+/* ===== 8. MARKDOWN VIEWER ===== */
+function renderMarkdown(){
+    var input=document.getElementById('md-input');var preview=document.getElementById('md-preview');if(!input||!preview)return;
+    preview.innerHTML=parseMarkdown(input.value);
+}
+function parseMarkdown(md){
+    var lines=md.split('\n');var html='';var inCB=false;var inList=false;var listType='';var inTable=false;var tableRows=[];
+    for(var i=0;i<lines.length;i++){var line=lines[i];
+        if(line.trim().substr(0,3)==='```'){if(inCB){html+='</code></pre>';inCB=false;}else{var lang=line.trim().substring(3).trim();html+='<pre class="md-code-block"><code>';inCB=true;}continue;}
+        if(inCB){html+=escHTML(line)+'\n';continue;}
+        if(inList&&!line.match(/^[\s]*[-*+]\s/)&&!line.match(/^[\s]*\d+\.\s/)){html+=listType==='ul'?'</ul>':'</ol>';inList=false;}
+        if(line.trim().charAt(0)==='|'&&line.trim().charAt(line.trim().length-1)==='|'){if(!inTable){inTable=true;tableRows=[];}tableRows.push(line);continue;}else if(inTable){html+=renderMDTable(tableRows);inTable=false;tableRows=[];}
+        if(line.trim()===''){if(inList){html+=listType==='ul'?'</ul>':'</ol>';inList=false;}continue;}
+        var hm=line.match(/^(#{1,6})\s+(.+)/);if(hm){var lv=hm[1].length;html+='<h'+lv+' class="md-h'+lv+'">'+mdInline(hm[2])+'</h'+lv+'>';continue;}
+        if(line.trim().match(/^(-{3,}|\*{3,}|_{3,})$/)){html+='<hr class="md-hr">';continue;}
+        if(line.trim().charAt(0)==='>'){html+='<blockquote class="md-blockquote">'+mdInline(line.trim().substring(1).trim())+'</blockquote>';continue;}
+        var um=line.match(/^[\s]*[-*+]\s+(.+)/);if(um){if(!inList||listType!=='ul'){if(inList)html+=listType==='ul'?'</ul>':'</ol>';html+='<ul class="md-list">';inList=true;listType='ul';}html+='<li>'+mdInline(um[1])+'</li>';continue;}
+        var om=line.match(/^[\s]*\d+\.\s+(.+)/);if(om){if(!inList||listType!=='ol'){if(inList)html+=listType==='ul'?'</ul>':'</ol>';html+='<ol class="md-list">';inList=true;listType='ol';}html+='<li>'+mdInline(om[1])+'</li>';continue;}
+        html+='<p class="md-p">'+mdInline(line)+'</p>';
+    }
+    if(inCB)html+='</code></pre>';if(inList)html+=listType==='ul'?'</ul>':'</ol>';if(inTable)html+=renderMDTable(tableRows);return html;
+}
+function mdInline(t){
+    t=t.replace(/`([^`]+)`/g,'<code class="md-inline-code">$1</code>');
+    t=t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');t=t.replace(/__(.+?)__/g,'<strong>$1</strong>');
+    t=t.replace(/\*(.+?)\*/g,'<em>$1</em>');t=t.replace(/_(.+?)_/g,'<em>$1</em>');
+    t=t.replace(/~~(.+?)~~/g,'<del>$1</del>');
+    t=t.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,'<img src="$2" alt="$1" style="max-width:100%;border-radius:8px;margin:.5em 0;">');
+    t=t.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" class="md-link" target="_blank" rel="noopener">$1</a>');
+    return t;
+}
+function renderMDTable(rows){if(rows.length<2)return '';var html='<table class="md-table"><thead><tr>';var hs=rows[0].split('|');for(var h=0;h<hs.length;h++){var c=hs[h].trim();if(c)html+='<th>'+mdInline(c)+'</th>';}html+='</tr></thead><tbody>';for(var r=2;r<rows.length;r++){html+='<tr>';var cs=rows[r].split('|');for(var c=0;c<cs.length;c++){var v=cs[c].trim();if(v)html+='<td>'+mdInline(v)+'</td>';}html+='</tr>';}html+='</tbody></table>';return html;}
+
+/* ===== 9. REGEX ===== */
+function validateRegex(){
+    var pattern=document.getElementById('regex-pattern').value;var flags=document.getElementById('regex-flags').value;var text=document.getElementById('regex-text').value;var out=document.getElementById('regex-output');
+    if(!pattern){out.innerHTML='';return;}
+    var regex;try{regex=new RegExp(pattern,flags);}catch(e){out.innerHTML='<div class="p-3 rounded-xl bg-[var(--bg-2)] border border-[var(--error)]"><span class="text-[var(--error)] text-sm"><i class="fas fa-exclamation-triangle mr-1"></i> Regex invalida: '+escHTML(e.message)+'</span></div>';return;}
+    if(!text){out.innerHTML='<div class="p-3 rounded-xl bg-[var(--bg-2)] border border-[var(--bg-4)]"><span class="text-[var(--success)] text-sm"><i class="fas fa-check-circle mr-1"></i> Regex valida</span></div>';return;}
+    var matches=[];var m;if(flags.indexOf('g')!==-1){while((m=regex.exec(text))!==null){matches.push({value:m[0],index:m.index,groups:m.slice(1)});if(m[0].length===0)regex.lastIndex++;}}else{m=regex.exec(text);if(m)matches.push({value:m[0],index:m.index,groups:m.slice(1)});}
+    var highlighted=escHTML(text);
+    if(matches.length>0){var sorted=matches.slice().sort(function(a,b){return b.index-a.index;});for(var s=0;s<sorted.length;s++){var mt=sorted[s];var before=highlighted.substring(0,mt.index);var match=highlighted.substring(mt.index,mt.index+mt.value.length);var after=highlighted.substring(mt.index+mt.value.length);highlighted=before+'<span class="regex-match">'+match+'</span>'+after;}}
+    var groupsHTML='';if(matches.length>0&&matches[0].groups.length>0){groupsHTML='<div class="mt-3"><p class="text-xs font-bold text-[var(--text-3)] uppercase mb-2">Grupos Capturados (1.o match)</p><div class="flex flex-wrap gap-2">';for(var g=0;g<matches[0].groups.length;g++){groupsHTML+='<span class="text-xs px-2 py-1 rounded-md bg-[var(--bg-3)] border border-[var(--bg-4)]"><span class="text-[var(--text-3)]">$'+(g+1)+':</span> <span class="text-[var(--accent)]">'+escHTML(matches[0].groups[g]||'(vazio)')+'</span></span>';}groupsHTML+='</div></div>';}
+    var matchesHTML='';if(matches.length>0){matchesHTML='<div class="space-y-1">';for(var mi=0;mi<matches.length;mi++){matchesHTML+='<div class="text-xs flex items-center gap-2"><span class="text-[var(--text-3)] w-6 text-right">#'+(mi+1)+'</span><span class="text-[var(--accent)] font-mono">'+escHTML(matches[mi].value)+'</span><span class="text-[var(--text-3)]">indice '+matches[mi].index+'</span></div>';}matchesHTML+='</div>';}
+    out.innerHTML='<div class="p-4 rounded-xl bg-[var(--bg-2)] border border-[var(--bg-4)] space-y-3"><div class="flex items-center gap-2"><span class="text-[var(--success)]"><i class="fas fa-check-circle"></i></span><span class="text-sm text-[var(--text-1)]">Regex valida</span><span class="text-xs text-[var(--text-3)] ml-auto">'+matches.length+' match'+(matches.length!==1?'es':'')+'</span></div><div class="font-mono text-sm leading-relaxed p-3 rounded-lg bg-[var(--bg-0)] border border-[var(--bg-4)]">'+(highlighted||'<span class="text-[var(--text-3)]">Nenhum match</span>')+'</div>'+matchesHTML+groupsHTML+'</div>';
+}
+
+/* ===== 10. TEXT COMPARE ===== */
+function compareTexts(){
+    var left=document.getElementById('diff-left').value;var right=document.getElementById('diff-right').value;var out=document.getElementById('diff-output');if(!left&&!right){out.innerHTML='';return;}
+    var a=left.split('\n');var b=right.split('\n');var diff=lcsDiff(a,b);var added=0,removed=0;for(var d=0;d<diff.length;d++){if(diff[d].type==='added')added++;if(diff[d].type==='removed')removed++;}
+    var li=0,ri=0,lines='';
+    for(var i=0;i<diff.length;i++){var item=diff[i];var ln,num,marker;
+        if(item.type==='equal'){ln=item.line;num='<span class="diff-line-num">'+(++li)+'</span><span class="diff-line-num">'+(++ri)+'</span>';marker=' ';}
+        else if(item.type==='added'){ln=item.line;num='<span class="diff-line-num"></span><span class="diff-line-num">'+(++ri)+'</span>';marker='+';}
+        else{ln=item.line;num='<span class="diff-line-num">'+(++li)+'</span><span class="diff-line-num"></span>';marker='-';}
+        lines+='<div class="diff-line diff-'+item.type+' font-mono text-xs">'+num+'<span style="display:inline-block;width:14px;text-align:center;font-weight:700;">'+marker+'</span>'+escHTML(ln)+'</div>';}
+    out.innerHTML='<div class="p-4 rounded-xl bg-[var(--bg-2)] border border-[var(--bg-4)]"><div class="flex gap-4 mb-3 text-xs"><span class="text-[var(--success)]"><i class="fas fa-plus mr-1"></i>'+added+' adicao'+(added!==1?'oes':'')+'</span><span class="text-[var(--error)]"><i class="fas fa-minus mr-1"></i>'+removed+' remocao'+(removed!==1?'oes':'')+'</span></div><div class="rounded-lg bg-[var(--bg-0)] border border-[var(--bg-4)] overflow-auto" style="max-height:500px;">'+(lines||'<div class="p-3 text-xs text-[var(--text-3)]">Textos identicos</div>')+'</div></div>';
+}
+function lcsDiff(a,b){var m=a.length,n=b.length;var dp=[];for(var i=0;i<=m;i++){dp[i]=[];for(var j=0;j<=n;j++)dp[i][j]=0;}for(var i=1;i<=m;i++)for(var j=1;j<=n;j++){if(a[i-1]===b[j-1])dp[i][j]=dp[i-1][j-1]+1;else dp[i][j]=Math.max(dp[i-1][j],dp[i][j-1]);}var result=[];var i=m,j=n;while(i>0&&j>0){if(a[i-1]===b[j-1]){result.unshift({type:'equal',line:a[i-1]});i--;j--;}else if(dp[i-1][j]>dp[i][j-1]){result.unshift({type:'removed',line:a[i-1]});i--;}else{result.unshift({type:'added',line:b[j-1]});j--;}}while(i>0){result.unshift({type:'removed',line:a[i-1]});i--;}while(j>0){result.unshift({type:'added',line:b[j-1]});j--;}return result;}
+
+/* ===== 11. HASH GENERATOR ===== */
+function generateHashes(){var input=document.getElementById('hash-input').value;var out=document.getElementById('hash-output');if(!input){out.innerHTML='';return;}var algos=['SHA-1','SHA-256','SHA-384','SHA-512'];var encoder=new TextEncoder();var data=encoder.encode(input);var promises=algos.map(function(algo){return crypto.subtle.digest(algo,data).then(function(buf){var hex=Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');return{algo:algo,hex:hex};});});Promise.all(promises).then(function(results){var rows='';for(var i=0;i<results.length;i++){var r=results[i];var sid='hash-'+r.algo.replace(/-/g,'');rows+='<div class="flex items-start gap-3 py-3 border-b border-[var(--bg-4)] last:border-0"><span class="text-xs font-bold text-[var(--text-3)] pt-0.5 whitespace-nowrap" style="min-width:70px;">'+r.algo+'</span><span class="font-mono text-xs text-[var(--accent)] break-all flex-1" id="'+sid+'">'+r.hex+'</span><button class="tool-btn small secondary" onclick="copyText(document.getElementById(\''+sid+'\').textContent)"><i class="far fa-copy"></i></button></div>';}out.innerHTML='<div class="tool-output" style="padding:8px 16px;">'+rows+'</div>';});}
+
+/* ===== 12. YAML VALIDATOR ===== */
+function validateYAML(){
+    var input=document.getElementById('yaml-input').value.trim();var out=document.getElementById('yaml-output');if(!input){out.innerHTML='';return;}
+    try{
+        if(typeof jsyaml==='undefined'){out.innerHTML=errorHTML('Biblioteca js-yaml nao carregou. Recarregue a pagina.');return;}
+        var parsed=jsyaml.load(input,{json:true});var json=JSON.stringify(parsed,null,2);var lineCount=input.split('\n').length;var keyCount=countKeys(parsed);
+        out.innerHTML='<div class="space-y-4"><div class="flex gap-4 flex-wrap text-sm"><span class="flex items-center gap-2 text-[var(--success)]"><i class="fas fa-check-circle"></i> YAML valido</span><span class="text-[var(--text-3)]">'+lineCount+' linhas</span><span class="text-[var(--text-3)]">'+keyCount+' chaves</span></div><div><p class="text-xs font-bold text-[var(--text-3)] uppercase mb-1">Resultado (JSON)</p>'+outputHTML(syntaxHL(json),'yaml-r')+'</div></div>';
+    }catch(e){
+        var msg=e.message;var lineInfo='';
+        var lm=msg.match(/line (\d+)/);
+        if(lm){var ln=parseInt(lm[1]);var lines=input.split('\n');var lineContent=lines[ln-1]||'';lineInfo='<div class="mt-2 text-xs"><span class="text-[var(--text-3)]">Linha '+ln+':</span> <span class="font-mono text-[var(--text-2)]">'+escHTML(lineContent)+'</span></div>';}
+        /* Indicar posicao do erro na linha */
+        var colMatch=msg.match(/column (\d+)/);
+        if(colMatch&&lineContent){var col=parseInt(colMatch[1])-1;var before=escHTML(lineContent.substring(0,col));var at=escHTML(lineContent.substring(col,col+1));var after=escHTML(lineContent.substring(col+1));lineInfo='<div class="mt-2 text-xs"><span class="text-[var(--text-3)]">Linha '+ln+', coluna '+colMatch[1]+':</span><br><span class="font-mono text-sm">'+before+'<span class="text-[var(--error)] font-bold" style="text-decoration:underline;">'+at+'</span>'+after+'</span></div>';}
+        out.innerHTML='<div class="p-4 rounded-xl bg-[var(--bg-2)] border border-[var(--error)]"><span class="text-[var(--error)] text-sm"><i class="fas fa-exclamation-triangle mr-1"></i> '+escHTML(msg)+'</span>'+lineInfo+'</div>';
+    }
+}
+function countKeys(obj){if(typeof obj!=='object'||obj===null)return 0;var c=0;if(Array.isArray(obj)){for(var i=0;i<obj.length;i++)c+=countKeys(obj[i]);}else{var ks=Object.keys(obj);c=ks.length;for(var i=0;i<ks.length;i++)c+=countKeys(obj[ks[i]]);}return c;}
+
+/* ===== 13. UUID ===== */
+function generateUUIDs(){var count=Math.min(100,Math.max(1,parseInt(document.getElementById('uuid-count').value)||1));var upper=document.getElementById('uuid-upper').checked;var noDash=document.getElementById('uuid-no-dash').checked;var uuids=[];for(var i=0;i<count;i++){var u=crypto.randomUUID();if(noDash)u=u.replace(/-/g,'');if(upper)u=u.toUpperCase();uuids.push(u);}document.getElementById('uuid-output').innerHTML=outputHTML(escHTML(uuids.join('\n')),'uuid-r');}
+
+/* ===== 14. LOREM IPSUM ===== */
+function generateLorem(){var type=document.getElementById('lorem-type').value;var count=Math.min(100,Math.max(1,parseInt(document.getElementById('lorem-count').value)||1));var words='lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum'.split(' ');
+function rw(){return words[Math.floor(Math.random()*words.length)];}
+function rs(){var len=8+Math.floor(Math.random()*12);var s=[];for(var i=0;i<len;i++)s.push(rw());var r=s.join(' ');return r.charAt(0).toUpperCase()+r.slice(1)+'.';}
+function rp(){var len=3+Math.floor(Math.random()*5);var p=[];for(var i=0;i<len;i++)p.push(rs());return p.join(' ');}
+var text='';if(type==='words'){var w=[];for(var i=0;i<count;i++)w.push(rw());text=w.join(' ');}else if(type==='sentences'){var s=[];for(var i=0;i<count;i++)s.push(rs());text=s.join(' ');}else{var p=[];for(var i=0;i<count;i++)p.push(rp());text=p.join('\n\n');}document.getElementById('lorem-output').innerHTML=outputHTML(escHTML(text),'lorem-r');}
+
+/* ===== 15. PASSWORD ===== */
+function generatePassword(){var length=parseInt(document.getElementById('pw-length').value);var uC=document.getElementById('pw-upper').checked;var lC=document.getElementById('pw-lower').checked;var nC=document.getElementById('pw-numbers').checked;var sC=document.getElementById('pw-symbols').checked;var chars='';if(uC)chars+='ABCDEFGHIJKLMNOPQRSTUVWXYZ';if(lC)chars+='abcdefghijklmnopqrstuvwxyz';if(nC)chars+='0123456789';if(sC)chars+='!@#$%^&*()_+-=[]{}|;:,.<>?';if(!chars){showToast('Selecione ao menos um tipo de caractere.','error');return;}var arr=new Uint32Array(length);crypto.getRandomValues(arr);var pw='';for(var i=0;i<length;i++)pw+=chars[arr[i]%chars.length];document.getElementById('pw-display').textContent=pw;var pool=0;if(uC)pool+=26;if(lC)pool+=26;if(nC)pool+=10;if(sC)pool+=28;var bits=Math.floor(length*Math.log2(pool));var bar=document.getElementById('pw-str-bar');var label=document.getElementById('pw-str-label');var pct,color,text;if(bits<40){pct=20;color='var(--error)';text='Fraca';}else if(bits<60){pct=40;color='#F97316';text='Razoavel';}else if(bits<80){pct=60;color='var(--accent)';text='Boa';}else if(bits<100){pct=80;color='var(--info)';text='Forte';}else{pct=100;color='var(--success)';text='Muito Forte';}bar.style.width=pct+'%';bar.style.background=color;label.textContent=text+' ('+bits+' bits)';label.style.color=color;}
+
+/* ===== 16. TIMESTAMP ===== */
+function tsToDate(){var input=document.getElementById('ts-input').value.trim();var out=document.getElementById('ts-date-output');if(!input){out.innerHTML='';return;}var ts=parseInt(input);if(isNaN(ts)){out.innerHTML=errorHTML('Timestamp invalido.');return;}if(ts>1e12)ts=Math.floor(ts/1000);var d=new Date(ts*1000);if(isNaN(d.getTime())){out.innerHTML=errorHTML('Timestamp invalido.');return;}var rel=relTime(d);out.innerHTML='<div class="tool-output text-sm space-y-1"><div><span class="text-[var(--text-3)]">Local: </span><span class="text-[var(--accent)]">'+d.toLocaleString('pt-BR')+'</span></div><div><span class="text-[var(--text-3)]">UTC: </span>'+d.toUTCString()+'</div><div><span class="text-[var(--text-3)]">ISO: </span>'+d.toISOString()+'</div><div><span class="text-[var(--text-3)]">Relativo: </span>'+rel+'</div></div>';}
+function dateToTs(){var input=document.getElementById('ts-date-input').value;var out=document.getElementById('ts-ts-output');if(!input){out.innerHTML='';return;}var d=new Date(input);if(isNaN(d.getTime())){out.innerHTML=errorHTML('Data invalida.');return;}var s=Math.floor(d.getTime()/1000);var ms=d.getTime();out.innerHTML='<div class="tool-output text-sm space-y-1"><div class="flex items-center justify-between"><span class="text-[var(--text-3)]">Segundos:</span><span class="text-[var(--accent)] font-mono">'+s+'</span><button class="tool-btn small secondary" onclick="copyText(\''+s+'\')"><i class="far fa-copy"></i></button></div><div class="flex items-center justify-between"><span class="text-[var(--text-3)]">Milissegundos:</span><span class="text-[var(--text-1)] font-mono">'+ms+'</span><button class="tool-btn small secondary" onclick="copyText(\''+ms+'\')"><i class="far fa-copy"></i></button></div></div>';}
+function relTime(d){var diff=(Date.now()-d.getTime())/1000;var abs=Math.abs(diff);var p=diff>0?'ha ':'em ';if(abs<60)return p+Math.floor(abs)+' segundos';if(abs<3600)return p+Math.floor(abs/60)+' minutos';if(abs<86400)return p+Math.floor(abs/3600)+' horas';if(abs<2592000)return p+Math.floor(abs/86400)+' dias';if(abs<31536000)return p+Math.floor(abs/2592000)+' meses';return p+Math.floor(abs/31536000)+' anos';}
+
+/* ===== 17. COLOR ===== */
+function colorFromPicker(){var hex=document.getElementById('color-picker').value;document.getElementById('color-hex').value=hex;updateColorHex(hex);}
+function colorFromHex(){var hex=document.getElementById('color-hex').value.trim();if(/^#?[0-9a-fA-F]{6}$/.test(hex)){var h=hex.startsWith('#')?hex:'#'+hex;document.getElementById('color-picker').value=h;updateColorHex(h);}}
+function updateColorHex(hex){var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);document.getElementById('color-rgb').value='rgb('+r+', '+g+', '+b+')';var hsl=rgb2hsl(r,g,b);document.getElementById('color-hsl').value='hsl('+hsl[0]+', '+hsl[1]+'%, '+hsl[2]+'%)';document.getElementById('color-swatch').style.background=hex;}
+function colorFromRGB(){var m=document.getElementById('color-rgb').value.match(/(\d+)/g);if(m&&m.length>=3){var r=parseInt(m[0]),g=parseInt(m[1]),b=parseInt(m[2]);if(r<=255&&g<=255&&b<=255){var hex='#'+[r,g,b].map(function(c){return c.toString(16).padStart(2,'0');}).join('');document.getElementById('color-hex').value=hex;document.getElementById('color-picker').value=hex;var hsl=rgb2hsl(r,g,b);document.getElementById('color-hsl').value='hsl('+hsl[0]+', '+hsl[1]+'%, '+hsl[2]+'%)';document.getElementById('color-swatch').style.background=hex;}}}
+function colorFromHSL(){var m=document.getElementById('color-hsl').value.match(/(\d+)/g);if(m&&m.length>=3){var h=parseInt(m[0]),s=parseInt(m[1]),l=parseInt(m[2]);var rgb=hsl2rgb(h,s,l);var hex='#'+rgb.map(function(c){return c.toString(16).padStart(2,'0');}).join('');document.getElementById('color-hex').value=hex;document.getElementById('color-picker').value=hex;document.getElementById('color-rgb').value='rgb('+rgb[0]+', '+rgb[1]+', '+rgb[2]+')';document.getElementById('color-swatch').style.background=hex;}}
+function rgb2hsl(r,g,b){r/=255;g/=255;b/=255;var mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;var h=0,s=0,l=(mx+mn)/2;if(d!==0){s=l>0.5?d/(2-mx-mn):d/(mx+mn);if(mx===r)h=((g-b)/d+(g<b?6:0))/6;else if(mx===g)h=((b-r)/d+2)/6;else h=((r-g)/d+4)/6;}return[Math.round(h*360),Math.round(s*100),Math.round(l*100)];}
+function hsl2rgb(h,s,l){h/=360;s/=100;l/=100;var r,g,b;if(s===0){r=g=b=l;}else{var h2r=function(p,q,t){if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p;};var q=l<0.5?l*(1+s):l+s-l*s;var p=2*l-q;r=h2r(p,q,h+1/3);g=h2r(p,q,h);b=h2r(p,q,h-1/3);}return[Math.round(r*255),Math.round(g*255),Math.round(b*255)];}
+
+/* ===== 18. NUMBER BASE ===== */
+function convertNumber(){var input=document.getElementById('num-input').value.trim();if(!input){document.getElementById('num-bin').textContent='\u2014';document.getElementById('num-oct').textContent='\u2014';document.getElementById('num-dec').textContent='\u2014';document.getElementById('num-hex').textContent='\u2014';return;}var dec;if(/^0b[01]+$/i.test(input))dec=parseInt(input.slice(2),2);else if(/^0o[0-7]+$/i.test(input))dec=parseInt(input.slice(2),8);else if(/^0x[0-9a-f]+$/i.test(input))dec=parseInt(input.slice(2),16);else if(/^[01]+$/.test(input))dec=parseInt(input,2);else if(/^[0-7]+$/.test(input))dec=parseInt(input,8);else if(/^[0-9]+$/.test(input))dec=parseInt(input,10);else if(/^[0-9a-fA-F]+$/.test(input))dec=parseInt(input,16);else{document.getElementById('num-bin').textContent='Invalido';document.getElementById('num-oct').textContent='Invalido';document.getElementById('num-dec').textContent='Invalido';document.getElementById('num-hex').textContent='Invalido';return;}if(isNaN(dec)){document.getElementById('num-bin').textContent='Invalido';document.getElementById('num-oct').textContent='Invalido';document.getElementById('num-dec').textContent='Invalido';document.getElementById('num-hex').textContent='Invalido';return;}document.getElementById('num-bin').textContent=dec.toString(2);document.getElementById('num-oct').textContent=dec.toString(8);document.getElementById('num-dec').textContent=dec.toString(10);document.getElementById('num-hex').textContent='0x'+dec.toString(16).toUpperCase();}
+
+/* ===== ATALHOS ===== */
+document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();document.getElementById('sidebar-search').focus();if(window.innerWidth<1024&&!document.getElementById('sidebar').classList.contains('open'))toggleSidebar();}if(e.key==='Escape'){var sb=document.getElementById('sidebar');if(sb.classList.contains('open')&&window.innerWidth<1024)toggleSidebar();document.getElementById('sidebar-search').blur();}});
+
+/* ===== INIT ===== */
+buildSidebar();
+showDashboard();
+</script>
+</body>
+</html>
