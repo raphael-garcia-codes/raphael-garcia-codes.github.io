@@ -3,525 +3,504 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevToolKit — Ferramentas para Desenvolvedores</title>
+    <title>DevToolKit - Ferramentas para Desenvolvedores</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Outfit','sans-serif'], mono: ['JetBrains Mono','monospace'] } } } }
+    </script>
     <style>
-        :root{--bg-0:#09090B;--bg-1:#0F0F12;--bg-2:#18181B;--bg-3:#27272A;--bg-4:#3F3F46;--text-0:#FAFAFA;--text-1:#D4D4D8;--text-2:#A1A1AA;--text-3:#71717A;--accent:#FBBF24;--accent-dim:rgba(251,191,36,0.08);--accent-hover:#F59E0B;--success:#34D399;--error:#F87171;--info:#2DD4BF}
-        *{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:'Space Grotesk',sans-serif;background:var(--bg-0);color:var(--text-0);overflow-x:hidden}
-        .font-mono{font-family:'JetBrains Mono',monospace}
-        ::-webkit-scrollbar{width:6px;height:6px}
-        ::-webkit-scrollbar-track{background:transparent}
-        ::-webkit-scrollbar-thumb{background:var(--bg-4);border-radius:3px}
-        ::-webkit-scrollbar-thumb:hover{background:var(--text-3)}
-        #sidebar{transition:transform .3s cubic-bezier(.4,0,.2,1)}
-        #sidebar.open{transform:translateX(0)!important}
-        .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;transition:all .15s;color:var(--text-2);font-size:13px;font-weight:500}
-        .nav-item:hover{background:var(--bg-3);color:var(--text-0)}
-        .nav-item.active{background:var(--accent-dim);color:var(--accent);border-left:2px solid var(--accent)}
-        .nav-item i{width:18px;text-align:center;font-size:12px}
-        .cat-header{display:flex;align-items:center;gap:8px;padding:10px 12px 6px;cursor:pointer;color:var(--text-3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;user-select:none}
-        .cat-header i.chevron{font-size:8px;transition:transform .2s}
-        .cat-header.collapsed i.chevron{transform:rotate(-90deg)}
-        .cat-tools{overflow:hidden;transition:max-height .3s ease}
-        .cat-tools.collapsed{max-height:0!important}
-        .tool-label{display:block;font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:6px}
-        .tool-textarea,.tool-input{width:100%;background:var(--bg-2);border:1px solid var(--bg-4);border-radius:10px;padding:12px 14px;color:var(--text-0);font-family:'JetBrains Mono',monospace;font-size:13px;resize:vertical;outline:none;transition:border-color .2s}
-        .tool-textarea:focus,.tool-input:focus{border-color:var(--accent)}
-        .tool-textarea::placeholder,.tool-input::placeholder{color:var(--text-3)}
-        .tool-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:'Space Grotesk',sans-serif}
-        .tool-btn.primary{background:var(--accent);color:#000}
-        .tool-btn.primary:hover{background:var(--accent-hover);transform:translateY(-1px)}
-        .tool-btn.primary:active{transform:translateY(0)}
-        .tool-btn.secondary{background:var(--bg-3);color:var(--text-1)}
-        .tool-btn.secondary:hover{background:var(--bg-4);color:var(--text-0)}
-        .tool-btn.small{padding:6px 12px;font-size:12px;border-radius:8px}
-        .tool-output{background:var(--bg-2);border:1px solid var(--bg-4);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:13px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;position:relative}
-        .tool-output .copy-btn{position:absolute;top:8px;right:8px;background:var(--bg-3);border:none;color:var(--text-2);padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;transition:all .15s;font-family:'Space Grotesk',sans-serif}
-        .tool-output .copy-btn:hover{background:var(--bg-4);color:var(--text-0)}
-        .syn-key{color:#7DD3FC}.syn-str{color:#86EFAC}.syn-num{color:#FDE68A}.syn-bool{color:#FCA5A5}.syn-null{color:#C4B5FD}.syn-kw{color:#FBBF24;font-weight:600}.syn-fn{color:#7DD3FC}.syn-cm{color:var(--text-3);font-style:italic}.syn-tag{color:#7DD3FC}.syn-attr{color:#FBBF24}
-        .diff-line{padding:2px 12px;border-left:3px solid transparent}
-        .diff-equal{color:var(--text-2)}.diff-added{background:rgba(52,211,153,.08);border-left-color:var(--success);color:var(--success)}.diff-removed{background:rgba(248,113,113,.08);border-left-color:var(--error);color:var(--error)}
-        .diff-line-num{display:inline-block;width:40px;text-align:right;margin-right:16px;color:var(--text-3);user-select:none}
-        .dash-card{background:var(--bg-2);border:1px solid var(--bg-4);border-radius:14px;padding:20px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
-        .dash-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);transform:scaleX(0);transition:transform .3s;transform-origin:left}
-        .dash-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 30px rgba(251,191,36,.08)}
-        .dash-card:hover::before{transform:scaleX(1)}
-        .dash-card .card-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--accent-dim);color:var(--accent);font-size:16px;margin-bottom:12px}
-        .toast{display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:500;transform:translateX(120%);transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:0 8px 30px rgba(0,0,0,.4);min-width:220px}
-        .toast.show{transform:translateX(0)}
-        .toast-success{background:#064E3B;color:#6EE7B7;border:1px solid #065F46}
-        .toast-error{background:#450A0A;color:#FCA5A5;border:1px solid #7F1D1D}
-        .toast-info{background:#042F2E;color:#5EEAD4;border:1px solid #134E4A}
-        .regex-match{background:rgba(251,191,36,.25);border-radius:2px;padding:0 1px}
-        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-        .fade-up{animation:fadeUp .35s ease-out}
-        .bg-grid{background-image:radial-gradient(circle,var(--bg-4) 1px,transparent 1px);background-size:32px 32px}
-        .toggle{position:relative;width:40px;height:22px;cursor:pointer;display:inline-block}
-        .toggle input{display:none}
-        .toggle-slider{position:absolute;inset:0;background:var(--bg-4);border-radius:11px;transition:.2s}
-        .toggle-slider::before{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:var(--text-2);top:3px;left:3px;transition:.2s}
-        .toggle input:checked+.toggle-slider{background:var(--accent)}
-        .toggle input:checked+.toggle-slider::before{transform:translateX(18px);background:#000}
-        .strength-bar{height:4px;border-radius:2px;background:var(--bg-4);overflow:hidden}
-        .strength-fill{height:100%;border-radius:2px;transition:all .3s}
-        .color-swatch{width:100%;height:120px;border-radius:12px;border:1px solid var(--bg-4);transition:background .2s}
-        input[type="range"]{-webkit-appearance:none;width:100%;height:6px;border-radius:3px;background:var(--bg-4);outline:none}
-        input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--bg-0)}
-        .md-h1{font-size:2em;font-weight:700;margin:1em 0 .5em;color:var(--text-0);border-bottom:2px solid var(--bg-4);padding-bottom:.3em}
-        .md-h2{font-size:1.5em;font-weight:700;margin:.8em 0 .4em;color:var(--text-0)}
-        .md-h3{font-size:1.25em;font-weight:600;margin:.6em 0 .3em;color:var(--text-1)}
-        .md-h4{font-size:1.1em;font-weight:600;margin:.5em 0 .25em;color:var(--text-1)}
-        .md-h5,.md-h6{font-size:1em;font-weight:600;margin:.4em 0 .2em;color:var(--text-2)}
-        .md-p{margin:.5em 0;line-height:1.7;color:var(--text-1)}
-        .md-code-block{background:var(--bg-0);border:1px solid var(--bg-4);border-radius:10px;padding:16px;overflow-x:auto;margin:1em 0;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6}
-        .md-inline-code{background:var(--bg-3);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.9em;color:var(--accent)}
-        .md-blockquote{border-left:3px solid var(--accent);padding:8px 16px;margin:.8em 0;background:var(--accent-dim);border-radius:0 8px 8px 0;color:var(--text-2)}
-        .md-list{padding-left:1.5em;margin:.5em 0}.md-list li{margin:.3em 0;line-height:1.6;color:var(--text-1)}.md-list li::marker{color:var(--accent)}
-        .md-hr{border:none;border-top:1px solid var(--bg-4);margin:1.5em 0}
-        .md-link{color:var(--accent);text-decoration:underline;text-underline-offset:2px}.md-link:hover{color:var(--accent-hover)}
-        .md-table{width:100%;border-collapse:collapse;margin:1em 0}
-        .md-table th{background:var(--bg-3);padding:10px 14px;text-align:left;font-size:13px;font-weight:600;color:var(--text-1);border-bottom:2px solid var(--bg-4)}
-        .md-table td{padding:8px 14px;font-size:13px;color:var(--text-2);border-bottom:1px solid var(--bg-4)}
-        .md-table tr:hover td{background:var(--bg-2)}
-        .md-preview strong{color:var(--text-0);font-weight:700}.md-preview em{color:var(--text-1)}.md-preview del{color:var(--text-3)}
-        .split-panel{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-        @media(max-width:768px){.split-panel{grid-template-columns:1fr}}
-        @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+        :root {
+            --sidebar-w: 260px;
+            --bg: #080c15;
+            --sidebar-bg: #0c1220;
+            --card-bg: #111827;
+            --card-border: #1c2640;
+            --text: #e8ecf4;
+            --text-muted: #5e6e88;
+            --accent: #10b981;
+            --accent-light: #34d399;
+            --accent-glow: rgba(16,185,129,0.15);
+            --danger: #ef4444;
+            --warn: #f59e0b;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;height:100vh;}
+
+        /* ===== SIDEBAR ===== */
+        .sidebar{width:var(--sidebar-w);min-width:180px;max-width:420px;background:var(--sidebar-bg);border-right:1px solid var(--card-border);height:100vh;position:fixed;left:0;top:0;display:flex;flex-direction:column;z-index:50;overflow:hidden;}
+        .sidebar-logo{padding:1.25rem 1rem;border-bottom:1px solid var(--card-border);flex-shrink:0;}
+        .logo-link{display:flex;align-items:center;gap:0.75rem;text-decoration:none;color:var(--text);transition:opacity .2s;}
+        .logo-link:hover{opacity:.85;}
+        .logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 20px rgba(16,185,129,.25);}
+        .logo-icon i{color:#080c15;font-size:14px;}
+        .logo-text{font-size:1.125rem;font-weight:800;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;}
+        .sidebar-nav{flex:1;overflow-y:auto;overflow-x:hidden;padding:0.5rem;}
+        .nav-category{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--text-muted);padding:.875rem .75rem .375rem;white-space:nowrap;overflow:hidden;opacity:.7;}
+        .nav-item{display:flex;align-items:center;gap:.75rem;padding:.55rem .75rem;border-radius:8px;cursor:pointer;color:var(--text-muted);transition:all .15s ease;font-size:.8125rem;font-weight:500;white-space:nowrap;overflow:hidden;margin-bottom:2px;position:relative;}
+        .nav-item:hover{background:var(--accent-glow);color:var(--text);}
+        .nav-item.active{background:var(--accent-glow);color:var(--accent);}
+        .nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;border-radius:0 3px 3px 0;background:var(--accent);}
+        .nav-item i{width:18px;text-align:center;flex-shrink:0;font-size:.8rem;}
+        .nav-item span{overflow:hidden;text-overflow:ellipsis;}
+        .sidebar-footer{padding:.75rem 1rem;border-top:1px solid var(--card-border);flex-shrink:0;text-align:center;}
+        .sidebar-footer span{font-size:.675rem;color:var(--text-muted);opacity:.5;}
+        .resize-handle{position:absolute;right:-4px;top:0;width:8px;height:100%;cursor:col-resize;z-index:100;background:transparent;transition:background .2s;border-radius:0 4px 4px 0;}
+        .resize-handle:hover,.resize-handle.active{background:var(--accent);opacity:.5;}
+
+        /* ===== MAIN ===== */
+        .main-content{margin-left:var(--sidebar-w);height:100vh;overflow-y:auto;padding:2rem 2.5rem;position:relative;}
+        ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--card-border);border-radius:4px;}::-webkit-scrollbar-thumb:hover{background:var(--text-muted);}
+
+        /* ===== SEARCH BAR ===== */
+        .search-bar-wrapper{position:relative;margin-bottom:1.5rem;}
+        .search-bar{width:100%;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:.75rem 1rem .75rem 2.75rem;color:var(--text);font-family:'Outfit',sans-serif;font-size:.875rem;outline:none;transition:all .2s;}
+        .search-bar:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);}
+        .search-bar::placeholder{color:var(--text-muted);opacity:.5;}
+        .search-bar-icon{position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:.85rem;pointer-events:none;transition:color .2s;}
+        .search-bar:focus~.search-bar-icon{color:var(--accent);}
+        .search-shortcut{position:absolute;right:1rem;top:50%;transform:translateY(-50%);background:var(--bg);border:1px solid var(--card-border);border-radius:6px;padding:.2rem .5rem;font-size:.65rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;pointer-events:none;letter-spacing:.03em;}
+
+        /* ===== SEARCH MODAL (global Ctrl+K) ===== */
+        .search-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:200;display:none;align-items:flex-start;justify-content:center;padding-top:min(15vh,120px);}
+        .search-modal-overlay.open{display:flex;animation:fadeIn .15s ease;}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+        .search-modal{width:100%;max-width:560px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,.5),0 0 40px var(--accent-glow);animation:modalSlide .2s ease;}
+        @keyframes modalSlide{from{opacity:0;transform:translateY(-12px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+        .search-modal-input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--card-border);padding:1rem 1.25rem 1rem 3rem;color:var(--text);font-family:'Outfit',sans-serif;font-size:1rem;outline:none;}
+        .search-modal-input::placeholder{color:var(--text-muted);opacity:.5;}
+        .search-modal-icon{position:absolute;left:1.1rem;top:1rem;color:var(--text-muted);font-size:.95rem;pointer-events:none;}
+        .search-modal-results{max-height:360px;overflow-y:auto;padding:.5rem;}
+        .search-modal-item{display:flex;align-items:center;gap:.75rem;padding:.7rem .875rem;border-radius:10px;cursor:pointer;transition:all .12s;color:var(--text-muted);}
+        .search-modal-item:hover,.search-modal-item.focused{background:var(--accent-glow);color:var(--text);}
+        .search-modal-item.focused{color:var(--accent);}
+        .search-modal-item i{width:20px;text-align:center;font-size:.8rem;flex-shrink:0;}
+        .search-modal-item-text{flex:1;min-width:0;}
+        .search-modal-item-name{font-size:.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .search-modal-item-name mark{background:none;color:var(--accent);font-weight:700;}
+        .search-modal-item-desc{font-size:.7rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.1rem;}
+        .search-modal-item-cat{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);opacity:.6;flex-shrink:0;}
+        .search-modal-empty{padding:2rem 1rem;text-align:center;color:var(--text-muted);font-size:.85rem;}
+        .search-modal-footer{padding:.625rem 1rem;border-top:1px solid var(--card-border);display:flex;gap:1rem;font-size:.65rem;color:var(--text-muted);opacity:.6;}
+        .search-modal-footer kbd{background:var(--bg);border:1px solid var(--card-border);border-radius:4px;padding:.1rem .35rem;font-family:'JetBrains Mono',monospace;font-size:.6rem;}
+
+        /* ===== NO RESULTS (dashboard) ===== */
+        .no-results{text-align:center;padding:3rem 1rem;color:var(--text-muted);}
+        .no-results i{font-size:2rem;opacity:.3;margin-bottom:.75rem;display:block;}
+        .no-results p{font-size:.875rem;}
+
+        /* ===== TOOL TEXTAREA ===== */
+        .tool-textarea{background:var(--bg);border:1px solid var(--card-border);border-radius:10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.8rem;line-height:1.6;padding:1rem;width:100%;resize:vertical;outline:none;transition:border-color .2s,box-shadow .2s;}
+        .tool-textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);}
+        .tool-textarea::placeholder{color:var(--text-muted);opacity:.5;}
+        .tool-textarea[readonly]{cursor:default;opacity:.9;}
+
+        /* ===== BUTTONS ===== */
+        .btn{font-family:'Outfit',sans-serif;font-size:.8125rem;font-weight:600;padding:.6rem 1.25rem;border-radius:8px;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.5rem;white-space:nowrap;}
+        .btn-primary{background:var(--accent);color:#080c15;}.btn-primary:hover{background:var(--accent-light);transform:translateY(-1px);box-shadow:0 4px 16px rgba(16,185,129,.3);}
+        .btn-secondary{background:var(--card-bg);color:var(--text);border:1px solid var(--card-border);}.btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+        .btn-danger{background:rgba(239,68,68,.1);color:var(--danger);border:1px solid rgba(239,68,68,.2);}.btn-danger:hover{background:rgba(239,68,68,.2);}
+        .tool-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:1.5rem;}
+        .dash-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:1.1rem;cursor:pointer;transition:all .25s ease;position:relative;overflow:hidden;}
+        .dash-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);transform:scaleX(0);transition:transform .3s ease;transform-origin:left;}
+        .dash-card:hover{border-color:rgba(16,185,129,.3);transform:translateY(-3px);box-shadow:0 8px 30px rgba(0,0,0,.3),0 0 40px var(--accent-glow);}
+        .dash-card:hover::before{transform:scaleX(1);}
+        .dash-card.hidden-card{display:none;}
+        .dash-card-icon{width:36px;height:36px;border-radius:9px;background:var(--accent-glow);display:flex;align-items:center;justify-content:center;margin-bottom:.75rem;color:var(--accent);font-size:.85rem;}
+        .glow-orb{position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none;z-index:0;}
+        .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--card-bg);border:1px solid var(--accent);color:var(--text);padding:.75rem 1.25rem;border-radius:10px;font-size:.8125rem;font-weight:500;z-index:9999;animation:toastIn .3s ease,toastOut .3s ease 2.2s forwards;box-shadow:0 8px 30px rgba(0,0,0,.4),0 0 20px var(--accent-glow);display:flex;align-items:center;gap:.5rem;}
+        .toast.error{border-color:var(--danger);box-shadow:0 8px 30px rgba(0,0,0,.4),0 0 20px rgba(239,68,68,.15);}
+        @keyframes toastIn{from{transform:translateY(20px) scale(.95);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+        @keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateY(-10px)}}
+        .page-enter{animation:pageIn .35s ease;}@keyframes pageIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        .jwt-section{background:var(--bg);border:1px solid var(--card-border);border-radius:10px;overflow:hidden;}
+        .jwt-section-header{padding:.625rem 1rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--card-border);display:flex;align-items:center;gap:.5rem;}
+        .jwt-section-body{padding:1rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.65;color:var(--accent-light);white-space:pre-wrap;word-break:break-all;max-height:220px;overflow-y:auto;}
+        .tool-select{background:var(--bg);border:1px solid var(--card-border);border-radius:8px;color:var(--text);font-family:'Outfit',sans-serif;font-size:.8125rem;padding:.6rem 1rem;outline:none;cursor:pointer;transition:border-color .2s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235e6e88' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .75rem center;padding-right:2.5rem;}
+        .tool-select:focus{border-color:var(--accent);}
+        .tool-input{background:var(--bg);border:1px solid var(--card-border);border-radius:8px;color:var(--text);font-family:'Outfit',sans-serif;font-size:.8125rem;padding:.6rem 1rem;outline:none;transition:border-color .2s;}
+        .tool-input:focus{border-color:var(--accent);}
+        .tool-input-num{width:80px;}
+        .tool-checkbox{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;}
+        .grid-pattern{position:absolute;inset:0;background-image:linear-gradient(rgba(28,38,64,.3) 1px,transparent 1px),linear-gradient(90deg,rgba(28,38,64,.3) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse at 30% 20%,black 20%,transparent 70%);-webkit-mask-image:radial-gradient(ellipse at 30% 20%,black 20%,transparent 70%);pointer-events:none;z-index:0;}
+        .field-label{font-size:.8rem;font-weight:600;color:#94a3b8;margin-bottom:.5rem;display:block;}
+        .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;}
+        .stat-box{background:var(--bg);border:1px solid var(--card-border);border-radius:10px;padding:1rem;text-align:center;}
+        .stat-value{font-size:1.5rem;font-weight:800;color:var(--accent);line-height:1;margin-bottom:.375rem;}
+        .stat-label{font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+        .color-swatch{width:100%;height:80px;border-radius:10px;border:1px solid var(--card-border);transition:background .3s;}
+        .ts-result{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+        .ts-box{background:var(--bg);border:1px solid var(--card-border);border-radius:10px;padding:1rem;}
+        .ts-box-label{font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:.375rem;}
+        .ts-box-value{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--accent-light);word-break:break-all;}
+        .pwd-item{display:flex;align-items:center;justify-content:space-between;background:var(--bg);border:1px solid var(--card-border);border-radius:8px;padding:.625rem .875rem;margin-bottom:.5rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--accent-light);word-break:break-all;}
+        .pwd-item button{background:none;border:none;color:var(--text-muted);cursor:pointer;padding:.25rem;font-size:.8rem;transition:color .2s;flex-shrink:0;margin-left:.5rem;}.pwd-item button:hover{color:var(--accent);}
+        .base-row{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;}
+        .base-label{font-size:.75rem;font-weight:700;color:var(--text-muted);width:100px;flex-shrink:0;text-transform:uppercase;letter-spacing:.04em;}
+        .base-value{flex:1;background:var(--bg);border:1px solid var(--card-border);border-radius:8px;color:var(--accent-light);font-family:'JetBrains Mono',monospace;font-size:.82rem;padding:.6rem .875rem;word-break:break-all;min-height:38px;display:flex;align-items:center;}
+        .md-preview{background:var(--bg);border:1px solid var(--card-border);border-radius:10px;padding:1.25rem;overflow-y:auto;line-height:1.7;font-size:.9rem;}
+        .md-preview h1{font-size:1.75rem;font-weight:800;color:white;margin:1rem 0 .5rem;border-bottom:1px solid var(--card-border);padding-bottom:.5rem;}
+        .md-preview h2{font-size:1.4rem;font-weight:700;color:white;margin:.875rem 0 .4rem;}
+        .md-preview h3{font-size:1.15rem;font-weight:700;color:white;margin:.75rem 0 .375rem;}
+        .md-preview p{margin:.5rem 0;color:#c9d1d9;}
+        .md-preview a{color:var(--accent);text-decoration:underline;}
+        .md-preview code{background:rgba(16,185,129,.1);color:var(--accent-light);padding:.15rem .4rem;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.82rem;}
+        .md-preview pre{background:var(--card-bg);border:1px solid var(--card-border);border-radius:8px;padding:1rem;margin:.75rem 0;overflow-x:auto;}
+        .md-preview pre code{background:none;padding:0;color:var(--accent-light);}
+        .md-preview blockquote{border-left:3px solid var(--accent);padding:.5rem 1rem;margin:.75rem 0;color:var(--text-muted);background:var(--accent-glow);border-radius:0 8px 8px 0;}
+        .md-preview ul,.md-preview ol{padding-left:1.5rem;margin:.5rem 0;color:#c9d1d9;}
+        .md-preview li{margin:.25rem 0;}
+        .md-preview hr{border:none;border-top:1px solid var(--card-border);margin:1.25rem 0;}
+        .md-preview table{width:100%;border-collapse:collapse;margin:.75rem 0;}
+        .md-preview th,.md-preview td{border:1px solid var(--card-border);padding:.5rem .75rem;text-align:left;font-size:.85rem;}
+        .md-preview th{background:var(--card-bg);font-weight:700;color:white;}
+        .md-preview td{color:#c9d1d9;}
+        .md-preview img{max-width:100%;border-radius:8px;}
+        .md-preview strong{color:white;}
+        .md-preview em{color:var(--accent-light);}
+        .diff-line{padding:.25rem .75rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.65;white-space:pre;border-left:3px solid transparent;}
+        .diff-added{background:rgba(16,185,129,.08);color:var(--accent-light);border-left-color:var(--accent);}
+        .diff-removed{background:rgba(239,68,68,.08);color:#fca5a5;border-left-color:var(--danger);text-decoration:line-through;opacity:.7;}
+        .diff-unchanged{color:var(--text-muted);opacity:.5;}
+        .regex-highlight{background:rgba(16,185,129,.25);border-radius:2px;padding:0 1px;}
+
+        @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
+        @media(max-width:768px){.main-content{padding:1.25rem;}.tool-grid,.dash-grid{grid-template-columns:1fr!important;}.ts-result{grid-template-columns:1fr;}.stats-grid{grid-template-columns:1fr 1fr;}.search-modal{margin:0 .5rem;}}
     </style>
 </head>
 <body>
-    <div id="toasts" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
-    <div id="sidebar-overlay" class="lg:hidden fixed inset-0 bg-black/60 z-30 hidden" onclick="toggleSidebar()"></div>
-    <button id="menu-toggle" onclick="toggleSidebar()" class="lg:hidden fixed top-4 left-4 z-40 w-10 h-10 rounded-lg flex items-center justify-center bg-[var(--bg-2)] border border-[var(--bg-4)] text-[var(--text-1)]" aria-label="Menu"><i class="fas fa-bars text-sm"></i></button>
-    <aside id="sidebar" class="fixed left-0 top-0 h-full w-[272px] bg-[var(--bg-1)] border-r border-[var(--bg-4)] z-30 flex flex-col -translate-x-full lg:translate-x-0">
-        <div class="p-5 border-b border-[var(--bg-4)] flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-[var(--accent-dim)] flex items-center justify-center"><i class="fas fa-terminal text-[var(--accent)] text-sm"></i></div>
-            <div><h1 class="text-base font-bold tracking-tight">DevToolKit</h1><p class="text-[10px] text-[var(--text-3)] font-medium tracking-wide uppercase">Ferramentas Dev</p></div>
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Menu principal">
+        <div class="resize-handle" id="resizeHandle" title="Arrastar para redimensionar"></div>
+        <div class="sidebar-logo">
+            <a href="#" onclick="navigateTo('dashboard');return false;" class="logo-link" aria-label="Dashboard" title="Dashboard">
+                <div class="logo-icon"><i class="fas fa-terminal"></i></div>
+                <span class="logo-text">DevToolKit</span>
+            </a>
         </div>
-        <div class="p-3"><div class="relative"><i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-3)] text-xs"></i><input id="sidebar-search" type="text" placeholder="Buscar... Ctrl+K" class="w-full bg-[var(--bg-2)] border border-[var(--bg-4)] rounded-lg pl-8 pr-3 py-2 text-xs text-[var(--text-0)] placeholder:text-[var(--text-3)] focus:outline-none focus:border-[var(--accent)]" oninput="filterSidebar(this.value)"></div></div>
-        <button onclick="showDashboard()" class="nav-item mx-3 mb-1 bg-[var(--accent-dim)]" id="nav-home"><i class="fas fa-th-large"></i> Dashboard</button>
-        <nav id="sidebar-nav" class="flex-1 overflow-y-auto px-3 pb-4"></nav>
-        <div class="p-3 border-t border-[var(--bg-4)] text-[10px] text-[var(--text-3)] text-center">18 ferramentas disponiveis</div>
+        <nav class="sidebar-nav" id="navMenu"></nav>
+        <div class="sidebar-footer"><span>DevToolKit v2.0</span></div>
     </aside>
-    <main id="main" class="lg:ml-[272px] min-h-screen bg-grid"></main>
 
-<script>
-/* ===== CATEGORIAS ===== */
-var categories = [
-    {name:'Codificacao & Decodificacao',icon:'fa-code',tools:['jwt-decode','base64-encode','base64-decode','url-encode-decode']},
-    {name:'Formatacao',icon:'fa-align-left',tools:['json-formatter','sql-formatter','xml-formatter','markdown-viewer']},
-    {name:'Analise & Validacao',icon:'fa-magnifying-glass-chart',tools:['regex-validator','text-compare','hash-generator','yaml-validator']},
-    {name:'Geradores',icon:'fa-wand-magic-sparkles',tools:['uuid-generator','lorem-ipsum','password-generator']},
-    {name:'Conversores',icon:'fa-arrows-rotate',tools:['timestamp-converter','color-converter','number-converter']}
-];
+    <!-- MAIN -->
+    <main class="main-content" id="mainContent" role="main"></main>
 
-/* ===== FERRAMENTAS ===== */
-var tools = {};
+    <!-- SEARCH MODAL (Ctrl+K) -->
+    <div class="search-modal-overlay" id="searchOverlay" onclick="if(event.target===this)closeSearchModal()">
+        <div class="search-modal">
+            <div style="position:relative">
+                <i class="fas fa-search search-modal-icon"></i>
+                <input type="text" class="search-modal-input" id="searchModalInput" placeholder="Pesquisar ferramentas..." oninput="onModalSearch(this.value)" onkeydown="onModalKeydown(event)">
+            </div>
+            <div class="search-modal-results" id="searchModalResults"></div>
+            <div class="search-modal-footer">
+                <span><kbd>↑</kbd> <kbd>↓</kbd> navegar</span>
+                <span><kbd>Enter</kbd> abrir</span>
+                <span><kbd>Esc</kbd> fechar</span>
+            </div>
+        </div>
+    </div>
 
-tools['jwt-decode']={name:'Decodificar JWT',desc:'Inspirecione header, payload e validade de tokens JWT.',icon:'fa-key',_t:null,
-render:function(){return '<div class="space-y-4"><label class="tool-label">Token JWT</label><textarea id="jwt-input" class="tool-textarea" rows="5" placeholder="Cole seu token JWT aqui..."></textarea><button onclick="decodeJWT()" class="tool-btn primary"><i class="fas fa-unlock"></i> Decodificar</button><div id="jwt-output"></div></div>';},
-init:function(){var self=this;document.getElementById('jwt-input').addEventListener('input',function(){clearTimeout(self._t);self._t=setTimeout(decodeJWT,300);});}};
+    <!-- TOAST -->
+    <div id="toastContainer" aria-live="polite"></div>
 
-tools['base64-encode']={name:'Codificar Base64',desc:'Converta texto para Base64 com suporte a UTF-8.',icon:'fa-lock',_t:null,
-render:function(){return '<div class="space-y-4"><label class="tool-label">Texto Original</label><textarea id="b64e-input" class="tool-textarea" rows="5" placeholder="Digite o texto para codificar..."></textarea><button onclick="b64Encode()" class="tool-btn primary"><i class="fas fa-arrow-right"></i> Codificar</button><div id="b64e-output"></div></div>';},
-init:function(){var self=this;document.getElementById('b64e-input').addEventListener('input',function(){clearTimeout(self._t);self._t=setTimeout(b64Encode,200);});}};
+    <script>
+    /* ==========================================================
+       28 ITENS
+       ========================================================== */
+    const tools=[
+        {id:'dashboard',name:'Dashboard',icon:'fa-house',category:null},
+        {id:'jwtDecode',name:'JWT Decode',icon:'fa-key',category:'Tokens'},
+        {id:'base64Encode',name:'Base64 Encode',icon:'fa-lock',category:'Codificação'},
+        {id:'base64Decode',name:'Base64 Decode',icon:'fa-lock-open',category:'Codificação'},
+        {id:'urlEncode',name:'URL Encode',icon:'fa-link',category:'Codificação'},
+        {id:'urlDecode',name:'URL Decode',icon:'fa-link-slash',category:'Codificação'},
+        {id:'htmlEncode',name:'HTML Encode',icon:'fa-code',category:'Codificação'},
+        {id:'htmlDecode',name:'HTML Decode',icon:'fa-code',category:'Codificação'},
+        {id:'jsonFormat',name:'JSON Format',icon:'fa-indent',category:'JSON'},
+        {id:'jsonClear',name:'JSON Clear',icon:'fa-broom',category:'JSON'},
+        {id:'upperText',name:'Upper Text',icon:'fa-arrow-up-a-z',category:'Texto'},
+        {id:'lowerText',name:'Lower Text',icon:'fa-arrow-down-a-z',category:'Texto'},
+        {id:'textReverse',name:'Text Reverse',icon:'fa-rotate-left',category:'Texto'},
+        {id:'charCounter',name:'Char Counter',icon:'fa-calculator',category:'Texto'},
+        {id:'removeSpaces',name:'Remove Spaces',icon:'fa-text-slash',category:'Texto'},
+        {id:'uuidGen',name:'UUID Generator',icon:'fa-fingerprint',category:'Geradores'},
+        {id:'hashGen',name:'Hash Generator',icon:'fa-hashtag',category:'Geradores'},
+        {id:'passwordGen',name:'Password Generator',icon:'fa-key',category:'Geradores'},
+        {id:'loremIpsum',name:'Lorem Ipsum',icon:'fa-paragraph',category:'Geradores'},
+        {id:'timestampConv',name:'Timestamp Converter',icon:'fa-clock',category:'Conversores'},
+        {id:'colorConv',name:'Color Converter',icon:'fa-palette',category:'Conversores'},
+        {id:'numberBase',name:'Number Base',icon:'fa-hashtag',category:'Conversores'},
+        {id:'sqlFormatter',name:'SQL Formatter',icon:'fa-database',category:'Formatters'},
+        {id:'xmlFormatter',name:'XML Formatter',icon:'fa-file-code',category:'Formatters'},
+        {id:'yamlValidator',name:'YAML Validator',icon:'fa-file-lines',category:'Formatters'},
+        {id:'markdownViewer',name:'Markdown Viewer',icon:'fa-eye',category:'Análise'},
+        {id:'regexValidator',name:'Regex Validator',icon:'fa-asterisk',category:'Análise'},
+        {id:'textCompare',name:'Text Compare',icon:'fa-code-compare',category:'Análise'},
+    ];
+    const toolDescriptions={
+        jwtDecode:'Decodifique e inspecione tokens JWT facilmente.',base64Encode:'Converta texto para codificação Base64.',base64Decode:'Decodifique textos em Base64 para texto legível.',urlEncode:'Codifique textos para formato de URL segura.',urlDecode:'Decodifique textos codificados em URL.',htmlEncode:'Converta caracteres especiais para entidades HTML.',htmlDecode:'Converta entidades HTML de volta para caracteres.',jsonFormat:'Formate e idente JSON para melhor leitura.',jsonClear:'Limpe e corrija JSON com escapes e caracteres inválidos.',upperText:'Converta todo o texto para CAIXA ALTA.',lowerText:'Converta todo o texto para caixa baixa.',textReverse:'Inverta a ordem dos caracteres do texto.',charCounter:'Conte caracteres, palavras, linhas e bytes do texto.',removeSpaces:'Remova espaços extras, quebras de linha ou todos os espaços.',uuidGen:'Gere UUIDs v4 únicos em massa.',hashGen:'Gere hashes SHA-1, SHA-256, SHA-384 e SHA-512.',passwordGen:'Gere senhas seguras com opções personalizáveis.',loremIpsum:'Gere textos placeholder Lorem Ipsum.',timestampConv:'Converta entre Unix timestamp e data legível.',colorConv:'Converta cores entre HEX, RGB e HSL.',numberBase:'Converta números entre Decimal, Binário, Octal e Hexadecimal.',sqlFormatter:'Formate consultas SQL para melhor leitura.',xmlFormatter:'Formate e idente XML para melhor leitura.',yamlValidator:'Valide e formate arquivos YAML.',markdownViewer:'Visualize textos Markdown renderizados em tempo real.',regexValidator:'Teste expressões regulares e veja os matches.',textCompare:'Compare dois textos e visualize as diferenças linha a linha.',
+    };
+    let currentPage='dashboard', modalFocusedIdx=-1;
 
-tools['base64-decode']={name:'Decodificar Base64',desc:'Converta Base64 de volta para texto UTF-8.',icon:'fa-lock-open',_t:null,
-render:function(){return '<div class="space-y-4"><label class="tool-label">Texto Base64</label><textarea id="b64d-input" class="tool-textarea" rows="5" placeholder="Cole o texto Base64 aqui..."></textarea><button onclick="b64Decode()" class="tool-btn primary"><i class="fas fa-arrow-left"></i> Decodificar</button><div id="b64d-output"></div></div>';},
-init:function(){var self=this;document.getElementById('b64d-input').addEventListener('input',function(){clearTimeout(self._t);self._t=setTimeout(b64Decode,200);});}};
+    /* ===== NAVEGAÇÃO ===== */
+    function navigateTo(p){currentPage=p;buildNav();renderPage();document.getElementById('mainContent').scrollTop=0;}
+    function buildNav(){const n=document.getElementById('navMenu');let h='',lc=null;tools.forEach(t=>{if(t.category!==lc){if(t.category)h+=`<div class="nav-category">${t.category}</div>`;lc=t.category;}h+=`<div class="nav-item${currentPage===t.id?' active':''}" onclick="navigateTo('${t.id}')" role="button" tabindex="0"><i class="fas ${t.icon}"></i><span>${t.name}</span></div>`;});n.innerHTML=h;}
 
-tools['url-encode-decode']={name:'URL Encode / Decode',desc:'Codifique ou decodifique componentes de URL.',icon:'fa-link',
-render:function(){return '<div class="space-y-4"><label class="tool-label">Texto</label><textarea id="url-input" class="tool-textarea" rows="4" placeholder="https://exemplo.com/?q=ola mundo&foo=bar+baz"></textarea><div class="flex gap-2 flex-wrap"><button onclick="urlEncode()" class="tool-btn primary"><i class="fas fa-arrow-right"></i> Encode</button><button onclick="urlDecode()" class="tool-btn secondary"><i class="fas fa-arrow-left"></i> Decode</button></div><div id="url-output"></div></div>';}};
+    /* ===== RENDER ===== */
+    function renderPage(){const m=document.getElementById('mainContent');const r={dashboard:renderDashboard,jwtDecode:renderJwtDecode,base64Encode:renderBase64Encode,base64Decode:renderBase64Decode,urlEncode:renderUrlEncode,urlDecode:renderUrlDecode,htmlEncode:renderHtmlEncode,htmlDecode:renderHtmlDecode,jsonFormat:renderJsonFormat,jsonClear:renderJsonClear,upperText:renderUpperText,lowerText:renderLowerText,textReverse:renderTextReverse,charCounter:renderCharCounter,removeSpaces:renderRemoveSpaces,uuidGen:renderUuidGen,hashGen:renderHashGen,passwordGen:renderPasswordGen,loremIpsum:renderLoremIpsum,timestampConv:renderTimestampConv,colorConv:renderColorConv,numberBase:renderNumberBase,sqlFormatter:renderSqlFormatter,xmlFormatter:renderXmlFormatter,yamlValidator:renderYamlValidator,markdownViewer:renderMarkdownViewer,regexValidator:renderRegexValidator,textCompare:renderTextCompare};m.innerHTML=(r[currentPage]||renderDashboard)();if(currentPage==='timestampConv')setTimeout(renderTsPresets,10);if(currentPage==='colorConv')setTimeout(()=>convertColor('hex'),10);}
 
-tools['json-formatter']={name:'Formatador JSON',desc:'Valide, formate e destaque a sintaxe de JSON.',icon:'fa-brackets-curly',
-render:function(){return '<div class="space-y-4"><label class="tool-label">JSON</label><textarea id="json-input" class="tool-textarea" rows="8" placeholder=\'{"nome":"Joao","idade":30,"ativo":true}\'></textarea><div class="flex gap-2 flex-wrap items-center"><button onclick="formatJSON()" class="tool-btn primary"><i class="fas fa-wand-magic-sparkles"></i> Formatador</button><button onclick="minifyJSON()" class="tool-btn secondary"><i class="fas fa-compress"></i> Minificar</button><select id="json-indent" class="tool-input" style="width:auto;padding:8px 12px;font-size:12px;"><option value="2">2 espacos</option><option value="4">4 espacos</option><option value="tab">Tab</option></select></div><div id="json-output"></div></div>';}};
+    /* ===== TEMPLATE PADRÃO ===== */
+    function toolPage(title,desc,inId,outId,btns,opts={}){return `<div class="page-enter"><div class="mb-6"><h1 class="text-2xl font-extrabold text-white mb-1.5 tracking-tight">${title}</h1><p style="color:var(--text-muted);font-size:.875rem">${desc}</p></div><div class="tool-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem"><div><label class="field-label" for="${inId}">Entrada</label><textarea id="${inId}" class="tool-textarea" rows="${opts.inputRows||14}" placeholder="${opts.inputPlaceholder||'Cole seu texto aqui...'}" spellcheck="false"></textarea></div><div><label class="field-label" for="${outId}">Resultado</label><textarea id="${outId}" class="tool-textarea" rows="${opts.outputRows||14}" readonly placeholder="${opts.outputPlaceholder||'O resultado aparecerá aqui...'}" spellcheck="false"></textarea></div></div><div style="display:flex;gap:.625rem;margin-top:1rem;flex-wrap:wrap">${btns}</div></div>`;}
 
-tools['sql-formatter']={name:'Formatador SQL',desc:'Beautifier SQL com indentacao e capitalizacao de keywords.',icon:'fa-database',
-render:function(){return '<div class="space-y-4"><label class="tool-label">Consulta SQL</label><textarea id="sql-input" class="tool-textarea" rows="10" placeholder="select u.nome, count(p.id) as total from usuarios u inner join pedidos p on u.id = p.usuario_id where u.ativo = true group by u.nome having count(p.id) > 5 order by total desc limit 10"></textarea><button onclick="formatSQL()" class="tool-btn primary"><i class="fas fa-wand-magic-sparkles"></i> Formatador</button><div id="sql-output"></div></div>';}};
-
-tools['xml-formatter']={name:'Formatador XML',desc:'Valide, formate e destaque a sintaxe de XML.',icon:'fa-file-code',
-render:function(){return '<div class="space-y-4"><label class="tool-label">XML</label><textarea id="xml-input" class="tool-textarea" rows="10" placeholder=\'<?xml version="1.0"?><root><item id="1"><name>Teste</name></item></root>\'></textarea><div class="flex gap-2 flex-wrap"><button onclick="formatXML()" class="tool-btn primary"><i class="fas fa-wand-magic-sparkles"></i> Formatador</button><button onclick="minifyXML()" class="tool-btn secondary"><i class="fas fa-compress"></i> Minificar</button></div><div id="xml-output"></div></div>';}};
-
-tools['markdown-viewer']={name:'Visualizador Markdown',desc:'Renderize Markdown com preview em tempo real.',icon:'fa-file-lines',_t:null,
-render:function(){return '<div class="split-panel"><div><label class="tool-label">Markdown</label><textarea id="md-input" class="tool-textarea" rows="20" placeholder="Escreva seu markdown aqui...">'+'# Exemplo de Markdown\n\n## Formatacao de Texto\n\nEste e um paragrafo com **texto em negrito**, *texto em italico* e ~~texto riscado~~.\n\nTambem podemos ter `codigo inline`.\n\n### Lista nao ordenada\n\n- Item 1\n- Item 2\n  - Sub-item 2.1\n  - Sub-item 2.2\n- Item 3\n\n### Lista ordenada\n\n1. Primeiro\n2. Segundo\n3. Terceiro\n\n### Bloco de Codigo\n\n```javascript\nfunction ola() {\n    console.log("Ola, mundo!");\n}\n```\n\n### Tabela\n\n| Nome | Idade | Cidade |\n|------|-------|--------|\n| Joao | 30    | SP     |\n| Maria | 25   | RJ     |\n\n> Esta e uma citacao importante.\n\n---\n\n[Link para exemplo](https://exemplo.com)\n'+'</textarea></div><div><label class="tool-label">Preview</label><div id="md-preview" class="md-preview tool-output" style="min-height:400px;max-height:600px;overflow-y:auto;white-space:normal;"></div></div></div>';},
-init:function(){var self=this;document.getElementById('md-input').addEventListener('input',function(){clearTimeout(self._t);self._t=setTimeout(renderMarkdown,150);});renderMarkdown();}};
-
-tools['regex-validator']={name:'Validador de Regex',desc:'Teste expressoes regulares com highlight em tempo real.',icon:'fa-asterisk',
-render:function(){return '<div class="space-y-4"><div class="flex gap-2 items-end flex-wrap"><div class="flex-1 min-w-[200px]"><label class="tool-label">Expressao Regular</label><input type="text" id="regex-pattern" class="tool-input" placeholder="\\b[A-Z][a-z]+\\b"></div><div class="w-20"><label class="tool-label">Flags</label><input type="text" id="regex-flags" class="tool-input" placeholder="gi" value="g"></div></div><label class="tool-label">Texto de Teste</label><textarea id="regex-text" class="tool-textarea" rows="6" placeholder="O Joao e a Maria foram ao mercado comprar frutas."></textarea><div id="regex-output"></div></div>';},
-init:function(){var run=function(){validateRegex();};document.getElementById('regex-pattern').addEventListener('input',run);document.getElementById('regex-flags').addEventListener('input',run);document.getElementById('regex-text').addEventListener('input',run);}};
-
-tools['text-compare']={name:'Comparar Textos',desc:'Compare dois textos com diff baseado em LCS.',icon:'fa-code-compare',
-render:function(){return '<div class="space-y-4"><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label class="tool-label">Texto Original</label><textarea id="diff-left" class="tool-textarea" rows="10" placeholder="Texto original..."></textarea></div><div><label class="tool-label">Texto Modificado</label><textarea id="diff-right" class="tool-textarea" rows="10" placeholder="Texto modificado..."></textarea></div></div><button onclick="compareTexts()" class="tool-btn primary"><i class="fas fa-code-compare"></i> Comparar</button><div id="diff-output"></div></div>';}};
-
-tools['hash-generator']={name:'Gerador de Hash',desc:'Gere hashes SHA-1, SHA-256, SHA-384 e SHA-512.',icon:'fa-hashtag',_t:null,
-render:function(){return '<div class="space-y-4"><label class="tool-label">Texto</label><textarea id="hash-input" class="tool-textarea" rows="4" placeholder="Digite o texto para gerar o hash..."></textarea><button onclick="generateHashes()" class="tool-btn primary"><i class="fas fa-rotate"></i> Gerar Hashes</button><div id="hash-output"></div></div>';},
-init:function(){var self=this;document.getElementById('hash-input').addEventListener('input',function(){clearTimeout(self._t);self._t=setTimeout(generateHashes,300);});}};
-
-tools['yaml-validator']={name:'Validador YAML',desc:'Valide YAML e visualize o resultado como JSON estruturado.',icon:'fa-file-lines',_t:null,
-render:function(){return '<div class="space-y-4"><label class="tool-label">YAML</label><textarea id="yaml-input" class="tool-textarea" rows="12" placeholder="nome: Joao\nidade: 30\nativo: true\nemails:\n  - joao@email.com\n  - joao.work@email.com\nendereco:\n  rua: Rua Exemplo\n  numero: 123\n  cidade: Sao Paulo"></textarea><button onclick="validateYAML()" class="tool-btn primary"><i class="fas fa-check-circle"></i> Validar</button><div id="yaml-output"></div></div>';},
-init:function(){var self=this;document.getElementById('yaml-input').addEventListener('input',function(){clearTimeout(self._t);self._t=setTimeout(validateYAML,400);});}};
-
-tools['uuid-generator']={name:'Gerador de UUID',desc:'Gere UUIDs v4 criptograficamente aleatorios.',icon:'fa-fingerprint',
-render:function(){return '<div class="space-y-4"><div class="flex items-center gap-4 flex-wrap"><label class="tool-label mb-0">Quantidade</label><input type="number" id="uuid-count" class="tool-input" style="width:80px;" value="1" min="1" max="100"><label class="flex items-center gap-2 text-sm text-[var(--text-2)] cursor-pointer"><span class="toggle"><input type="checkbox" id="uuid-upper"><span class="toggle-slider"></span></span> Uppercase</label><label class="flex items-center gap-2 text-sm text-[var(--text-2)] cursor-pointer"><span class="toggle"><input type="checkbox" id="uuid-no-dash"><span class="toggle-slider"></span></span> Sem tracos</label></div><button onclick="generateUUIDs()" class="tool-btn primary"><i class="fas fa-rotate"></i> Gerar</button><div id="uuid-output"></div></div>';}};
-
-tools['lorem-ipsum']={name:'Gerador Lorem Ipsum',desc:'Gere texto placeholder Lorem Ipsum.',icon:'fa-paragraph',
-render:function(){return '<div class="space-y-4"><div class="flex gap-4 flex-wrap items-end"><div><label class="tool-label">Tipo</label><select id="lorem-type" class="tool-input" style="width:130px;"><option value="paragraphs">Paragrafos</option><option value="sentences">Frases</option><option value="words">Palavras</option></select></div><div><label class="tool-label">Quantidade</label><input type="number" id="lorem-count" class="tool-input" style="width:80px;" value="3" min="1" max="100"></div></div><button onclick="generateLorem()" class="tool-btn primary"><i class="fas fa-rotate"></i> Gerar</button><div id="lorem-output"></div></div>';}};
-
-tools['password-generator']={name:'Gerador de Senhas',desc:'Gere senhas fortes com opcoes personalizaveis.',icon:'fa-shield-halved',
-render:function(){return '<div class="space-y-5"><div id="pw-display" class="tool-output font-mono text-center tracking-widest py-6" style="font-size:20px;cursor:pointer;" onclick="copyText(this.textContent)" title="Clique para copiar">Clique em Gerar</div><div><div class="flex justify-between mb-2"><label class="tool-label mb-0">Comprimento: <span id="pw-len-val">16</span></label></div><input type="range" id="pw-length" min="4" max="128" value="16" oninput="document.getElementById(\'pw-len-val\').textContent=this.value"></div><div class="grid grid-cols-2 gap-3"><label class="flex items-center gap-2 text-sm text-[var(--text-2)] cursor-pointer"><span class="toggle"><input type="checkbox" id="pw-upper" checked><span class="toggle-slider"></span></span> Maiusculas (A-Z)</label><label class="flex items-center gap-2 text-sm text-[var(--text-2)] cursor-pointer"><span class="toggle"><input type="checkbox" id="pw-lower" checked><span class="toggle-slider"></span></span> Minusculas (a-z)</label><label class="flex items-center gap-2 text-sm text-[var(--text-2)] cursor-pointer"><span class="toggle"><input type="checkbox" id="pw-numbers" checked><span class="toggle-slider"></span></span> Numeros (0-9)</label><label class="flex items-center gap-2 text-sm text-[var(--text-2)] cursor-pointer"><span class="toggle"><input type="checkbox" id="pw-symbols" checked><span class="toggle-slider"></span></span> Simbolos (!@#)</label></div><div><div class="flex justify-between mb-1"><span class="text-xs text-[var(--text-3)]">Forca</span><span id="pw-str-label" class="text-xs font-semibold"></span></div><div class="strength-bar"><div id="pw-str-bar" class="strength-fill" style="width:0%"></div></div></div><button onclick="generatePassword()" class="tool-btn primary w-full justify-center"><i class="fas fa-rotate"></i> Gerar Senha</button></div>';}};
-
-tools['timestamp-converter']={name:'Conversor de Timestamp',desc:'Converta entre Unix timestamp e data legivel.',icon:'fa-clock',_interval:null,
-render:function(){return '<div class="space-y-5"><div class="p-4 rounded-xl bg-[var(--bg-2)] border border-[var(--bg-4)] text-center"><p class="text-xs text-[var(--text-3)] mb-1">Timestamp Atual</p><p id="ts-now" class="font-mono text-2xl font-bold text-[var(--accent)]"></p></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div class="space-y-3"><label class="tool-label">Unix Timestamp (segundos)</label><input type="text" id="ts-input" class="tool-input" placeholder="1700000000"><button onclick="tsToDate()" class="tool-btn primary w-full justify-center"><i class="fas fa-arrow-right"></i> Para Data</button><div id="ts-date-output"></div></div><div class="space-y-3"><label class="tool-label">Data e Hora</label><input type="datetime-local" id="ts-date-input" class="tool-input" step="1"><button onclick="dateToTs()" class="tool-btn primary w-full justify-center"><i class="fas fa-arrow-left"></i> Para Timestamp</button><div id="ts-ts-output"></div></div></div></div>';},
-init:function(){var el=document.getElementById('ts-now');var update=function(){el.textContent=Math.floor(Date.now()/1000);};update();tools['timestamp-converter']._interval=setInterval(update,1000);},
-cleanup:function(){if(tools['timestamp-converter']._interval){clearInterval(tools['timestamp-converter']._interval);tools['timestamp-converter']._interval=null;}}};
-
-tools['color-converter']={name:'Conversor de Cores',desc:'Converta entre HEX, RGB e HSL com preview visual.',icon:'fa-palette',
-render:function(){return '<div class="space-y-5"><div class="color-swatch" id="color-swatch" style="background:#FBBF24;"></div><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div><label class="tool-label">HEX</label><input type="text" id="color-hex" class="tool-input" value="#FBBF24" oninput="colorFromHex()"></div><div><label class="tool-label">RGB</label><input type="text" id="color-rgb" class="tool-input" value="rgb(251, 191, 36)" oninput="colorFromRGB()"></div><div><label class="tool-label">HSL</label><input type="text" id="color-hsl" class="tool-input" value="hsl(45, 96%, 56%)" oninput="colorFromHSL()"></div></div><input type="color" id="color-picker" value="#FBBF24" class="w-full h-10 rounded-lg cursor-pointer border border-[var(--bg-4)]" oninput="colorFromPicker()"></div>';}};
-
-tools['number-converter']={name:'Conversor de Bases',desc:'Converta numeros entre Binario, Octal, Decimal e Hexadecimal.',icon:'fa-calculator',
-render:function(){return '<div class="space-y-4"><label class="tool-label">Valor</label><input type="text" id="num-input" class="tool-input" placeholder="255 ou 0xFF ou 0b11111111" oninput="convertNumber()"><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label class="tool-label">Binario (Base 2)</label><div id="num-bin" class="tool-output text-sm" style="min-height:40px;">&mdash;</div></div><div><label class="tool-label">Octal (Base 8)</label><div id="num-oct" class="tool-output text-sm" style="min-height:40px;">&mdash;</div></div><div><label class="tool-label">Decimal (Base 10)</label><div id="num-dec" class="tool-output text-sm" style="min-height:40px;">&mdash;</div></div><div><label class="tool-label">Hexadecimal (Base 16)</label><div id="num-hex" class="tool-output text-sm" style="min-height:40px;">&mdash;</div></div></div></div>';}};
-
-/* ===== ESTADO ===== */
-var currentTool = null;
-
-/* ===== SIDEBAR ===== */
-function buildSidebar(){
-    var nav=document.getElementById('sidebar-nav');var html='';
-    for(var c=0;c<categories.length;c++){var cat=categories[c];
-        html+='<div class="cat-group"><div class="cat-header" onclick="toggleCategory(this)"><i class="fas fa-chevron-down chevron"></i><i class="fas '+cat.icon+'" style="font-size:10px;"></i> '+cat.name+'</div><div class="cat-tools" style="max-height:500px;">';
-        for(var t=0;t<cat.tools.length;t++){var id=cat.tools[t];var tool=tools[id];
-            html+='<div class="nav-item" data-tool="'+id+'" onclick="openTool(\''+id+'\')"><i class="fas '+tool.icon+'"></i> '+tool.name+'</div>';}
-        html+='</div></div>';}
-    nav.innerHTML=html;
-}
-function toggleCategory(h){h.classList.toggle('collapsed');h.nextElementSibling.classList.toggle('collapsed');}
-function filterSidebar(q){q=q.toLowerCase().trim();var gs=document.querySelectorAll('.cat-group');
-    for(var g=0;g<gs.length;g++){var gr=gs[g];var it=gr.querySelectorAll('.nav-item[data-tool]');var any=false;
-        for(var i=0;i<it.length;i++){var item=it[i];var tl=tools[item.dataset.tool];var m=!q||tl.name.toLowerCase().indexOf(q)!==-1||tl.desc.toLowerCase().indexOf(q)!==-1;item.style.display=m?'':'none';if(m)any=true;}
-        gr.style.display=any?'':'none';if(q&&any){gr.querySelector('.cat-header').classList.remove('collapsed');gr.querySelector('.cat-tools').classList.remove('collapsed');}}}
-function toggleSidebar(){var sb=document.getElementById('sidebar');var ov=document.getElementById('sidebar-overlay');sb.classList.toggle('open');ov.classList.toggle('hidden');}
-function setActiveTool(id){var items=document.querySelectorAll('.nav-item[data-tool]');for(var i=0;i<items.length;i++){items[i].classList.toggle('active',items[i].dataset.tool===id);}document.getElementById('nav-home').classList.toggle('active',!id);}
-
-/* ===== DASHBOARD ===== */
-function showDashboard(){
-    if(currentTool&&tools[currentTool]&&tools[currentTool].cleanup)tools[currentTool].cleanup();
-    currentTool=null;setActiveTool(null);
-    var main=document.getElementById('main');var html='<div class="p-6 lg:p-10 fade-up"><div class="mb-8"><h2 class="text-3xl font-bold tracking-tight mb-2">Dashboard</h2><p class="text-[var(--text-2)] text-sm">Selecione uma ferramenta para comecar.</p></div>';
-    for(var c=0;c<categories.length;c++){var cat=categories[c];
-        html+='<div class="mb-8"><h3 class="text-xs font-bold uppercase tracking-widest text-[var(--text-3)] mb-4 flex items-center gap-2"><i class="fas '+cat.icon+' text-[var(--accent)]" style="font-size:11px;"></i> '+cat.name+'</h3><div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">';
-        for(var t=0;t<cat.tools.length;t++){var id=cat.tools[t];var tl=tools[id];
-            html+='<div class="dash-card" onclick="openTool(\''+id+'\')"><div class="card-icon"><i class="fas '+tl.icon+'"></i></div><h4 class="font-semibold text-sm mb-1">'+tl.name+'</h4><p class="text-xs text-[var(--text-3)] leading-relaxed">'+tl.desc+'</p></div>';}
-        html+='</div></div>';}
-    html+='</div>';main.innerHTML=html;
-    if(window.innerWidth<1024){var sb=document.getElementById('sidebar');if(sb.classList.contains('open'))toggleSidebar();}
-}
-
-/* ===== ABRIR FERRAMENTA ===== */
-function openTool(id){
-    var tool=tools[id];if(!tool)return;
-    if(currentTool&&tools[currentTool]&&tools[currentTool].cleanup)tools[currentTool].cleanup();
-    currentTool=id;setActiveTool(id);
-    var main=document.getElementById('main');
-    var html='<div class="p-6 lg:p-10 fade-up"><button onclick="showDashboard()" class="flex items-center gap-2 text-xs text-[var(--text-3)] hover:text-[var(--text-1)] mb-5 transition-colors"><i class="fas fa-arrow-left"></i> Voltar ao Dashboard</button><div class="mb-6"><div class="flex items-center gap-3 mb-2"><div class="w-9 h-9 rounded-lg bg-[var(--accent-dim)] flex items-center justify-center"><i class="fas '+tool.icon+' text-[var(--accent)] text-sm"></i></div><h2 class="text-2xl font-bold tracking-tight">'+tool.name+'</h2></div><p class="text-sm text-[var(--text-2)]">'+tool.desc+'</p></div><div class="max-w-5xl w-full">'+tool.render()+'</div></div>';
-    main.innerHTML=html;if(tool.init)tool.init();
-    if(window.innerWidth<1024){var sb=document.getElementById('sidebar');if(sb.classList.contains('open'))toggleSidebar();}
-}
-
-/* ===== UTILITARIOS ===== */
-function copyText(t){if(!t||t==='Clique em Gerar'||t==='\u2014')return;navigator.clipboard.writeText(t).then(function(){showToast('Copiado!');}).catch(function(){showToast('Erro ao copiar.','error');});}
-function outputHTML(t,id){return '<div class="tool-output"><button class="copy-btn" onclick="copyText(document.getElementById(\''+id+'\').textContent)"><i class="far fa-copy"></i> Copiar</button><span id="'+id+'">'+t+'</span></div>';}
-function errorHTML(m){return '<div class="tool-output" style="border-color:var(--error);"><span class="text-[var(--error)]"><i class="fas fa-exclamation-triangle mr-2"></i>'+m+'</span></div>';}
-function showToast(m,type){type=type||'success';var c=document.getElementById('toasts');var t=document.createElement('div');var ic={success:'check-circle',error:'exclamation-circle',info:'info-circle'};t.className='toast toast-'+type;t.innerHTML='<i class="fas fa-'+(ic[type]||ic.info)+'"></i><span>'+m+'</span>';c.appendChild(t);requestAnimationFrame(function(){t.classList.add('show');});setTimeout(function(){t.classList.remove('show');setTimeout(function(){t.remove();},300);},2500);}
-function escHTML(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
-function syntaxHL(json){return escHTML(json).replace(/("(\\u[\da-fA-F]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,function(m){var c='syn-num';if(/^"/.test(m))c=/:$/.test(m)?'syn-key':'syn-str';else if(/true|false/.test(m))c='syn-bool';else if(/null/.test(m))c='syn-null';return '<span class="'+c+'">'+m+'</span>';});}
-
-/* ===== 1. JWT ===== */
-function decodeJWT(){
-    var input=document.getElementById('jwt-input').value.trim();var out=document.getElementById('jwt-output');if(!input){out.innerHTML='';return;}
-    var parts=input.split('.');if(parts.length!==3){out.innerHTML=errorHTML('Token JWT invalido. Deve conter 3 partes.');return;}
-    try{function bd(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return decodeURIComponent(Array.from(atob(s),function(c){return '%'+('00'+c.charCodeAt(0).toString(16)).slice(-2);}).join(''));}
-        var header=JSON.parse(bd(parts[0]));var payload=JSON.parse(bd(parts[1]));var now=Math.floor(Date.now()/1000);var expInfo='';
-        if(payload.exp){var diff=payload.exp-now;if(diff>0){var h=Math.floor(diff/3600);var m=Math.floor((diff%3600)/60);expInfo='<div class="mt-2 p-2 rounded-lg text-xs" style="background:rgba(52,211,153,0.1);color:var(--success);"><i class="fas fa-check-circle mr-1"></i> Valido \u2014 expira em '+h+'h '+m+'m</div>';}else{expInfo='<div class="mt-2 p-2 rounded-lg text-xs" style="background:rgba(248,113,113,0.1);color:var(--error);"><i class="fas fa-times-circle mr-1"></i> Expirado ha '+Math.abs(Math.floor((-diff)/3600))+'h</div>';}}
-        out.innerHTML='<div class="space-y-3"><div><p class="text-xs font-bold text-[var(--text-3)] uppercase mb-1">Header</p>'+outputHTML(syntaxHL(JSON.stringify(header,null,2)),'jwt-h')+'</div><div><p class="text-xs font-bold text-[var(--text-3)] uppercase mb-1">Payload</p>'+outputHTML(syntaxHL(JSON.stringify(payload,null,2)),'jwt-p')+'</div>'+expInfo+'<div><p class="text-xs font-bold text-[var(--text-3)] uppercase mb-1">Signature</p><div class="tool-output text-xs break-all" style="color:var(--text-3);">'+escHTML(parts[2])+'</div></div></div>';
-    }catch(e){out.innerHTML=errorHTML('Erro ao decodificar: '+e.message);}
-}
-
-/* ===== 2. BASE64 ENCODE ===== */
-function b64Encode(){var i=document.getElementById('b64e-input').value;var o=document.getElementById('b64e-output');if(!i){o.innerHTML='';return;}try{var e=btoa(encodeURIComponent(i).replace(/%([0-9A-F]{2})/g,function(_,p){return String.fromCharCode(parseInt(p,16));}));o.innerHTML=outputHTML(escHTML(e),'b64e-r');}catch(e){o.innerHTML=errorHTML(e.message);}}
-
-/* ===== 3. BASE64 DECODE ===== */
-function b64Decode(){var i=document.getElementById('b64d-input').value.trim();var o=document.getElementById('b64d-output');if(!i){o.innerHTML='';return;}try{var d=decodeURIComponent(Array.from(atob(i),function(c){return '%'+('00'+c.charCodeAt(0).toString(16)).slice(-2);}).join(''));o.innerHTML=outputHTML(escHTML(d),'b64d-r');}catch(e){o.innerHTML=errorHTML('Base64 invalido: '+e.message);}}
-
-/* ===== 4. URL ENCODE/DECODE ===== */
-function urlEncode(){var i=document.getElementById('url-input').value;var o=document.getElementById('url-output');if(!i){o.innerHTML='';return;}o.innerHTML=outputHTML(escHTML(encodeURIComponent(i)),'url-r');}
-function urlDecode(){var i=document.getElementById('url-input').value.trim();var o=document.getElementById('url-output');if(!i){o.innerHTML='';return;}try{o.innerHTML=outputHTML(escHTML(decodeURIComponent(i)),'url-r');}catch(e){o.innerHTML=errorHTML('URL invalida: '+e.message);}}
-
-/* ===== 5. JSON ===== */
-function formatJSON(){var i=document.getElementById('json-input').value.trim();var o=document.getElementById('json-output');if(!i){o.innerHTML='';return;}try{var obj=JSON.parse(i);var ind=document.getElementById('json-indent').value;var sp=ind==='tab'?'\t':parseInt(ind);o.innerHTML=outputHTML(syntaxHL(JSON.stringify(obj,null,sp)),'json-r');}catch(e){o.innerHTML=errorHTML('JSON invalido: '+e.message);}}
-function minifyJSON(){var i=document.getElementById('json-input').value.trim();var o=document.getElementById('json-output');if(!i){o.innerHTML='';return;}try{var obj=JSON.parse(i);o.innerHTML=outputHTML(escHTML(JSON.stringify(obj)),'json-r');}catch(e){o.innerHTML=errorHTML('JSON invalido: '+e.message);}}
-
-/* ===== 6. SQL FORMATTER (Beautifier) ===== */
-var SQL_MULTIWORD=['LEFT OUTER JOIN','RIGHT OUTER JOIN','FULL OUTER JOIN','INNER JOIN','LEFT JOIN','RIGHT JOIN','FULL JOIN','CROSS JOIN','GROUP BY','ORDER BY','INSERT INTO','DELETE FROM','CREATE TABLE','ALTER TABLE','DROP TABLE','UNION ALL','IS NOT NULL','IS NULL','NOT IN','NOT LIKE','NOT EXISTS','NOT BETWEEN'];
-var SQL_CLAUSES=['SELECT','FROM','WHERE','GROUP BY','ORDER BY','HAVING','LIMIT','OFFSET','INSERT INTO','UPDATE','DELETE FROM','SET','VALUES','CREATE TABLE','ALTER TABLE','DROP TABLE','UNION','UNION ALL','INTERSECT','EXCEPT','INNER JOIN','LEFT JOIN','RIGHT JOIN','FULL JOIN','CROSS JOIN','LEFT OUTER JOIN','RIGHT OUTER JOIN','FULL OUTER JOIN'];
-var SQL_SUBCLAUSES=['AND','OR','ON'];
-var SQL_FUNCTIONS=['COUNT','SUM','AVG','MIN','MAX','COALESCE','IFNULL','NULLIF','CAST','CONVERT','CONCAT','UPPER','LOWER','TRIM','LTRIM','RTRIM','LENGTH','LEN','SUBSTRING','SUBSTR','REPLACE','INSTR','CHARINDEX','POSITION','LEFT','RIGHT','REVERSE','NOW','CURDATE','CURTIME','DATE','YEAR','MONTH','DAY','HOUR','MINUTE','SECOND','DATEDIFF','DATE_ADD','DATE_SUB','ROUND','FLOOR','CEIL','CEILING','ABS','MOD','POWER','SQRT','RAND','ROW_NUMBER','RANK','DENSE_RANK','LEAD','LAG','FIRST_VALUE','LAST_VALUE','NTILE','GROUP_CONCAT','STRING_AGG','ARRAY_AGG','NVL','DECODE','TRUNC','SYSDATE','TO_DATE','TO_CHAR','TO_NUMBER','LISTAGG','WM_CONCAT','NEXTVAL','CURRVAL','CHR','ASCII','OVER','PARTITION'];
-var SQL_SUBQUERY_INTRODUCERS=['FROM','WHERE','HAVING','SET','VALUES'];
-
-function isSQLKW(w){return SQL_CLAUSES.indexOf(w.toUpperCase())!==-1||SQL_SUBCLAUSES.indexOf(w.toUpperCase())!==-1||['AS','IN','LIKE','BETWEEN','EXISTS','DISTINCT','ALL','ASC','DESC','NULL','TRUE','FALSE','NOT','JOIN','INTO','CASE','WHEN','THEN','ELSE','END','IF','BEGIN','COMMIT','ROLLBACK','GRANT','REVOKE','INDEX','VIEW','TRIGGER','PROCEDURE','FUNCTION','RETURN','DECLARE','PRIMARY','KEY','FOREIGN','REFERENCES','CHECK','DEFAULT','CONSTRAINT','UNIQUE','AUTO_INCREMENT','WITH','RECURSIVE','TOP','PERCENT','OUTPUT','MERGE','MATCHED','USING','NATURAL','ANY','SOME','OVER','PARTITION','ROW','ROWS','RANGE','UNBOUNDED','PRECEDING','FOLLOWING','CURRENT','FETCH','FIRST','NEXT','ONLY','ACTION','CASCADE','RESTRICT','LATERAL','NO'].indexOf(w.toUpperCase())!==-1;}
-function isSQLFn(w){return SQL_FUNCTIONS.indexOf(w.toUpperCase())!==-1;}
-
-function formatSQL(){
-    var input=document.getElementById('sql-input').value.trim();var out=document.getElementById('sql-output');if(!input){out.innerHTML='';return;}
-    try{
-        /* Passo 1: substituir multi-word keywords por placeholders */
-        var sql=input;var phs=[];
-        for(var p=0;p<SQL_MULTIWORD.length;p++){var kw=SQL_MULTIWORD[p];var ph='\x01'+String.fromCharCode(65+p)+'\x01';var rx=new RegExp('\\b'+kw.replace(/\s+/g,'\\s+')+'\\b','gi');sql=sql.replace(rx,ph);phs.push({ph:ph,kw:kw.toUpperCase()});}
-
-        /* Passo 2: tokenizar */
-        var tokens=[];var pos=0;var len=sql.length;
-        while(pos<len){
-            if(/\s/.test(sql[pos])){pos++;continue;}
-            /* String */
-            if(sql[pos]==="'"){var s=pos;pos++;while(pos<len){if(sql[pos]=="'"&&pos+1<len&&sql[pos+1]==="'"){pos+=2;continue;}if(sql[pos]==="'"){pos++;break;}pos++;}tokens.push({type:'string',value:sql.substring(s,pos)});continue;}
-            /* Number */
-            if(/\d/.test(sql[pos])){var s=pos;while(pos<len&&/[\d.]/.test(sql[pos]))pos++;tokens.push({type:'number',value:sql.substring(s,pos)});continue;}
-            /* Operators */
-            if('<>=!'.indexOf(sql[pos])!==-1){var op=sql[pos];pos++;if(pos<len&&'<>=!'.indexOf(sql[pos])!==-1){op+=sql[pos];pos++;}tokens.push({type:'operator',value:op});continue;}
-            /* Placeholder */
-            if(sql[pos]==='\x01'){var s=pos;pos++;while(pos<len&&sql[pos]!=='\x01')pos++;if(pos<len)pos++;var phStr=sql.substring(s,pos);for(var j=0;j<phs.length;j++){if(phs[j].ph===phStr){tokens.push({type:'keyword',value:phs[j].kw});break;}}continue;}
-            /* Punctuation */
-            if('(),;*+-/'.indexOf(sql[pos])!==-1){
-                if(sql[pos]==='/'&&pos+1<len&&sql[pos+1]==='*'){var s=pos;pos+=2;while(pos<len&&!(sql[pos]==='*'&&pos+1<len&&sql[pos+1]==='/'))pos++;if(pos<len)pos+=2;tokens.push({type:'comment',value:sql.substring(s,pos)});continue;}
-                if(sql[pos]==='-'&&pos+1<len&&sql[pos+1]==='-'){var s=pos;pos+=2;while(pos<len&&sql[pos]!=='\n')pos++;tokens.push({type:'comment',value:sql.substring(s,pos)});continue;}
-                tokens.push({type:'punctuation',value:sql[pos]});pos++;continue;}
-            /* Word */
-            if(/[a-zA-Z_`]/.test(sql[pos])){
-                if(sql[pos]==='`'){var s=pos;pos++;while(pos<len&&sql[pos]!=='`')pos++;if(pos<len)pos++;tokens.push({type:'identifier',value:sql.substring(s,pos)});continue;}
-                var s=pos;while(pos<len&&/[a-zA-Z0-9_]/.test(sql[pos]))pos++;var w=sql.substring(s,pos);tokens.push({type:(isSQLKW(w)||isSQLFn(w))?'keyword':'identifier',value:w});continue;}
-            tokens.push({type:'other',value:sql[pos]});pos++;
-        }
-
-        /* Passo 3: formatar com indentacao */
-        var indent=0;var lines=[''];var li=0;var prev=null;var parenDepth=0;
-        function cLine(){return lines[li];}
-        function append(t){lines[li]+=t;}
-        function nLine(extra){var sp='  '.repeat(indent+(extra||0));li++;lines[li]=sp;}
-
-        for(var i=0;i<tokens.length;i++){
-            var t=tokens[i];var val=(t.type==='keyword')?t.value.toUpperCase():t.value;var upper=val.toUpperCase();
-
-            if(t.value==='('){
-                var isSubquery=false;
-                if(prev&&(prev.type==='keyword')&&SQL_SUBQUERY_INTRODUCERS.indexOf(prev.value.toUpperCase())!==-1){isSubquery=true;}
-                if(isSubquery){append('(');indent++;nLine();}
-                else{append('(');indent++;nLine();}
-                parenDepth++;prev=t;continue;
-            }
-            if(t.value===')'){
-                indent=Math.max(0,indent-1);parenDepth=Math.max(0,parenDepth-1);nLine();append(')');prev=t;continue;
-            }
-            if(t.value===','){append(',');nLine();prev=t;continue;}
-            if(t.value===';'){append(';');indent=0;nLine();prev=t;continue;}
-
-            /* Clausula principal */
-            if(t.type==='keyword'&&SQL_CLAUSES.indexOf(upper)!==-1){
-                if(parenDepth===0)indent=0;nLine();append(val);prev=t;continue;
-            }
-            /* Sub-clausula */
-            if(t.type==='keyword'&&SQL_SUBCLAUSES.indexOf(upper)!==-1){nLine(1);append(val);prev=t;continue;}
-            /* CASE */
-            if(t.type==='keyword'&&upper==='CASE'){append('CASE');prev=t;continue;}
-            /* WHEN */
-            if(t.type==='keyword'&&upper==='WHEN'){nLine(1);append('WHEN');prev=t;continue;}
-            /* THEN */
-            if(t.type==='keyword'&&upper==='THEN'){append(' THEN');prev=t;continue;}
-            /* ELSE */
-            if(t.type==='keyword'&&upper==='ELSE'){nLine(1);append('ELSE');prev=t;continue;}
-            /* END */
-            if(t.type==='keyword'&&upper==='END'){nLine();append('END');prev=t;continue;}
-
-            /* Default */
-            var cl=cLine();
-            if(cl.length>0&&cl[cl.length-1]!==' '&&cl[cl.length-1]!=='('&&cl[cl.length-1]!=='\n'){append(' ');}
-            append(val);prev=t;
-        }
-
-        var formatted=lines.join('\n').trim();
-
-        /* Passo 4: syntax highlight */
-        var hl=escHTML(formatted);
-        hl=hl.replace(/'([^']*(?:''[^']*)*)'/g,"<span class=\"syn-str\">'$1'</span>");
-        /* Funcoes primeiro (mais especifico) */
-        for(var f=0;f<SQL_FUNCTIONS.length;f++){var fn=SQL_FUNCTIONS[f];hl=hl.replace(new RegExp('\\b('+fn+')\\b','gi'),'<span class="syn-fn">$1</span>');}
-        /* Keywords */
-        var hlKws=SQL_CLAUSES.concat(SQL_SUBCLAUSES,['AS','IN','LIKE','BETWEEN','EXISTS','DISTINCT','ALL','ASC','DESC','NULL','TRUE','FALSE','NOT','CASE','WHEN','THEN','ELSE','END','SET','INTO','VALUES','UPDATE','DELETE']);
-        for(var k=0;k<hlKws.length;k++){var kw=hlKws[k];hl=hl.replace(new RegExp('\\b('+kw.replace(/\s+/g,'\\s+')+')\\b','gi'),'<span class="syn-kw">$1</span>');}
-        hl=hl.replace(/\b(\d+(?:\.\d+)?)\b/g,'<span class="syn-num">$1</span>');
-        hl=hl.replace(/(\/\*[\s\S]*?\*\/|--[^\n]*)/g,'<span class="syn-cm">$1</span>');
-
-        out.innerHTML=outputHTML(hl,'sql-r');
-    }catch(e){out.innerHTML=errorHTML('Erro ao formatar: '+e.message);}
-}
-
-/* ===== 7. XML FORMATTER ===== */
-function formatXML(){
-    var input=document.getElementById('xml-input').value.trim();var out=document.getElementById('xml-output');if(!input){out.innerHTML='';return;}
-    if(input.indexOf('<')===-1){out.innerHTML=errorHTML('XML invalido.');return;}
-    try{
-        var xml=input.replace(/>\s+</g,'><').trim();
-        var result='';var indent=0;var tab='  ';var i=0;
-        while(i<xml.length){
-            if(xml[i]==='<'){
-                /* Comentario */
-                if(xml.substr(i,4)==='<!--'){var ce=xml.indexOf('-->',i);if(ce===-1)break;result+=tab.repeat(indent)+xml.substring(i,ce+3)+'\n';i=ce+3;continue;}
-                /* PI */
-                if(xml.substr(i,2)==='<?'){var pe=xml.indexOf('?>',i);if(pe===-1)break;result+=tab.repeat(indent)+xml.substring(i,pe+2)+'\n';i=pe+2;continue;}
-                var te=xml.indexOf('>',i);if(te===-1)break;var tag=xml.substring(i,te+1);
-                if(tag.indexOf('</')===0){indent=Math.max(0,indent-1);result+=tab.repeat(indent)+tag+'\n';i=te+1;continue;}
-                if(tag.indexOf('/>')!==-1){result+=tab.repeat(indent)+tag+'\n';i=te+1;continue;}
-                /* Tag de abertura - verificar se fecha na mesma linha */
-                var tn=tag.match(/<(\w[\w\-:]*)/);
-                if(tn){var ct='</'+tn[1]+'>';var ci=xml.indexOf(ct,te+1);
-                    if(ci!==-1){var content=xml.substring(te+1,ci).trim();if(content.indexOf('<')===-1){result+=tab.repeat(indent)+tag+content+ct+'\n';i=ci+ct.length;continue;}}}
-                result+=tab.repeat(indent)+tag+'\n';indent++;i=te+1;continue;
-            }
-            var nt=xml.indexOf('<',i);if(nt===-1)nt=xml.length;var txt=xml.substring(i,nt).trim();if(txt){result+=tab.repeat(indent)+txt+'\n';}i=nt;
-        }
-        var hl=escHTML(result.trim());
-        hl=hl.replace(/(&lt;!--[\s\S]*?--&gt;)/g,'<span class="syn-cm">$1</span>');
-        hl=hl.replace(/(&lt;\?[\s\S]*?\?&gt;)/g,'<span class="syn-kw">$1</span>');
-        hl=hl.replace(/(&lt;\/?)([\w\-:]+)/g,'$1<span class="syn-tag">$2</span>');
-        hl=hl.replace(/(\/?&gt;)/g,'<span class="syn-kw">$1</span>');
-        hl=hl.replace(/\s([\w\-:]+)(=)(&quot;|")/g,' <span class="syn-attr">$1</span><span class="syn-kw">$2</span>$3');
-        hl=hl.replace(/(&quot;)(.*?)(&quot;)/g,'<span class="syn-str">$1$2$3</span>');
-        out.innerHTML=outputHTML(hl,'xml-r');
-    }catch(e){out.innerHTML=errorHTML('Erro ao formatar XML: '+e.message);}
-}
-function minifyXML(){var i=document.getElementById('xml-input').value.trim();var o=document.getElementById('xml-output');if(!i){o.innerHTML='';return;}try{var m=i.replace(/>\s+</g,'><').replace(/\s{2,}/g,' ').trim();o.innerHTML=outputHTML(escHTML(m),'xml-r');}catch(e){o.innerHTML=errorHTML(e.message);}}
-
-/* ===== 8. MARKDOWN VIEWER ===== */
-function renderMarkdown(){
-    var input=document.getElementById('md-input');var preview=document.getElementById('md-preview');if(!input||!preview)return;
-    preview.innerHTML=parseMarkdown(input.value);
-}
-function parseMarkdown(md){
-    var lines=md.split('\n');var html='';var inCB=false;var inList=false;var listType='';var inTable=false;var tableRows=[];
-    for(var i=0;i<lines.length;i++){var line=lines[i];
-        if(line.trim().substr(0,3)==='```'){if(inCB){html+='</code></pre>';inCB=false;}else{var lang=line.trim().substring(3).trim();html+='<pre class="md-code-block"><code>';inCB=true;}continue;}
-        if(inCB){html+=escHTML(line)+'\n';continue;}
-        if(inList&&!line.match(/^[\s]*[-*+]\s/)&&!line.match(/^[\s]*\d+\.\s/)){html+=listType==='ul'?'</ul>':'</ol>';inList=false;}
-        if(line.trim().charAt(0)==='|'&&line.trim().charAt(line.trim().length-1)==='|'){if(!inTable){inTable=true;tableRows=[];}tableRows.push(line);continue;}else if(inTable){html+=renderMDTable(tableRows);inTable=false;tableRows=[];}
-        if(line.trim()===''){if(inList){html+=listType==='ul'?'</ul>':'</ol>';inList=false;}continue;}
-        var hm=line.match(/^(#{1,6})\s+(.+)/);if(hm){var lv=hm[1].length;html+='<h'+lv+' class="md-h'+lv+'">'+mdInline(hm[2])+'</h'+lv+'>';continue;}
-        if(line.trim().match(/^(-{3,}|\*{3,}|_{3,})$/)){html+='<hr class="md-hr">';continue;}
-        if(line.trim().charAt(0)==='>'){html+='<blockquote class="md-blockquote">'+mdInline(line.trim().substring(1).trim())+'</blockquote>';continue;}
-        var um=line.match(/^[\s]*[-*+]\s+(.+)/);if(um){if(!inList||listType!=='ul'){if(inList)html+=listType==='ul'?'</ul>':'</ol>';html+='<ul class="md-list">';inList=true;listType='ul';}html+='<li>'+mdInline(um[1])+'</li>';continue;}
-        var om=line.match(/^[\s]*\d+\.\s+(.+)/);if(om){if(!inList||listType!=='ol'){if(inList)html+=listType==='ul'?'</ul>':'</ol>';html+='<ol class="md-list">';inList=true;listType='ol';}html+='<li>'+mdInline(om[1])+'</li>';continue;}
-        html+='<p class="md-p">'+mdInline(line)+'</p>';
+    /* ===== DASHBOARD COM PESQUISA ===== */
+    function renderDashboard(){
+        let cards='';
+        tools.filter(t=>t.id!=='dashboard').forEach(t=>{
+            cards+=`<div class="dash-card" data-tool-id="${t.id}" data-tool-name="${t.name.toLowerCase()}" data-tool-desc="${(toolDescriptions[t.id]||'').toLowerCase()}" onclick="navigateTo('${t.id}')" role="button" tabindex="0"><div class="dash-card-icon"><i class="fas ${t.icon}"></i></div><h3 class="text-sm font-bold text-white mb-1">${t.name}</h3><p class="text-xs" style="color:var(--text-muted);line-height:1.5">${toolDescriptions[t.id]||''}</p></div>`;
+        });
+        return `<div class="page-enter" style="position:relative;min-height:100%">
+            <div class="grid-pattern"></div>
+            <div class="glow-orb" style="width:400px;height:400px;background:#10b981;top:-120px;left:-80px;opacity:.07"></div>
+            <div class="glow-orb" style="width:300px;height:300px;background:#06b6d4;top:300px;right:-50px;opacity:.05"></div>
+            <div style="position:relative;z-index:1">
+                <div style="max-width:600px;margin-bottom:1.5rem">
+                    <div style="display:inline-flex;align-items:center;gap:.5rem;background:var(--accent-glow);border:1px solid rgba(16,185,129,.2);border-radius:999px;padding:.3rem .875rem;margin-bottom:1.25rem">
+                        <span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block"></span>
+                        <span style="font-size:.7rem;font-weight:600;color:var(--accent);letter-spacing:.03em">SUITE COMPLETA — ${tools.length-1} FERRAMENTAS</span>
+                    </div>
+                    <h1 class="text-4xl font-black text-white mb-3" style="letter-spacing:-.03em;line-height:1.15">Bem-vindo ao<br><span style="color:var(--accent)">DevToolKit</span></h1>
+                    <p style="color:var(--text-muted);font-size:1rem;line-height:1.6;max-width:480px">Ferramentas essenciais para o seu dia a dia como desenvolvedor. Rápido, offline, direto ao ponto.</p>
+                </div>
+                <!-- BARRA DE PESQUISA DO DASHBOARD -->
+                <div class="search-bar-wrapper">
+                    <input type="text" class="search-bar" id="dashSearch" placeholder="Pesquisar ferramentas..." oninput="onDashSearch(this.value)" onkeydown="if(event.key==='Escape'){this.value='';onDashSearch('');this.blur();}">
+                    <i class="fas fa-search search-bar-icon"></i>
+                    <span class="search-shortcut">Ctrl+K</span>
+                </div>
+                <div class="dash-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem" id="dashGrid">${cards}</div>
+                <div class="no-results" id="dashNoResults" style="display:none">
+                    <i class="fas fa-search"></i>
+                    <p>Nenhuma ferramenta encontrada para "<strong id="dashNoResultsTerm"></strong>"</p>
+                </div>
+            </div>
+        </div>`;
     }
-    if(inCB)html+='</code></pre>';if(inList)html+=listType==='ul'?'</ul>':'</ol>';if(inTable)html+=renderMDTable(tableRows);return html;
-}
-function mdInline(t){
-    t=t.replace(/`([^`]+)`/g,'<code class="md-inline-code">$1</code>');
-    t=t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');t=t.replace(/__(.+?)__/g,'<strong>$1</strong>');
-    t=t.replace(/\*(.+?)\*/g,'<em>$1</em>');t=t.replace(/_(.+?)_/g,'<em>$1</em>');
-    t=t.replace(/~~(.+?)~~/g,'<del>$1</del>');
-    t=t.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,'<img src="$2" alt="$1" style="max-width:100%;border-radius:8px;margin:.5em 0;">');
-    t=t.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" class="md-link" target="_blank" rel="noopener">$1</a>');
-    return t;
-}
-function renderMDTable(rows){if(rows.length<2)return '';var html='<table class="md-table"><thead><tr>';var hs=rows[0].split('|');for(var h=0;h<hs.length;h++){var c=hs[h].trim();if(c)html+='<th>'+mdInline(c)+'</th>';}html+='</tr></thead><tbody>';for(var r=2;r<rows.length;r++){html+='<tr>';var cs=rows[r].split('|');for(var c=0;c<cs.length;c++){var v=cs[c].trim();if(v)html+='<td>'+mdInline(v)+'</td>';}html+='</tr>';}html+='</tbody></table>';return html;}
 
-/* ===== 9. REGEX ===== */
-function validateRegex(){
-    var pattern=document.getElementById('regex-pattern').value;var flags=document.getElementById('regex-flags').value;var text=document.getElementById('regex-text').value;var out=document.getElementById('regex-output');
-    if(!pattern){out.innerHTML='';return;}
-    var regex;try{regex=new RegExp(pattern,flags);}catch(e){out.innerHTML='<div class="p-3 rounded-xl bg-[var(--bg-2)] border border-[var(--error)]"><span class="text-[var(--error)] text-sm"><i class="fas fa-exclamation-triangle mr-1"></i> Regex invalida: '+escHTML(e.message)+'</span></div>';return;}
-    if(!text){out.innerHTML='<div class="p-3 rounded-xl bg-[var(--bg-2)] border border-[var(--bg-4)]"><span class="text-[var(--success)] text-sm"><i class="fas fa-check-circle mr-1"></i> Regex valida</span></div>';return;}
-    var matches=[];var m;if(flags.indexOf('g')!==-1){while((m=regex.exec(text))!==null){matches.push({value:m[0],index:m.index,groups:m.slice(1)});if(m[0].length===0)regex.lastIndex++;}}else{m=regex.exec(text);if(m)matches.push({value:m[0],index:m.index,groups:m.slice(1)});}
-    var highlighted=escHTML(text);
-    if(matches.length>0){var sorted=matches.slice().sort(function(a,b){return b.index-a.index;});for(var s=0;s<sorted.length;s++){var mt=sorted[s];var before=highlighted.substring(0,mt.index);var match=highlighted.substring(mt.index,mt.index+mt.value.length);var after=highlighted.substring(mt.index+mt.value.length);highlighted=before+'<span class="regex-match">'+match+'</span>'+after;}}
-    var groupsHTML='';if(matches.length>0&&matches[0].groups.length>0){groupsHTML='<div class="mt-3"><p class="text-xs font-bold text-[var(--text-3)] uppercase mb-2">Grupos Capturados (1.o match)</p><div class="flex flex-wrap gap-2">';for(var g=0;g<matches[0].groups.length;g++){groupsHTML+='<span class="text-xs px-2 py-1 rounded-md bg-[var(--bg-3)] border border-[var(--bg-4)]"><span class="text-[var(--text-3)]">$'+(g+1)+':</span> <span class="text-[var(--accent)]">'+escHTML(matches[0].groups[g]||'(vazio)')+'</span></span>';}groupsHTML+='</div></div>';}
-    var matchesHTML='';if(matches.length>0){matchesHTML='<div class="space-y-1">';for(var mi=0;mi<matches.length;mi++){matchesHTML+='<div class="text-xs flex items-center gap-2"><span class="text-[var(--text-3)] w-6 text-right">#'+(mi+1)+'</span><span class="text-[var(--accent)] font-mono">'+escHTML(matches[mi].value)+'</span><span class="text-[var(--text-3)]">indice '+matches[mi].index+'</span></div>';}matchesHTML+='</div>';}
-    out.innerHTML='<div class="p-4 rounded-xl bg-[var(--bg-2)] border border-[var(--bg-4)] space-y-3"><div class="flex items-center gap-2"><span class="text-[var(--success)]"><i class="fas fa-check-circle"></i></span><span class="text-sm text-[var(--text-1)]">Regex valida</span><span class="text-xs text-[var(--text-3)] ml-auto">'+matches.length+' match'+(matches.length!==1?'es':'')+'</span></div><div class="font-mono text-sm leading-relaxed p-3 rounded-lg bg-[var(--bg-0)] border border-[var(--bg-4)]">'+(highlighted||'<span class="text-[var(--text-3)]">Nenhum match</span>')+'</div>'+matchesHTML+groupsHTML+'</div>';
-}
-
-/* ===== 10. TEXT COMPARE ===== */
-function compareTexts(){
-    var left=document.getElementById('diff-left').value;var right=document.getElementById('diff-right').value;var out=document.getElementById('diff-output');if(!left&&!right){out.innerHTML='';return;}
-    var a=left.split('\n');var b=right.split('\n');var diff=lcsDiff(a,b);var added=0,removed=0;for(var d=0;d<diff.length;d++){if(diff[d].type==='added')added++;if(diff[d].type==='removed')removed++;}
-    var li=0,ri=0,lines='';
-    for(var i=0;i<diff.length;i++){var item=diff[i];var ln,num,marker;
-        if(item.type==='equal'){ln=item.line;num='<span class="diff-line-num">'+(++li)+'</span><span class="diff-line-num">'+(++ri)+'</span>';marker=' ';}
-        else if(item.type==='added'){ln=item.line;num='<span class="diff-line-num"></span><span class="diff-line-num">'+(++ri)+'</span>';marker='+';}
-        else{ln=item.line;num='<span class="diff-line-num">'+(++li)+'</span><span class="diff-line-num"></span>';marker='-';}
-        lines+='<div class="diff-line diff-'+item.type+' font-mono text-xs">'+num+'<span style="display:inline-block;width:14px;text-align:center;font-weight:700;">'+marker+'</span>'+escHTML(ln)+'</div>';}
-    out.innerHTML='<div class="p-4 rounded-xl bg-[var(--bg-2)] border border-[var(--bg-4)]"><div class="flex gap-4 mb-3 text-xs"><span class="text-[var(--success)]"><i class="fas fa-plus mr-1"></i>'+added+' adicao'+(added!==1?'oes':'')+'</span><span class="text-[var(--error)]"><i class="fas fa-minus mr-1"></i>'+removed+' remocao'+(removed!==1?'oes':'')+'</span></div><div class="rounded-lg bg-[var(--bg-0)] border border-[var(--bg-4)] overflow-auto" style="max-height:500px;">'+(lines||'<div class="p-3 text-xs text-[var(--text-3)]">Textos identicos</div>')+'</div></div>';
-}
-function lcsDiff(a,b){var m=a.length,n=b.length;var dp=[];for(var i=0;i<=m;i++){dp[i]=[];for(var j=0;j<=n;j++)dp[i][j]=0;}for(var i=1;i<=m;i++)for(var j=1;j<=n;j++){if(a[i-1]===b[j-1])dp[i][j]=dp[i-1][j-1]+1;else dp[i][j]=Math.max(dp[i-1][j],dp[i][j-1]);}var result=[];var i=m,j=n;while(i>0&&j>0){if(a[i-1]===b[j-1]){result.unshift({type:'equal',line:a[i-1]});i--;j--;}else if(dp[i-1][j]>dp[i][j-1]){result.unshift({type:'removed',line:a[i-1]});i--;}else{result.unshift({type:'added',line:b[j-1]});j--;}}while(i>0){result.unshift({type:'removed',line:a[i-1]});i--;}while(j>0){result.unshift({type:'added',line:b[j-1]});j--;}return result;}
-
-/* ===== 11. HASH GENERATOR ===== */
-function generateHashes(){var input=document.getElementById('hash-input').value;var out=document.getElementById('hash-output');if(!input){out.innerHTML='';return;}var algos=['SHA-1','SHA-256','SHA-384','SHA-512'];var encoder=new TextEncoder();var data=encoder.encode(input);var promises=algos.map(function(algo){return crypto.subtle.digest(algo,data).then(function(buf){var hex=Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');return{algo:algo,hex:hex};});});Promise.all(promises).then(function(results){var rows='';for(var i=0;i<results.length;i++){var r=results[i];var sid='hash-'+r.algo.replace(/-/g,'');rows+='<div class="flex items-start gap-3 py-3 border-b border-[var(--bg-4)] last:border-0"><span class="text-xs font-bold text-[var(--text-3)] pt-0.5 whitespace-nowrap" style="min-width:70px;">'+r.algo+'</span><span class="font-mono text-xs text-[var(--accent)] break-all flex-1" id="'+sid+'">'+r.hex+'</span><button class="tool-btn small secondary" onclick="copyText(document.getElementById(\''+sid+'\').textContent)"><i class="far fa-copy"></i></button></div>';}out.innerHTML='<div class="tool-output" style="padding:8px 16px;">'+rows+'</div>';});}
-
-/* ===== 12. YAML VALIDATOR ===== */
-function validateYAML(){
-    var input=document.getElementById('yaml-input').value.trim();var out=document.getElementById('yaml-output');if(!input){out.innerHTML='';return;}
-    try{
-        if(typeof jsyaml==='undefined'){out.innerHTML=errorHTML('Biblioteca js-yaml nao carregou. Recarregue a pagina.');return;}
-        var parsed=jsyaml.load(input,{json:true});var json=JSON.stringify(parsed,null,2);var lineCount=input.split('\n').length;var keyCount=countKeys(parsed);
-        out.innerHTML='<div class="space-y-4"><div class="flex gap-4 flex-wrap text-sm"><span class="flex items-center gap-2 text-[var(--success)]"><i class="fas fa-check-circle"></i> YAML valido</span><span class="text-[var(--text-3)]">'+lineCount+' linhas</span><span class="text-[var(--text-3)]">'+keyCount+' chaves</span></div><div><p class="text-xs font-bold text-[var(--text-3)] uppercase mb-1">Resultado (JSON)</p>'+outputHTML(syntaxHL(json),'yaml-r')+'</div></div>';
-    }catch(e){
-        var msg=e.message;var lineInfo='';
-        var lm=msg.match(/line (\d+)/);
-        if(lm){var ln=parseInt(lm[1]);var lines=input.split('\n');var lineContent=lines[ln-1]||'';lineInfo='<div class="mt-2 text-xs"><span class="text-[var(--text-3)]">Linha '+ln+':</span> <span class="font-mono text-[var(--text-2)]">'+escHTML(lineContent)+'</span></div>';}
-        /* Indicar posicao do erro na linha */
-        var colMatch=msg.match(/column (\d+)/);
-        if(colMatch&&lineContent){var col=parseInt(colMatch[1])-1;var before=escHTML(lineContent.substring(0,col));var at=escHTML(lineContent.substring(col,col+1));var after=escHTML(lineContent.substring(col+1));lineInfo='<div class="mt-2 text-xs"><span class="text-[var(--text-3)]">Linha '+ln+', coluna '+colMatch[1]+':</span><br><span class="font-mono text-sm">'+before+'<span class="text-[var(--error)] font-bold" style="text-decoration:underline;">'+at+'</span>'+after+'</span></div>';}
-        out.innerHTML='<div class="p-4 rounded-xl bg-[var(--bg-2)] border border-[var(--error)]"><span class="text-[var(--error)] text-sm"><i class="fas fa-exclamation-triangle mr-1"></i> '+escHTML(msg)+'</span>'+lineInfo+'</div>';
+    /* ===== PESQUISA DO DASHBOARD ===== */
+    function onDashSearch(query){
+        const q=query.toLowerCase().trim();
+        const cards=document.querySelectorAll('#dashGrid .dash-card');
+        let visibleCount=0;
+        cards.forEach(card=>{
+            const name=card.getAttribute('data-tool-name');
+            const desc=card.getAttribute('data-tool-desc');
+            const match=!q||name.includes(q)||desc.includes(q);
+            card.classList.toggle('hidden-card',!match);
+            if(match)visibleCount++;
+        });
+        const noRes=document.getElementById('dashNoResults');
+        const noTerm=document.getElementById('dashNoResultsTerm');
+        if(noRes&&noTerm){
+            if(visibleCount===0&&q){noRes.style.display='block';noTerm.textContent=query;}
+            else{noRes.style.display='none';}
+        }
     }
-}
-function countKeys(obj){if(typeof obj!=='object'||obj===null)return 0;var c=0;if(Array.isArray(obj)){for(var i=0;i<obj.length;i++)c+=countKeys(obj[i]);}else{var ks=Object.keys(obj);c=ks.length;for(var i=0;i<ks.length;i++)c+=countKeys(obj[ks[i]]);}return c;}
 
-/* ===== 13. UUID ===== */
-function generateUUIDs(){var count=Math.min(100,Math.max(1,parseInt(document.getElementById('uuid-count').value)||1));var upper=document.getElementById('uuid-upper').checked;var noDash=document.getElementById('uuid-no-dash').checked;var uuids=[];for(var i=0;i<count;i++){var u=crypto.randomUUID();if(noDash)u=u.replace(/-/g,'');if(upper)u=u.toUpperCase();uuids.push(u);}document.getElementById('uuid-output').innerHTML=outputHTML(escHTML(uuids.join('\n')),'uuid-r');}
+    /* ===== SEARCH MODAL (Ctrl+K global) ===== */
+    function openSearchModal(){
+        const overlay=document.getElementById('searchOverlay');
+        overlay.classList.add('open');
+        const input=document.getElementById('searchModalInput');
+        input.value='';
+        input.focus();
+        modalFocusedIdx=-1;
+        onModalSearch('');
+    }
+    function closeSearchModal(){
+        document.getElementById('searchOverlay').classList.remove('open');
+        modalFocusedIdx=-1;
+    }
+    function onModalSearch(query){
+        const q=query.toLowerCase().trim();
+        const container=document.getElementById('searchModalResults');
+        const toolList=tools.filter(t=>t.id!=='dashboard');
+        const filtered=q?toolList.filter(t=>t.name.toLowerCase().includes(q)||(toolDescriptions[t.id]||'').toLowerCase().includes(q)||t.category.toLowerCase().includes(q)):toolList;
+        modalFocusedIdx=-1;
+        if(filtered.length===0){
+            container.innerHTML=`<div class="search-modal-empty"><i class="fas fa-search" style="display:block;font-size:1.5rem;opacity:.3;margin-bottom:.5rem"></i>Nenhum resultado para "${query}"</div>`;
+            return;
+        }
+        container.innerHTML=filtered.map((t,i)=>{
+            const nameHtml=q?highlightMatch(t.name,q):t.name;
+            return `<div class="search-modal-item" data-idx="${i}" data-tool-id="${t.id}" onclick="navigateTo('${t.id}');closeSearchModal()" onmouseenter="setModalFocus(${i})">
+                <i class="fas ${t.icon}"></i>
+                <div class="search-modal-item-text"><div class="search-modal-item-name">${nameHtml}</div><div class="search-modal-item-desc">${toolDescriptions[t.id]||''}</div></div>
+                <div class="search-modal-item-cat">${t.category||''}</div>
+            </div>`;
+        }).join('');
+    }
+    function highlightMatch(text,query){
+        const idx=text.toLowerCase().indexOf(query);
+        if(idx===-1)return text;
+        return text.substring(0,idx)+'<mark>'+text.substring(idx,idx+query.length)+'</mark>'+text.substring(idx+query.length);
+    }
+    function setModalFocus(idx){
+        const items=document.querySelectorAll('.search-modal-item');
+        items.forEach((el,i)=>el.classList.toggle('focused',i===idx));
+        modalFocusedIdx=idx;
+        if(items[idx])items[idx].scrollIntoView({block:'nearest'});
+    }
+    function onModalKeydown(e){
+        const items=document.querySelectorAll('.search-modal-item');
+        if(e.key==='ArrowDown'){e.preventDefault();setModalFocus(Math.min(modalFocusedIdx+1,items.length-1));}
+        else if(e.key==='ArrowUp'){e.preventDefault();setModalFocus(Math.max(modalFocusedIdx-1,0));}
+        else if(e.key==='Enter'&&modalFocusedIdx>=0&&items[modalFocusedIdx]){e.preventDefault();items[modalFocusedIdx].click();}
+        else if(e.key==='Escape'){closeSearchModal();}
+    }
 
-/* ===== 14. LOREM IPSUM ===== */
-function generateLorem(){var type=document.getElementById('lorem-type').value;var count=Math.min(100,Math.max(1,parseInt(document.getElementById('lorem-count').value)||1));var words='lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum'.split(' ');
-function rw(){return words[Math.floor(Math.random()*words.length)];}
-function rs(){var len=8+Math.floor(Math.random()*12);var s=[];for(var i=0;i<len;i++)s.push(rw());var r=s.join(' ');return r.charAt(0).toUpperCase()+r.slice(1)+'.';}
-function rp(){var len=3+Math.floor(Math.random()*5);var p=[];for(var i=0;i<len;i++)p.push(rs());return p.join(' ');}
-var text='';if(type==='words'){var w=[];for(var i=0;i<count;i++)w.push(rw());text=w.join(' ');}else if(type==='sentences'){var s=[];for(var i=0;i<count;i++)s.push(rs());text=s.join(' ');}else{var p=[];for(var i=0;i<count;i++)p.push(rp());text=p.join('\n\n');}document.getElementById('lorem-output').innerHTML=outputHTML(escHTML(text),'lorem-r');}
+    /* ===== ATALHO GLOBAL Ctrl+K ===== */
+    document.addEventListener('keydown',function(e){
+        if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();openSearchModal();}
+        /* "/" também abre pesquisa se não estiver em input */
+        if(e.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)){e.preventDefault();openSearchModal();}
+    });
 
-/* ===== 15. PASSWORD ===== */
-function generatePassword(){var length=parseInt(document.getElementById('pw-length').value);var uC=document.getElementById('pw-upper').checked;var lC=document.getElementById('pw-lower').checked;var nC=document.getElementById('pw-numbers').checked;var sC=document.getElementById('pw-symbols').checked;var chars='';if(uC)chars+='ABCDEFGHIJKLMNOPQRSTUVWXYZ';if(lC)chars+='abcdefghijklmnopqrstuvwxyz';if(nC)chars+='0123456789';if(sC)chars+='!@#$%^&*()_+-=[]{}|;:,.<>?';if(!chars){showToast('Selecione ao menos um tipo de caractere.','error');return;}var arr=new Uint32Array(length);crypto.getRandomValues(arr);var pw='';for(var i=0;i<length;i++)pw+=chars[arr[i]%chars.length];document.getElementById('pw-display').textContent=pw;var pool=0;if(uC)pool+=26;if(lC)pool+=26;if(nC)pool+=10;if(sC)pool+=28;var bits=Math.floor(length*Math.log2(pool));var bar=document.getElementById('pw-str-bar');var label=document.getElementById('pw-str-label');var pct,color,text;if(bits<40){pct=20;color='var(--error)';text='Fraca';}else if(bits<60){pct=40;color='#F97316';text='Razoavel';}else if(bits<80){pct=60;color='var(--accent)';text='Boa';}else if(bits<100){pct=80;color='var(--info)';text='Forte';}else{pct=100;color='var(--success)';text='Muito Forte';}bar.style.width=pct+'%';bar.style.background=color;label.textContent=text+' ('+bits+' bits)';label.style.color=color;}
+    /* ===== JWT DECODE ===== */
+    function renderJwtDecode(){return `<div class="page-enter"><div class="mb-6"><h1 class="text-2xl font-extrabold text-white mb-1.5 tracking-tight">JWT Decode</h1><p style="color:var(--text-muted);font-size:.875rem">Cole um token JWT para decodificar.</p></div><div class="tool-card mb-4"><label class="field-label" for="jwtInput">Token JWT</label><textarea id="jwtInput" class="tool-textarea" rows="4" placeholder="eyJhbGciOiJIUzI1NiIs..." spellcheck="false"></textarea><div style="display:flex;gap:.625rem;margin-top:.75rem"><button class="btn btn-primary" onclick="doJwtDecode()"><i class="fas fa-key"></i> Decodificar</button><button class="btn btn-danger" onclick="document.getElementById('jwtInput').value='';document.getElementById('jwtOutput').innerHTML='<span style=color:var(--text-muted)>Aguardando token...</span>'"><i class="fas fa-eraser"></i> Limpar</button></div></div><div id="jwtOutput"><span style="color:var(--text-muted);font-size:.875rem">Aguardando token...</span></div></div>`;}
+    function doJwtDecode(){const input=document.getElementById('jwtInput').value.trim();if(!input)return showToast('Cole um token JWT',true);const parts=input.split('.');if(parts.length!==3)return showToast('JWT inválido',true);try{const header=JSON.parse(atob(parts[0].replace(/-/g,'+').replace(/_/g,'/')));const payload=JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));let ei='';if(payload.exp){const d=new Date(payload.exp*1000),now=new Date(),ex=now>d;ei=`<div style="margin-top:.75rem;padding:.5rem .75rem;border-radius:8px;font-size:.75rem;font-weight:600;display:inline-flex;align-items:center;gap:.4rem;background:${ex?'rgba(239,68,68,.1)':'rgba(16,185,129,.1)'};color:${ex?'var(--danger)':'var(--accent)'}"><i class="fas ${ex?'fa-circle-xmark':'fa-circle-check'}"></i>${ex?'Expirado em ':'Expira em '}${d.toLocaleString('pt-BR')}</div>`;}document.getElementById('jwtOutput').innerHTML=`<div style="display:grid;gap:.875rem"><div class="jwt-section"><div class="jwt-section-header" style="color:var(--warn)"><i class="fas fa-info-circle"></i> Header</div><div class="jwt-section-body" style="color:var(--warn)">${syntaxHL(JSON.stringify(header,null,2))}</div></div><div class="jwt-section"><div class="jwt-section-header" style="color:var(--accent-light)"><i class="fas fa-user"></i> Payload</div><div class="jwt-section-body">${syntaxHL(JSON.stringify(payload,null,2))}</div>${ei}</div><div class="jwt-section"><div class="jwt-section-header" style="color:var(--text-muted)"><i class="fas fa-shield-halved"></i> Signature</div><div class="jwt-section-body" style="color:var(--text-muted);font-size:.72rem">${parts[2]}</div></div></div>`;showToast('Token decodificado');}catch(e){showToast('Erro: '+e.message,true);}}
+    function syntaxHL(json){json=json.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,m=>{let c='color:#e879f9';if(/^"/.test(m))c=/:$/.test(m)?'color:#60a5fa':'color:var(--accent-light)';else if(/true|false/.test(m))c='color:var(--warn)';else if(/null/.test(m))c='color:var(--text-muted)';return '<span style="'+c+'">'+m+'</span>';});}
 
-/* ===== 16. TIMESTAMP ===== */
-function tsToDate(){var input=document.getElementById('ts-input').value.trim();var out=document.getElementById('ts-date-output');if(!input){out.innerHTML='';return;}var ts=parseInt(input);if(isNaN(ts)){out.innerHTML=errorHTML('Timestamp invalido.');return;}if(ts>1e12)ts=Math.floor(ts/1000);var d=new Date(ts*1000);if(isNaN(d.getTime())){out.innerHTML=errorHTML('Timestamp invalido.');return;}var rel=relTime(d);out.innerHTML='<div class="tool-output text-sm space-y-1"><div><span class="text-[var(--text-3)]">Local: </span><span class="text-[var(--accent)]">'+d.toLocaleString('pt-BR')+'</span></div><div><span class="text-[var(--text-3)]">UTC: </span>'+d.toUTCString()+'</div><div><span class="text-[var(--text-3)]">ISO: </span>'+d.toISOString()+'</div><div><span class="text-[var(--text-3)]">Relativo: </span>'+rel+'</div></div>';}
-function dateToTs(){var input=document.getElementById('ts-date-input').value;var out=document.getElementById('ts-ts-output');if(!input){out.innerHTML='';return;}var d=new Date(input);if(isNaN(d.getTime())){out.innerHTML=errorHTML('Data invalida.');return;}var s=Math.floor(d.getTime()/1000);var ms=d.getTime();out.innerHTML='<div class="tool-output text-sm space-y-1"><div class="flex items-center justify-between"><span class="text-[var(--text-3)]">Segundos:</span><span class="text-[var(--accent)] font-mono">'+s+'</span><button class="tool-btn small secondary" onclick="copyText(\''+s+'\')"><i class="far fa-copy"></i></button></div><div class="flex items-center justify-between"><span class="text-[var(--text-3)]">Milissegundos:</span><span class="text-[var(--text-1)] font-mono">'+ms+'</span><button class="tool-btn small secondary" onclick="copyText(\''+ms+'\')"><i class="far fa-copy"></i></button></div></div>';}
-function relTime(d){var diff=(Date.now()-d.getTime())/1000;var abs=Math.abs(diff);var p=diff>0?'ha ':'em ';if(abs<60)return p+Math.floor(abs)+' segundos';if(abs<3600)return p+Math.floor(abs/60)+' minutos';if(abs<86400)return p+Math.floor(abs/3600)+' horas';if(abs<2592000)return p+Math.floor(abs/86400)+' dias';if(abs<31536000)return p+Math.floor(abs/2592000)+' meses';return p+Math.floor(abs/31536000)+' anos';}
+    /* ===== BASE64 ENCODE ===== */
+    function renderBase64Encode(){return toolPage('Base64 Encode','Converta texto para Base64.','b64EncIn','b64EncOut',`<button class="btn btn-primary" onclick="doB64E()"><i class="fas fa-lock"></i> Codificar</button><button class="btn btn-secondary" onclick="copyField('b64EncOut')"><i class="fas fa-copy"></i> Copiar</button><button class="btn btn-danger" onclick="clearPair('b64EncIn','b64EncOut')"><i class="fas fa-eraser"></i> Limpar</button>`);}
+    function doB64E(){const v=document.getElementById('b64EncIn').value;if(!v)return showToast('Insira um texto',true);try{document.getElementById('b64EncOut').value=btoa(unescape(encodeURIComponent(v)));showToast('Codificado');}catch(e){showToast('Erro: '+e.message,true);}}
 
-/* ===== 17. COLOR ===== */
-function colorFromPicker(){var hex=document.getElementById('color-picker').value;document.getElementById('color-hex').value=hex;updateColorHex(hex);}
-function colorFromHex(){var hex=document.getElementById('color-hex').value.trim();if(/^#?[0-9a-fA-F]{6}$/.test(hex)){var h=hex.startsWith('#')?hex:'#'+hex;document.getElementById('color-picker').value=h;updateColorHex(h);}}
-function updateColorHex(hex){var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);document.getElementById('color-rgb').value='rgb('+r+', '+g+', '+b+')';var hsl=rgb2hsl(r,g,b);document.getElementById('color-hsl').value='hsl('+hsl[0]+', '+hsl[1]+'%, '+hsl[2]+'%)';document.getElementById('color-swatch').style.background=hex;}
-function colorFromRGB(){var m=document.getElementById('color-rgb').value.match(/(\d+)/g);if(m&&m.length>=3){var r=parseInt(m[0]),g=parseInt(m[1]),b=parseInt(m[2]);if(r<=255&&g<=255&&b<=255){var hex='#'+[r,g,b].map(function(c){return c.toString(16).padStart(2,'0');}).join('');document.getElementById('color-hex').value=hex;document.getElementById('color-picker').value=hex;var hsl=rgb2hsl(r,g,b);document.getElementById('color-hsl').value='hsl('+hsl[0]+', '+hsl[1]+'%, '+hsl[2]+'%)';document.getElementById('color-swatch').style.background=hex;}}}
-function colorFromHSL(){var m=document.getElementById('color-hsl').value.match(/(\d+)/g);if(m&&m.length>=3){var h=parseInt(m[0]),s=parseInt(m[1]),l=parseInt(m[2]);var rgb=hsl2rgb(h,s,l);var hex='#'+rgb.map(function(c){return c.toString(16).padStart(2,'0');}).join('');document.getElementById('color-hex').value=hex;document.getElementById('color-picker').value=hex;document.getElementById('color-rgb').value='rgb('+rgb[0]+', '+rgb[1]+', '+rgb[2]+')';document.getElementById('color-swatch').style.background=hex;}}
-function rgb2hsl(r,g,b){r/=255;g/=255;b/=255;var mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;var h=0,s=0,l=(mx+mn)/2;if(d!==0){s=l>0.5?d/(2-mx-mn):d/(mx+mn);if(mx===r)h=((g-b)/d+(g<b?6:0))/6;else if(mx===g)h=((b-r)/d+2)/6;else h=((r-g)/d+4)/6;}return[Math.round(h*360),Math.round(s*100),Math.round(l*100)];}
-function hsl2rgb(h,s,l){h/=360;s/=100;l/=100;var r,g,b;if(s===0){r=g=b=l;}else{var h2r=function(p,q,t){if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p;};var q=l<0.5?l*(1+s):l+s-l*s;var p=2*l-q;r=h2r(p,q,h+1/3);g=h2r(p,q,h);b=h2r(p,q,h-1/3);}return[Math.round(r*255),Math.round(g*255),Math.round(b*255)];}
+    /* ===== BASE64 DECODE ===== */
+    function renderBase64Decode(){return toolPage('Base64 Decode','Decodifique Base64.','b64DecIn','b64DecOut',`<button class="btn btn-primary" onclick="doB64D()"><i class="fas fa-lock-open"></i> Decodificar</button><button class="btn btn-secondary" onclick="copyField('b64DecOut')"><i class="fas fa-copy"></i> Copiar</button><button class="btn btn-danger" onclick="clearPair('b64DecIn','b64DecOut')"><i class="fas fa-eraser"></i> Limpar</button>`);}
+    function doB64D(){const v=document.getElementById('b64DecIn').value.trim();if(!v)return showToast('Insira Base64',true);try{document.getElementById('b64DecOut').value=decodeURIComponent(escape(atob(v)));showToast('Decodificado');}catch(e){showToast('Base64 inválido',true);}}
 
-/* ===== 18. NUMBER BASE ===== */
-function convertNumber(){var input=document.getElementById('num-input').value.trim();if(!input){document.getElementById('num-bin').textContent='\u2014';document.getElementById('num-oct').textContent='\u2014';document.getElementById('num-dec').textContent='\u2014';document.getElementById('num-hex').textContent='\u2014';return;}var dec;if(/^0b[01]+$/i.test(input))dec=parseInt(input.slice(2),2);else if(/^0o[0-7]+$/i.test(input))dec=parseInt(input.slice(2),8);else if(/^0x[0-9a-f]+$/i.test(input))dec=parseInt(input.slice(2),16);else if(/^[01]+$/.test(input))dec=parseInt(input,2);else if(/^[0-7]+$/.test(input))dec=parseInt(input,8);else if(/^[0-9]+$/.test(input))dec=parseInt(input,10);else if(/^[0-9a-fA-F]+$/.test(input))dec=parseInt(input,16);else{document.getElementById('num-bin').textContent='Invalido';document.getElementById('num-oct').textContent='Invalido';document.getElementById('num-dec').textContent='Invalido';document.getElementById('num-hex').textContent='Invalido';return;}if(isNaN(dec)){document.getElementById('num-bin').textContent='Invalido';document.getElementById('num-oct').textContent='Invalido';document.getElementById('num-dec').textContent='Invalido';document.getElementById('num-hex').textContent='Invalido';return;}document.getElementById('num-bin').textContent=dec.toString(2);document.getElementById('num-oct').textContent=dec.toString(8);document.getElementById('num-dec').textContent=dec.toString(10);document.getElementById('num-hex').textContent='0x'+dec.toString(16).toUpperCase();}
+    /* ===== URL ENCODE ===== */
+    function renderUrlEncode(){return toolPage('URL Encode','Codifique textos para URL.','urlEncIn','urlEncOut',`<button class="btn btn-primary" onclick="const v=document.getElementById('urlEncIn').value;if(!v)return showToast('Insira texto',true);document.getElementById('urlEncOut').value=encodeURIComponent(v);showToast('Codificado')"><i class="fas fa-link"></i> Codificar</button><button class="btn btn-secondary" onclick="copyField('urlEncOut')"><i class="fas fa-copy"></i> Copiar</button><button class="btn btn-danger" onclick="clearPair('urlEncIn','urlEncOut')"><i class="fas fa-eraser"></i> Limpar</button>`);}
 
-/* ===== ATALHOS ===== */
-document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();document.getElementById('sidebar-search').focus();if(window.innerWidth<1024&&!document.getElementById('sidebar').classList.contains('open'))toggleSidebar();}if(e.key==='Escape'){var sb=document.getElementById('sidebar');if(sb.classList.contains('open')&&window.innerWidth<1024)toggleSidebar();document.getElementById('sidebar-search').blur();}});
+    /* ===== URL DECODE ===== */
+    function renderUrlDecode(){return toolPage('URL Decode','Decodifique URL.','urlDecIn','urlDecOut',`<button class="btn btn-primary" onclick="try{document.getElementById('urlDecOut').value=decodeURIComponent(document.getElementById('urlDecIn').value.trim()||'');showToast('Decodificado')}catch(e){showToast('Erro: '+e.message,true)}"><i class="fas fa-link-slash"></i> Decodificar</button><button class="btn btn-secondary" onclick="copyField('urlDecOut')"><i class="fas fa-copy"></i> Copiar</button><button class="btn btn-danger" onclick="clearPair('urlDecIn','urlDecOut')"><i class="fas fa-eraser"></i> Limpar</button>`);}
 
-/* ===== INIT ===== */
-buildSidebar();
-showDashboard();
-</script>
+    /* ===== HTML ENCODE ===== */
+    function renderHtmlEncode(){return toolPage('HTML Encode','Converta caracteres para entidades HTML.','htmlEncIn','htmlEncOut',`<button class="btn btn-primary" onclick="const v=document.getElementById('htmlEncIn').value;if(!v)return showToast('Insira texto',true);const d=document.createElement('div');d.textContent=v;document.getElementById('htmlEncOut').value=d.innerHTML;showToast('Codificado')"><i class="fas fa-code"></i> Codificar</button><button class="btn btn-secondary" onclick="copyField('htmlEncOut')"><i class="fas fa-copy"></i> Copiar</button><button class="btn btn-danger" onclick="clearPair('htmlEncIn','htmlEncOut')"><i class="fas fa-eraser"></i> Limpar</button>`);}
+
+    /* ===== HTML DECODE ===== */
+    function renderHtmlDecode(){return toolPage('HTML Decode','Converta entidades HTML para caracteres.','htmlDecIn','htmlDecOut',`<button class="btn btn-primary" onclick="const v=document.getElementById('htmlDecIn').value.trim();if(!v)return showToast('Insira HTML',true);const d=document.createElement('div');d.innerHTML=v;document.getElementById('htmlDecOut').value=d.textContent;showToast('Decodificado')"><i class="fas fa-code"></i> Decodificar</button><button class="btn btn-secondary" onclick="copyField('htmlDecOut')"><i class="fas fa-copy"></i> Copiar</button><button class="btn btn-danger" onclick="clearPair('htmlDecIn','htmlDecOut')"><i class="fas fa-eraser"></i> Limpar</button>`);}
+
+    /* ===== JSON FORMAT ===== */
+    function renderJsonFormat(){return toolPage('JSON Format','Formate e idente JSON.','jsonFmtIn','jsonFmtOut',`<button class="btn btn-primary" onclick="doJFmt()"><i class="fas fa-indent"></i> Formatar</button><button class="btn btn-secondary" onclick="doJMin()"><i class="fas fa-compress"></i> Minificar</button><button class="btn btn-secondary" onclick="copyField('jsonFmtOut')"><i class="fas fa-copy"></i> Copiar</button><button class="btn btn-danger" onclick="clearPair('jsonFmtIn','jsonFmtOut')"><i class="fas fa-eraser"></i> Limpar</button>`);}
+    function doJFmt(){const v=document.getElementById('jsonFmtIn').value.trim();if(!v)return showToast('Insira JSON',true);try{document.getElementById('jsonFmtOut').value=JSON.stringify(JSON.parse(v),null,2);showToast('Formatado');}catch(e){showToast('JSON inválido: '+e.message,true);}}
+    function doJMin(){const v=document.getElementById('jsonFmtIn').value.trim();if(!v)return showToast('Insira JSON',true);try{document.getElementById('jsonFmtOut').value=JSON.stringify(JSON.parse(v));showToast('Minificado');}catch(e){showToast('JSON inválido: '+e.message,true);}}
+
+    /* ===== JSON CLEAR ===== */
+    function renderJsonClear(){return `<div class="page-enter"><div class="mb-6"><h1 class="text-2xl font-extrabold text-white mb-1.5 tracking-tight">JSON Clear</h1><p style="color:var(--text-muted);font-size:.875rem">Limpe e corrija JSON com escapes excessivos, barras e comentários.</p></div><div class="tool-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem"><div><label class="field-label" for="jsonClrIn">JSON com problemas</label><textarea id="jsonClrIn" class="tool-textarea" rows="14" placeholder="Cole o JSON sujo..." spellcheck="false"></textarea></div><div><label class="field-label" for="jsonClrOut">JSON limpo</label><textarea id="jsonClrOut" class="tool-textarea" rows="14" readonly spellcheck="false"></textarea></div></div><div style="display:flex;gap:.625rem;margin-top:1rem;flex-wrap:wrap"><button class="btn btn-primary" onclick="doJsonClear()"><i class="fas fa-broom"></i> Limpar JSON</button><button class="btn btn-secondary" onclick="copyField('jsonClrOut')"><i class="fas fa-copy"></i> Copiar</button><button class="btn btn-secondary" onclick="sendToJsonFormat()"><i class="fas fa-indent"></i> Enviar para JSON Format</button><button class="btn btn-danger" onclick="clearPair('jsonClrIn','jsonClrOut')"><i class="fas fa-eraser"></i> Limpar</button></div><div class="tool-card" style="margin-top:1.25rem;padding:1rem 1.25rem"><p style="font-size:.75rem;color:var(--text-muted);line-height:1.6"><i class="fas fa-circle-info" style="color:var(--accent);margin-right:.35rem"></i><strong style="color:var(--text)">O que faz:</strong> Remove escapes (\\/ → /), unescape duplo, comentários JS, vírgulas trailing, e tenta corrigir keys sem aspas.</p></div></div>`;}
+    function doJsonClear(){const input=document.getElementById('jsonClrIn').value.trim();if(!input)return showToast('Cole um JSON',true);const r=tryCleanJson(input);if(r!==null){document.getElementById('jsonClrOut').value=r;showToast('JSON limpo');}else{showToast('Não foi possível corrigir',true);}}
+    function tryCleanJson(t){try{return JSON.stringify(JSON.parse(t));}catch(e){}try{const f=JSON.parse(t);if(typeof f==='string')return JSON.stringify(JSON.parse(f));return JSON.stringify(f);}catch(e){}let c=t.replace(/\\\//g,'/').replace(/\\\\/g,'\\').replace(/\\n/g,' ').replace(/\\t/g,' ').replace(/\\r/g,'');try{return JSON.stringify(JSON.parse(c));}catch(e){}let nc=c.replace(/\/\/.*$/gm,'').replace(/\/\*[\s\S]*?\*\//g,'');try{return JSON.stringify(JSON.parse(nc));}catch(e){}let nt=nc.replace(/,\s*([}\]])/g,'$1');try{return JSON.stringify(JSON.parse(nt));}catch(e){}let q=nt.replace(/([{,]\s*)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:/g,'$1"$2":');try{return JSON.stringify(JSON.parse(q));}catch(e){}let du=t;if(du.includes('\\"')){du=du.replace(/\\"/g,'"').replace(/\\\\"/g,'\\"');}try{return JSON.stringify(JSON.parse(du));}catch(e){}return null;}
+    function sendToJsonFormat(){const r=document.getElementById('jsonClrOut').value;if(!r)return showToast('Nenhum resultado',true);navigateTo('jsonFormat');setTimeout(()=>{const el=document.getElementById('jsonFmtIn');if(el)el.value=r;},50);}
+
+    /* ===== UPPER TEXT ===== */
+    function renderUpperText(){return toolPage('Upper Text','Converta para CAIXA ALTA.','upperIn','upperOut',`<button class="btn btn-primary" onclick="const v=document.getElementById('upperIn').value;if(!v)return showToast('Insira texto',true);document.getElementById('upperOut').value=v.toUpperCase();showToast('Convertido')"><i class="fas fa-arrow-up-a-z"></i> Converter</button><button class="btn btn-secondary" onclick="copyField('upperOut')"><i class="fas fa-copy"></i> Copiar</button><button class="btn btn-danger" onclick="clearPair('upperIn','upperOut')"><i class="fas fa-eraser"></i> Limpar</button>`);}
+
+    /* ===== LOWER TEXT ===== */
+    function renderLowerText(){return toolPage('Lower Text','Converta para caixa baixa.','lowerIn','lowerOut',`<button class="btn btn-primary" onclick="const v=document.getElementById('lowerIn').value;if(!v)return showToast('Insira texto',true);document.getElementById('lowerOut').value=v.toLowerCase();showToast('Convertido')"><i class="fas fa-arrow-down-a-z"></i> Converter</button><button class="btn btn-secondary" onclick="copyField('lowerOut')"><i class="fas fa-copy"></i> Copiar</button><button class="btn btn-danger" onclick="clearPair('lowerIn','lowerOut')"><i class="fas fa-eraser"></i> Limpar</button>`);}
+
+    /* ===== TEXT REVERSE ===== */
+    function renderTextReverse(){return toolPage('Text Reverse','Inverta caracteres.','revIn','revOut',`<button class="btn btn-primary" onclick="const v=document.getElementById('revIn').value;if(!v)return showToast('Insira texto',true);document.getElementById('revOut').value=v.split('').reverse().join('');showToast('Invertido')"><i class="fas fa-rotate-left"></i> Inverter</button><button class="btn btn-secondary" onclick="copyField('revOut')"><i class="fas fa-copy"></i> Copiar</button><button class="btn btn-danger" onclick="clearPair('revIn','revOut')"><i class="fas fa-eraser"></i> Limpar</button>`);}
+
+    /* ===== CHAR COUNTER ===== */
+    function renderCharCounter(){return `<div class="page-enter"><div class="mb-6"><h1 class="text-2xl font-extrabold text-white mb-1.5 tracking-tight">Char Counter</h1><p style="color:var(--text-muted);font-size:.875rem">Conte caracteres, palavras, linhas e bytes em tempo real.</p></div><div class="tool-card mb-4"><label class="field-label" for="counterIn">Texto</label><textarea id="counterIn" class="tool-textarea" rows="12" placeholder="Digite ou cole seu texto..." spellcheck="false" oninput="doCharCount()"></textarea></div><div class="stats-grid"><div class="stat-box"><div class="stat-value" id="statChars">0</div><div class="stat-label">Caracteres</div></div><div class="stat-box"><div class="stat-value" id="statCharsNoSpace">0</div><div class="stat-label">Sem espaços</div></div><div class="stat-box"><div class="stat-value" id="statWords">0</div><div class="stat-label">Palavras</div></div><div class="stat-box"><div class="stat-value" id="statLines">0</div><div class="stat-label">Linhas</div></div><div class="stat-box"><div class="stat-value" id="statBytes">0</div><div class="stat-label">Bytes</div></div><div class="stat-box"><div class="stat-value" id="statSentences">0</div><div class="stat-label">Frases</div></div></div></div>`;}
+    function doCharCount(){const v=document.getElementById('counterIn').value;document.getElementById('statChars').textContent=v.length;document.getElementById('statCharsNoSpace').textContent=v.replace(/\s/g,'').length;document.getElementById('statWords').textContent=v.trim()===''?0:v.trim().split(/\s+/).length;document.getElementById('statLines').textContent=v===''?0:v.split('\n').length;document.getElementById('statBytes').textContent=new Blob([v]).size;document.getElementById('statSentences').textContent=v.trim()===''?0:v.split(/[.!?]+/).filter(s=>s.trim().length>0).length;}
+
+    /* ===== REMOVE SPACES ===== */
+    function renderRemoveSpaces(){return `<div class="page-enter"><div class="mb-6"><h1 class="text-2xl font-extrabold text-white mb-1.5 tracking-tight">Remove Spaces</h1><p style="color:var(--text-muted);font-size:.875rem">Remova espaços desnecessários.</p></div><div class="tool-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem"><div><label class="field-label" for="remSpIn">Entrada</label><textarea id="remSpIn" class="tool-textarea" rows="14" spellcheck="false"></textarea></div><div><label class="field-label" for="remSpOut">Resultado</label><textarea id="remSpOut" class="tool-textarea" rows="14" readonly spellcheck="false"></textarea></div></div><div style="display:flex;gap:.625rem;margin-top:1rem;flex-wrap:wrap"><button class="btn btn-primary" onclick="doRemSp('trim')"><i class="fas fa-text-slash"></i> Trim</button><button class="btn btn-secondary" onclick="doRemSp('extra')"><i class="fas fa-arrows-left-right"></i> Espaços extras</button><button class="btn btn-secondary" onclick="doRemSp('all')"><i class="fas fa-xmark"></i> Todos</button><button class="btn btn-secondary" onclick="doRemSp('lines')"><i class="fas fa-bars"></i> Linhas vazias</button><button class="btn btn-secondary" onclick="copyField('remSpOut')"><i class="fas fa-copy"></i> Copiar</button><button class="btn btn-danger" onclick="clearPair('remSpIn','remSpOut')"><i class="fas fa-eraser"></i> Limpar</button></div></div>`;}
+    function doRemSp(mode){const v=document.getElementById('remSpIn').value;if(!v)return showToast('Insira texto',true);let r=v;if(mode==='trim')r=v.split('\n').map(l=>l.trim()).join('\n');else if(mode==='extra')r=v.replace(/[^\S\n]+/g,' ').replace(/^ +| +$/gm,'');else if(mode==='all')r=v.replace(/\s+/g,'');else if(mode==='lines')r=v.split('\n').filter(l=>l.trim()!=='').join('\n');document.getElementById('remSpOut').value=r;showToast('Processado');}
+
+    /* ===== UUID GENERATOR ===== */
+    function renderUuidGen(){return `<div class="page-enter"><div class="mb-6"><h1 class="text-2xl font-extrabold text-white mb-1.5 tracking-tight">UUID Generator</h1><p style="color:var(--text-muted);font-size:.875rem">Gere UUIDs v4 únicos.</p></div><div class="tool-card mb-4"><div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap"><div><label class="field-label" for="uuidQty">Quantidade</label><input type="number" id="uuidQty" class="tool-input tool-input-num" value="5" min="1" max="100"></div><div style="align-self:flex-end"><button class="btn btn-primary" onclick="doUuidGen()"><i class="fas fa-fingerprint"></i> Gerar</button></div><div style="align-self:flex-end"><button class="btn btn-secondary" onclick="copyField('uuidOut')"><i class="fas fa-copy"></i> Copiar todos</button></div></div></div><div class="tool-card"><label class="field-label">UUIDs gerados</label><textarea id="uuidOut" class="tool-textarea" rows="12" readonly spellcheck="false"></textarea></div></div>`;}
+    function doUuidGen(){const qty=Math.min(100,Math.max(1,parseInt(document.getElementById('uuidQty').value)||5));const u=[];for(let i=0;i<qty;i++)u.push(crypto.randomUUID());document.getElementById('uuidOut').value=u.join('\n');showToast(qty+' UUID'+(qty>1?'s':'')+' gerado'+(qty>1?'s':''));}
+
+    /* ===== HASH GENERATOR ===== */
+    function renderHashGen(){return `<div class="page-enter"><div class="mb-6"><h1 class="text-2xl font-extrabold text-white mb-1.5 tracking-tight">Hash Generator</h1><p style="color:var(--text-muted);font-size:.875rem">Gere hashes SHA.</p></div><div class="tool-card mb-4"><label class="field-label" for="hashIn">Texto</label><textarea id="hashIn" class="tool-textarea" rows="5" spellcheck="false"></textarea></div><div class="tool-card mb-4"><div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1rem"><div><label class="field-label" for="hashAlgo">Algoritmo</label><select id="hashAlgo" class="tool-select"><option value="SHA-1">SHA-1</option><option value="SHA-256" selected>SHA-256</option><option value="SHA-384">SHA-384</option><option value="SHA-512">SHA-512</option></select></div><div style="align-self:flex-end"><button class="btn btn-primary" onclick="doHashGen()"><i class="fas fa-hashtag"></i> Gerar</button></div></div><label class="field-label" for="hashOut">Resultado</label><textarea id="hashOut" class="tool-textarea" rows="3" readonly style="font-size:.85rem;letter-spacing:.02em"></textarea><div style="margin-top:.625rem"><button class="btn btn-secondary" onclick="copyField('hashOut')"><i class="fas fa-copy"></i> Copiar</button></div></div></div>`;}
+    async function doHashGen(){const t=document.getElementById('hashIn').value;if(!t)return showToast('Digite texto',true);const a=document.getElementById('hashAlgo').value;try{const d=new TextEncoder().encode(t);const b=await crypto.subtle.digest(a,d);document.getElementById('hashOut').value=Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');showToast('Hash '+a+' gerado');}catch(e){showToast('Erro',true);}}
+
+    /* ===== PASSWORD GENERATOR ===== */
+    function renderPasswordGen(){return `<div class="page-enter"><div class="mb-6"><h1 class="text-2xl font-extrabold text-white mb-1.5 tracking-tight">Password Generator</h1><p style="color:var(--text-muted);font-size:.875rem">Gere senhas seguras.</p></div><div class="tool-card mb-4"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.25rem"><div><label class="field-label" for="pwdLen">Comprimento</label><input type="number" id="pwdLen" class="tool-input" value="16" min="4" max="128" style="width:100%"></div><div><label class="field-label" for="pwdQty">Quantidade</label><input type="number" id="pwdQty" class="tool-input" value="5" min="1" max="50" style="width:100%"></div></div><div style="display:flex;flex-wrap:wrap;gap:1.25rem;margin-bottom:1.25rem"><label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.8125rem;color:var(--text)"><input type="checkbox" id="pwdUpper" class="tool-checkbox" checked> Maiúsculas</label><label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.8125rem;color:var(--text)"><input type="checkbox" id="pwdLower" class="tool-checkbox" checked> Minúsculas</label><label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.8125rem;color:var(--text)"><input type="checkbox" id="pwdNumbers" class="tool-checkbox" checked> Números</label><label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.8125rem;color:var(--text)"><input type="checkbox" id="pwdSymbols" class="tool-checkbox" checked> Símbolos</label></div><button class="btn btn-primary" onclick="doPwdGen()"><i class="fas fa-key"></i> Gerar Senhas</button></div><div class="tool-card"><label class="field-label">Senhas geradas</label><div id="pwdResults"><span style="color:var(--text-muted);font-size:.8125rem">Clique em gerar...</span></div></div></div>`;}
+    function doPwdGen(){const len=Math.min(128,Math.max(4,parseInt(document.getElementById('pwdLen').value)||16)),qty=Math.min(50,Math.max(1,parseInt(document.getElementById('pwdQty').value)||5));const uU=document.getElementById('pwdUpper').checked,uL=document.getElementById('pwdLower').checked,uN=document.getElementById('pwdNumbers').checked,uS=document.getElementById('pwdSymbols').checked;if(!uU&&!uL&&!uN&&!uS)return showToast('Selecione pelo menos um tipo',true);let cs='';if(uU)cs+='ABCDEFGHIJKLMNOPQRSTUVWXYZ';if(uL)cs+='abcdefghijklmnopqrstuvwxyz';if(uN)cs+='0123456789';if(uS)cs+='!@#$%^&*()_+-=[]{}|;:,.<>?';const arr=new Uint32Array(len);let html='';for(let i=0;i<qty;i++){crypto.getRandomValues(arr);let p='';for(let j=0;j<len;j++)p+=cs[arr[j]%cs.length];html+=`<div class="pwd-item"><span>${p}</span><button onclick="navigator.clipboard.writeText('${p.replace(/'/g,"\\'")}');showToast('Copiado!')"><i class="fas fa-copy"></i></button></div>`;}document.getElementById('pwdResults').innerHTML=html;showToast(qty+' senha'+(qty>1?'s':'')+' gerada'+(qty>1?'s':''));}
+
+    /* ===== LOREM IPSUM ===== */
+    function renderLoremIpsum(){return `<div class="page-enter"><div class="mb-6"><h1 class="text-2xl font-extrabold text-white mb-1.5 tracking-tight">Lorem Ipsum</h1><p style="color:var(--text-muted);font-size:.875rem">Gere textos placeholder.</p></div><div class="tool-card mb-4"><div style="display:flex;align-items:flex-end;gap:1rem;flex-wrap:wrap;margin-bottom:1rem"><div><label class="field-label" for="loremType">Tipo</label><select id="loremType" class="tool-select"><option value="paragraphs">Parágrafos</option><option value="sentences">Frases</option><option value="words">Palavras</option></select></div><div><label class="field-label" for="loremQty">Quantidade</label><input type="number" id="loremQty" class="tool-input tool-input-num" value="3" min="1" max="100"></div><button class="btn btn-primary" onclick="doLorem()"><i class="fas fa-paragraph"></i> Gerar</button></div></div><div class="tool-card"><label class="field-label">Resultado</label><textarea id="loremOut" class="tool-textarea" rows="14" readonly spellcheck="false"></textarea><div style="margin-top:.625rem"><button class="btn btn-secondary" onclick="copyField('loremOut')"><i class="fas fa-copy"></i> Copiar</button></div></div></div>`;}
+    const LW='lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum'.split(' ');
+    function doLorem(){const type=document.getElementById('loremType').value,qty=Math.min(100,Math.max(1,parseInt(document.getElementById('loremQty').value)||3));const rw=()=>LW[Math.floor(Math.random()*LW.length)],cap=s=>s.charAt(0).toUpperCase()+s.slice(1);let r='';if(type==='words'){const w=[];for(let i=0;i<qty;i++)w.push(rw());r=w.join(' ');}else if(type==='sentences'){const s=[];for(let i=0;i<qty;i++){const w=[],len=8+Math.floor(Math.random()*12);for(let j=0;j<len;j++)w.push(rw());w[0]=cap(w[0]);s.push(w.join(' ')+'.');}r=s.join(' ');}else{const p=[];for(let i=0;i<qty;i++){const s=[],sc=4+Math.floor(Math.random()*4);for(let j=0;j<sc;j++){const w=[],len=8+Math.floor(Math.random()*12);for(let k=0;k<len;k++)w.push(rw());w[0]=cap(w[0]);s.push(w.join(' ')+'.');}p.push(s.join(' '));}r=p.join('\n\n');}document.getElementById('loremOut').value=r;showToast('Texto gerado');}
+
+    /* ===== TIMESTAMP CONVERTER ===== */
+    function renderTimestampConv(){const now=Math.floor(Date.now()/1000);return `<div class="page-enter"><div class="mb-6"><h1 class="text-2xl font-extrabold text-white mb-1.5 tracking-tight">Timestamp Converter</h1><p style="color:var(--text-muted);font-size:.875rem">Converta entre Unix timestamp e data.</p></div><div class="ts-result mb-6" style="background:var(--accent-glow);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:1rem;grid-template-columns:1fr 1fr"><div><div class="ts-box-label" style="color:var(--accent)">Timestamp atual</div><div class="ts-box-value" style="color:var(--accent);font-size:1.1rem;font-weight:700">${now}</div></div><div><div class="ts-box-label" style="color:var(--accent)">Data atual</div><div class="ts-box-value" style="color:var(--accent);font-size:1.1rem;font-weight:700">${new Date().toLocaleString('pt-BR')}</div></div></div><div class="tool-card mb-4"><h3 class="text-sm font-bold text-white mb-3">Timestamp para Data</h3><div style="display:flex;gap:.75rem;align-items:flex-end;flex-wrap:wrap"><div style="flex:1;min-width:200px"><label class="field-label" for="tsToDate">Unix Timestamp</label><input type="text" id="tsToDate" class="tool-input" style="width:100%" placeholder="1700000000"></div><button class="btn btn-primary" onclick="doTsToDate()"><i class="fas fa-arrow-right"></i> Converter</button></div><div id="tsToDateResult" style="margin-top:.75rem"></div></div><div class="tool-card mb-4"><h3 class="text-sm font-bold text-white mb-3">Data para Timestamp</h3><div style="display:flex;gap:.75rem;align-items:flex-end;flex-wrap:wrap"><div style="flex:1;min-width:200px"><label class="field-label" for="dateToTs">Data e Hora</label><input type="datetime-local" id="dateToTs" class="tool-input" style="width:100%"></div><button class="btn btn-primary" onclick="doDateToTs()"><i class="fas fa-arrow-right"></i> Converter</button></div><div id="dateToTsResult" style="margin-top:.75rem"></div></div><div class="tool-card"><h3 class="text-sm font-bold text-white mb-3">Timestamps Comuns</h3><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.5rem" id="tsPresets"></div></div></div>`;}
+    function doTsToDate(){const v=document.getElementById('tsToDate').value.trim();if(!v||isNaN(Number(v)))return showToast('Timestamp inválido',true);const d=new Date(Number(v)*1000);if(isNaN(d.getTime()))return showToast('Timestamp inválido',true);document.getElementById('tsToDateResult').innerHTML=`<div class="ts-result"><div class="ts-box"><div class="ts-box-label">Data Local</div><div class="ts-box-value">${d.toLocaleString('pt-BR')}</div></div><div class="ts-box"><div class="ts-box-label">UTC</div><div class="ts-box-value">${d.toUTCString()}</div></div><div class="ts-box"><div class="ts-box-label">ISO 8601</div><div class="ts-box-value">${d.toISOString()}</div></div><div class="ts-box"><div class="ts-box-label">Relativo</div><div class="ts-box-value">${timeAgo(d)}</div></div></div>`;showToast('Convertido');}
+    function doDateToTs(){const v=document.getElementById('dateToTs').value;if(!v)return showToast('Selecione data',true);const ts=Math.floor(new Date(v).getTime()/1000);document.getElementById('dateToTsResult').innerHTML=`<div class="ts-box" style="max-width:400px"><div class="ts-box-label">Unix Timestamp</div><div class="ts-box-value" style="font-size:1.1rem;font-weight:700">${ts}</div></div><div style="margin-top:.5rem"><button class="btn btn-secondary" onclick="navigator.clipboard.writeText('${ts}');showToast('Copiado!')"><i class="fas fa-copy"></i> Copiar</button></div>`;showToast('Convertido');}
+    function timeAgo(d){const diff=Date.now()-d,abs=Math.abs(diff),p=diff>0?'Há ':'Daqui a ';if(abs<6e4)return p+Math.floor(abs/1e3)+'s';if(abs<36e5)return p+Math.floor(abs/6e4)+'min';if(abs<864e5)return p+Math.floor(abs/36e5)+'h';if(abs<2592e6)return p+Math.floor(abs/864e5)+'d';return p+Math.floor(abs/2592e6)+' meses';}
+    function renderTsPresets(){const el=document.getElementById('tsPresets');if(!el)return;const n=new Date();[{l:'1 hora atrás',d:new Date(n-36e5)},{l:'Hoje 00:00',d:new Date(n.getFullYear(),n.getMonth(),n.getDate())},{l:'Ontem 00:00',d:new Date(n.getFullYear(),n.getMonth(),n.getDate()-1)},{l:'Início do mês',d:new Date(n.getFullYear(),n.getMonth(),1)},{l:'Início do ano',d:new Date(n.getFullYear(),0,1)},{l:'1 ano atrás',d:new Date(n.getFullYear()-1,n.getMonth(),n.getDate())}].forEach(p=>{const ts=Math.floor(p.d.getTime()/1000);el.innerHTML+=`<div style="background:var(--bg);border:1px solid var(--card-border);border-radius:8px;padding:.625rem .875rem;cursor:pointer;transition:border-color .2s" onclick="document.getElementById('tsToDate').value='${ts}';doTsToDate()" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--card-border)'"><div style="font-size:.7rem;color:var(--text-muted);margin-bottom:.2rem">${p.l}</div><div style="font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--accent-light)">${ts}</div></div>`;});}
+
+    /* ===== COLOR CONVERTER ===== */
+    function renderColorConv(){return `<div class="page-enter"><div class="mb-6"><h1 class="text-2xl font-extrabold text-white mb-1.5 tracking-tight">Color Converter</h1><p style="color:var(--text-muted);font-size:.875rem">Converta cores entre HEX, RGB e HSL.</p></div><div class="tool-card mb-4"><div class="color-swatch" id="colorSwatch" style="background:#10b981"></div></div><div class="tool-card mb-4"><h3 class="text-sm font-bold text-white mb-3">Conversão</h3><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem"><div><label class="field-label" for="colorHex">HEX</label><input type="text" id="colorHex" class="tool-input" style="width:100%" value="#10b981" oninput="convertColor('hex')"></div><div><label class="field-label" for="colorRgb">RGB</label><input type="text" id="colorRgb" class="tool-input" style="width:100%" value="rgb(16, 185, 129)" oninput="convertColor('rgb')"></div><div><label class="field-label" for="colorHsl">HSL</label><input type="text" id="colorHsl" class="tool-input" style="width:100%" value="hsl(160, 84%, 39%)" oninput="convertColor('hsl')"></div></div></div><div class="tool-card"><h3 class="text-sm font-bold text-white mb-3">Seletor</h3><div style="display:flex;align-items:center;gap:1rem"><input type="color" id="colorPicker" value="#10b981" style="width:60px;height:40px;border:none;border-radius:8px;cursor:pointer;background:transparent" oninput="pickColor(this.value)"><button class="btn btn-secondary" onclick="copyField('colorHex')"><i class="fas fa-copy"></i> HEX</button><button class="btn btn-secondary" onclick="copyField('colorRgb')"><i class="fas fa-copy"></i> RGB</button><button class="btn btn-secondary" onclick="copyField('colorHsl')"><i class="fas fa-copy"></i> HSL</button></div></div></div>`;}
+    function pickColor(h){document.getElementById('colorHex').value=h;convertColor('hex');}
+    function convertColor(from){let r=0,g=0,b=0;const hE=document.getElementById('colorHex'),rE=document.getElementById('colorRgb'),sE=document.getElementById('colorHsl'),sw=document.getElementById('colorSwatch');if(from==='hex'){const m=hE.value.trim().match(/^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);if(!m)return;r=parseInt(m[1],16);g=parseInt(m[2],16);b=parseInt(m[3],16);}else if(from==='rgb'){const m=rE.value.trim().match(/(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);if(!m)return;r=Math.min(255,+m[1]);g=Math.min(255,+m[2]);b=Math.min(255,+m[3]);}else if(from==='hsl'){const m=sE.value.trim().match(/(\d+)\s*,\s*(\d+)%?\s*,\s*(\d+)%?/);if(!m)return;[r,g,b]=hslToRgb(+m[1],+m[2],+m[3]);}const hex='#'+[r,g,b].map(c=>c.toString(16).padStart(2,'0')).join('');const[h,s,l]=rgbToHsl(r,g,b);if(from!=='hex')hE.value=hex;if(from!=='rgb')rE.value=`rgb(${r}, ${g}, ${b})`;if(from!=='hsl')sE.value=`hsl(${h}, ${s}%, ${l}%)`;sw.style.background=hex;try{document.getElementById('colorPicker').value=hex;}catch(e){}}
+    function rgbToHsl(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let h=0,s=0,l=(mx+mn)/2;if(mx!==mn){const d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);switch(mx){case r:h=((g-b)/d+(g<b?6:0))/6;break;case g:h=((b-r)/d+2)/6;break;case b:h=((r-g)/d+4)/6;break;}}return[Math.round(h*360),Math.round(s*100),Math.round(l*100)];}
+    function hslToRgb(h,s,l){h/=360;s/=100;l/=100;let r,g,b;if(s===0){r=g=b=l;}else{const f=(p,q,t)=>{if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p;};const q=l<.5?l*(1+s):l+s-l*s,p=2*l-q;r=f(p,q,h+1/3);g=f(p,q,h);b=f(p,q,h-1/3);}return[Math.round(r*255),Math.round(g*255),Math.round(b*255)];}
+
+    /* ===== NUMBER BASE ===== */
+    function renderNumberBase(){return `<div class="page-enter"><div class="mb-6"><h1 class="text-2xl font-extrabold text-white mb-1.5 tracking-tight">Number Base Converter</h1><p style="color:var(--text-muted);font-size:.875rem">Converta entre Decimal, Binário, Octal e Hexadecimal.</p></div><div class="tool-card mb-4"><div class="base-row"><div class="base-label">Decimal</div><div class="base-value" id="nbDec">0</div></div><div class="base-row"><div class="base-label">Binário</div><div class="base-value" id="nbBin">0b0</div></div><div class="base-row"><div class="base-label">Octal</div><div class="base-value" id="nbOct">0o0</div></div><div class="base-row"><div class="base-label">Hexadecimal</div><div class="base-value" id="nbHex">0x0</div></div></div><div class="tool-card"><label class="field-label" for="nbInput">Insira um número em qualquer base</label><div style="display:flex;gap:.75rem;align-items:flex-end;flex-wrap:wrap"><div style="flex:1;min-width:200px"><input type="text" id="nbInput" class="tool-input" style="width:100%;font-family:'JetBrains Mono',monospace" placeholder="255, 0xFF, 0b11111111, 0o377" oninput="doNbConvert()"></div><div><label class="field-label" for="nbBase">Base</label><input type="text" id="nbBase" class="tool-input" style="width:100px" readonly value="-"></div></div><div style="margin-top:1rem;display:flex;gap:.5rem;flex-wrap:wrap"><button class="btn btn-secondary" onclick="copyText(document.getElementById('nbDec').textContent)"><i class="fas fa-copy"></i> Decimal</button><button class="btn btn-secondary" onclick="copyText(document.getElementById('nbBin').textContent)"><i class="fas fa-copy"></i> Binário</button><button class="btn btn-secondary" onclick="copyText(document.getElementById('nbOct').textContent)"><i class="fas fa-copy"></i> Octal</button><button class="btn btn-secondary" onclick="copyText(document.getElementById('nbHex').textContent)"><i class="fas fa-copy"></i> Hex</button></div></div></div>`;}
+    function doNbConvert(){const v=document.getElementById('nbInput').value.trim();if(!v){['nbDec','nbBin','nbOct','nbHex'].forEach(id=>document.getElementById(id).textContent=id==='nbDec'?'0':id==='nbBin'?'0b0':id==='nbOct'?'0o0':'0x0');document.getElementById('nbBase').value='-';return;}let num,base=10;if(v.startsWith('0b')||v.startsWith('0B')){num=parseInt(v.slice(2),2);base=2;}else if(v.startsWith('0o')||v.startsWith('0O')){num=parseInt(v.slice(2),8);base=8;}else if(v.startsWith('0x')||v.startsWith('0X')){num=parseInt(v.slice(2),16);base=16;}else{num=parseInt(v,10);}if(isNaN(num)){document.getElementById('nbBase').value='inválido';return;}document.getElementById('nbDec').textContent=num.toString(10);document.getElementById('nbBin').textContent='0b'+num.toString(2);document.getElementById('nbOct').textContent='0o'+num.toString(8);document.getElementById('nbHex').textContent='0x'+num.toString(16).toUpperCase();document.getElementById('nbBase').value='Base '+base;}
+
+    /* ===== SQL FORMATTER ===== */
+    function renderSqlFormatter(){return toolPage('SQL Formatter','Formate consultas SQL.','sqlFmtIn','sqlFmtOut',`<button class="btn btn-primary" onclick="doSqlFmt()"><i class="fas fa-database"></i> Formatar</button><button class="btn btn-secondary" onclick="copyField('sqlFmtOut')"><i class="fas fa-copy"></i> Copiar</button><button class="btn btn-danger" onclick="clearPair('sqlFmtIn','sqlFmtOut')"><i class="fas fa-eraser"></i> Limpar</button>`,{inputPlaceholder:"SELECT id, name FROM users WHERE active = 1 ORDER BY created_at DESC LIMIT 10;"});}
+    function doSqlFmt(){let v=document.getElementById('sqlFmtIn').value.trim();if(!v)return showToast('Insira SQL',true);try{const mainKw=['SELECT','FROM','WHERE','ORDER BY','GROUP BY','HAVING','LIMIT','OFFSET','LEFT JOIN','RIGHT JOIN','INNER JOIN','OUTER JOIN','CROSS JOIN','FULL JOIN','JOIN','INSERT INTO','VALUES','UPDATE','SET','DELETE FROM','CREATE TABLE','ALTER TABLE','DROP TABLE','UNION ALL','UNION','EXCEPT','INTERSECT'];mainKw.sort((a,b)=>b.length-a.length);let sql=v.replace(/\s+/g,' ').replace(/\s*([,;])\s*/g,'$1 ').trim();mainKw.forEach(kw=>{const regex=new RegExp('\\b'+kw.replace(/\s+/g,'\\s+')+'\\b','gi');sql=sql.replace(regex,'\n'+kw.toUpperCase());});const lines=sql.split('\n').filter(l=>l.trim());let result=[],indent=0;lines.forEach((line,i)=>{const t=line.trim();if(!t)return;const u=t.toUpperCase();if(/^(ORDER\s+BY|GROUP\s+BY|HAVING|LIMIT|OFFSET|UNION\s+ALL|UNION|EXCEPT|INTERSECT)/.test(u))indent=Math.max(0,indent-1);result.push('  '.repeat(indent)+t);if(/^(SELECT|FROM|WHERE|SET|VALUES|JOIN|LEFT\s+JOIN|RIGHT\s+JOIN|INNER\s+JOIN|OUTER\s+JOIN|CROSS\s+JOIN|FULL\s+JOIN|AND|OR)/.test(u)&&i>0)indent=Math.min(indent+1,4);});document.getElementById('sqlFmtOut').value=result.join('\n').replace(/^\n+/,'').trim();showToast('SQL formatado');}catch(e){showToast('Erro',true);}}
+
+    /* ===== XML FORMATTER ===== */
+    function renderXmlFormatter(){return toolPage('XML Formatter','Formate e idente XML.','xmlFmtIn','xmlFmtOut',`<button class="btn btn-primary" onclick="doXmlFmt()"><i class="fas fa-file-code"></i> Formatar</button><button class="btn btn-secondary" onclick="doXmlMin()"><i class="fas fa-compress"></i> Minificar</button><button class="btn btn-secondary" onclick="copyField('xmlFmtOut')"><i class="fas fa-copy"></i> Copiar</button><button class="btn btn-danger" onclick="clearPair('xmlFmtIn','xmlFmtOut')"><i class="fas fa-eraser"></i> Limpar</button>`,{inputPlaceholder:'<users><user id="1"><name>João</name></user></users>'});}
+    function doXmlFmt(){let v=document.getElementById('xmlFmtIn').value.trim();if(!v)return showToast('Insira XML',true);try{const parser=new DOMParser();const doc=parser.parseFromString(v,'text/xml');if(doc.querySelector('parsererror'))return showToast('XML inválido',true);let formatted=new XMLSerializer().serializeToString(doc);let indent=0;const tab='  ';const lines=formatted.replace(/(>)(<)(\/*)/g,'$1\n$2$3').split('\n');const result=[];lines.forEach(node=>{node=node.trim();if(!node)return;if(node.match(/^<\/\w/))indent--;result.push(tab.repeat(Math.max(0,indent))+node);if(node.match(/^<\w[^>]*[^/]>.*$/)&&!node.match(/^<\w[^>]*>.*<\/\w/))indent++;});document.getElementById('xmlFmtOut').value=result.join('\n');showToast('XML formatado');}catch(e){showToast('Erro: '+e.message,true);}}
+    function doXmlMin(){let v=document.getElementById('xmlFmtIn').value.trim();if(!v)return showToast('Insira XML',true);try{const parser=new DOMParser();const doc=parser.parseFromString(v,'text/xml');if(doc.querySelector('parsererror'))return showToast('XML inválido',true);document.getElementById('xmlFmtOut').value=new XMLSerializer().serializeToString(doc).replace(/\s+/g,' ').replace(/>\s+</g,'><').trim();showToast('XML minificado');}catch(e){showToast('Erro',true);}}
+
+    /* ===== YAML VALIDATOR ===== */
+    function renderYamlValidator(){return toolPage('YAML Validator','Valide e formate YAML.','yamlValIn','yamlValOut',`<button class="btn btn-primary" onclick="doYamlVal()"><i class="fas fa-file-lines"></i> Validar</button><button class="btn btn-secondary" onclick="doYamlToJson()"><i class="fas fa-arrow-right"></i> Para JSON</button><button class="btn btn-secondary" onclick="copyField('yamlValOut')"><i class="fas fa-copy"></i> Copiar</button><button class="btn btn-danger" onclick="clearPair('yamlValIn','yamlValOut')"><i class="fas fa-eraser"></i> Limpar</button>`,{inputPlaceholder:'name: João\nage: 30\nactive: true\nskills:\n  - JavaScript\n  - Python'});}
+    function doYamlVal(){const v=document.getElementById('yamlValIn').value.trim();if(!v)return showToast('Insira YAML',true);try{const parsed=jsyaml.load(v);document.getElementById('yamlValOut').value=jsyaml.dump(parsed,{indent:2,lineWidth:120,noRefs:true});showToast('YAML válido');}catch(e){document.getElementById('yamlValOut').value='ERRO: '+e.message;showToast('YAML inválido: '+e.message,true);}}
+    function doYamlToJson(){const v=document.getElementById('yamlValIn').value.trim();if(!v)return showToast('Insira YAML',true);try{const parsed=jsyaml.load(v);navigateTo('jsonFormat');setTimeout(()=>{const el=document.getElementById('jsonFmtIn');if(el)el.value=JSON.stringify(parsed,null,2);},50);showToast('Convertido para JSON');}catch(e){showToast('YAML inválido',true);}}
+
+    /* ===== MARKDOWN VIEWER ===== */
+    function renderMarkdownViewer(){return `<div class="page-enter"><div class="mb-6"><h1 class="text-2xl font-extrabold text-white mb-1.5 tracking-tight">Markdown Viewer</h1><p style="color:var(--text-muted);font-size:.875rem">Visualize Markdown renderizado em tempo real.</p></div><div class="tool-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem"><div><label class="field-label" for="mdIn">Markdown</label><textarea id="mdIn" class="tool-textarea" rows="18" placeholder="# Título\n\n**negrito** e *itálico*\n\n- Item 1\n- Item 2\n\n\`\`\`js\nconsole.log('hello');\n\`\`\`" spellcheck="false" oninput="doMdRender()"></textarea></div><div><label class="field-label">Preview</label><div id="mdOut" class="md-preview" style="min-height:432px;max-height:500px;overflow-y:auto"><span style="color:var(--text-muted)">O preview aparecerá aqui...</span></div></div></div><div style="display:flex;gap:.625rem;margin-top:1rem;flex-wrap:wrap"><button class="btn btn-secondary" onclick="doMdCopyHtml()"><i class="fas fa-code"></i> Copiar HTML</button><button class="btn btn-danger" onclick="document.getElementById('mdIn').value='';document.getElementById('mdOut').innerHTML='<span style=color:var(--text-muted)>O preview aparecerá aqui...</span>'"><i class="fas fa-eraser"></i> Limpar</button></div></div>`;}
+    function doMdRender(){const v=document.getElementById('mdIn').value;if(!v.trim()){document.getElementById('mdOut').innerHTML='<span style="color:var(--text-muted)">O preview aparecerá aqui...</span>';return;}try{document.getElementById('mdOut').innerHTML=marked.parse(v,{breaks:true,gfm:true});}catch(e){document.getElementById('mdOut').innerHTML='<span style="color:var(--danger)">Erro: '+e.message+'</span>';}}
+    function doMdCopyHtml(){const v=document.getElementById('mdIn').value;if(!v.trim())return showToast('Nada para copiar',true);try{navigator.clipboard.writeText(marked.parse(v,{breaks:true,gfm:true}));showToast('HTML copiado');}catch(e){showToast('Erro',true);}}
+
+    /* ===== REGEX VALIDATOR ===== */
+    function renderRegexValidator(){return `<div class="page-enter"><div class="mb-6"><h1 class="text-2xl font-extrabold text-white mb-1.5 tracking-tight">Regex Validator</h1><p style="color:var(--text-muted);font-size:.875rem">Teste expressões regulares em tempo real.</p></div><div class="tool-card mb-4"><div style="display:grid;grid-template-columns:1fr auto;gap:.75rem;align-items:flex-end"><div><label class="field-label" for="regexPattern">Expressão Regular</label><input type="text" id="regexPattern" class="tool-input" style="width:100%;font-family:'JetBrains Mono',monospace" placeholder="\\b[A-Z][a-z]+\\b" oninput="doRegexTest()"></div><div><label class="field-label" for="regexFlags">Flags</label><input type="text" id="regexFlags" class="tool-input" style="width:60px;font-family:'JetBrains Mono',monospace" value="gi" oninput="doRegexTest()"></div></div><div id="regexError" style="margin-top:.5rem;font-size:.78rem;color:var(--danger);display:none"></div></div><div class="tool-card mb-4"><label class="field-label" for="regexText">Texto de Teste</label><textarea id="regexText" class="tool-textarea" rows="6" spellcheck="false" oninput="doRegexTest()"></textarea></div><div class="tool-card mb-4"><label class="field-label">Texto com Destaque</label><div id="regexHighlight" style="background:var(--bg);border:1px solid var(--card-border);border-radius:10px;padding:1rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.7;min-height:60px;white-space:pre-wrap;word-break:break-all;color:var(--text-muted)"><span style="opacity:.5">Matches destacados aqui...</span></div></div><div class="tool-card"><label class="field-label">Matches</label><div id="regexMatches" style="min-height:40px"><span style="color:var(--text-muted);font-size:.8125rem;opacity:.5">Nenhum match...</span></div><div id="regexStats" style="margin-top:.75rem;display:flex;gap:1rem;flex-wrap:wrap"></div></div></div>`;}
+    function doRegexTest(){const pattern=document.getElementById('regexPattern').value,flags=document.getElementById('regexFlags').value,text=document.getElementById('regexText').value,errEl=document.getElementById('regexError'),hlEl=document.getElementById('regexHighlight'),matchEl=document.getElementById('regexMatches'),statsEl=document.getElementById('regexStats');if(!pattern){errEl.style.display='none';hlEl.innerHTML='<span style="opacity:.5">Matches destacados aqui...</span>';matchEl.innerHTML='';statsEl.innerHTML='';return;}let regex;try{regex=new RegExp(pattern,flags);errEl.style.display='none';}catch(e){errEl.textContent='Regex inválida: '+e.message;errEl.style.display='block';hlEl.innerHTML='';matchEl.innerHTML='';statsEl.innerHTML='';return;}if(!text){hlEl.innerHTML='<span style="opacity:.5">Digite texto...</span>';matchEl.innerHTML='';statsEl.innerHTML='';return;}const matches=[];let m;if(flags.includes('g')){while((m=regex.exec(text))!==null){matches.push({val:m[0],idx:m.index,groups:m.slice(1)});if(m[0].length===0)regex.lastIndex++;}}else{m=regex.exec(text);if(m)matches.push({val:m[0],idx:m.index,groups:m.slice(1)});}if(matches.length>0){let html='',lastIdx=0;const esc=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');matches.forEach(match=>{html+=esc.substring(lastIdx,match.idx);html+='<span class="regex-highlight">'+esc.substring(match.idx,match.idx+match.val.length)+'</span>';lastIdx=match.idx+match.val.length;});html+=esc.substring(lastIdx);hlEl.innerHTML=html;}else{hlEl.innerHTML=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}if(matches.length>0){matchEl.innerHTML=matches.map((m,i)=>{let gh='';if(m.groups.length>0)gh='<div style="margin-top:.25rem;font-size:.7rem;color:var(--text-muted)">Grupos: '+m.groups.map((g,gi)=>`<span style="color:var(--warn)">$${gi+1}</span>=<span style="color:#60a5fa">${g!==undefined?g:'undefined'}</span>`).join(', ')+'</div>';return `<div style="display:block;margin-bottom:.375rem;padding:.375rem .625rem;background:var(--accent-glow);border:1px solid rgba(16,185,129,.3);border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:.78rem"><span style="color:var(--text-muted);font-size:.7rem;margin-right:.5rem">#${i+1} [${m.idx}]</span><span style="color:var(--accent-light)">${m.val.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</span>${gh}</div>`;}).join('');}else{matchEl.innerHTML='<span style="color:var(--text-muted);font-size:.8125rem">Nenhum match.</span>';}statsEl.innerHTML=`<div class="stat-box" style="padding:.625rem"><div class="stat-value" style="font-size:1.1rem">${matches.length}</div><div class="stat-label">Matches</div></div><div class="stat-box" style="padding:.625rem"><div class="stat-value" style="font-size:1.1rem">${matches.reduce((s,m)=>s+m.val.length,0)}</div><div class="stat-label">Caracteres</div></div><div class="stat-box" style="padding:.625rem"><div class="stat-value" style="font-size:1.1rem">${matches.some(m=>m.groups.length>0)?matches[0].groups.length:0}</div><div class="stat-label">Grupos</div></div>`;}
+
+    /* ===== TEXT COMPARE ===== */
+    function renderTextCompare(){return `<div class="page-enter"><div class="mb-6"><h1 class="text-2xl font-extrabold text-white mb-1.5 tracking-tight">Text Compare</h1><p style="color:var(--text-muted);font-size:.875rem">Compare dois textos e visualize diferenças.</p></div><div class="tool-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem"><div><label class="field-label" for="diffIn1">Texto Original</label><textarea id="diffIn1" class="tool-textarea" rows="14" spellcheck="false"></textarea></div><div><label class="field-label" for="diffIn2">Texto Modificado</label><textarea id="diffIn2" class="tool-textarea" rows="14" spellcheck="false"></textarea></div></div><div style="display:flex;gap:.625rem;margin-top:1rem;flex-wrap:wrap"><button class="btn btn-primary" onclick="doDiff()"><i class="fas fa-code-compare"></i> Comparar</button><button class="btn btn-danger" onclick="document.getElementById('diffIn1').value='';document.getElementById('diffIn2').value='';document.getElementById('diffOut').innerHTML='';document.getElementById('diffStats').innerHTML=''"><i class="fas fa-eraser"></i> Limpar</button></div><div class="tool-card" style="margin-top:1rem"><label class="field-label">Diferenças</label><div id="diffOut" style="background:var(--bg);border:1px solid var(--card-border);border-radius:10px;overflow:hidden;max-height:500px;overflow-y:auto"><div style="padding:2rem;text-align:center;color:var(--text-muted);font-size:.875rem;opacity:.5">Clique em "Comparar"...</div></div><div id="diffStats" style="margin-top:.75rem"></div></div></div>`;}
+    function doDiff(){const t1=document.getElementById('diffIn1').value,t2=document.getElementById('diffIn2').value;if(!t1&&!t2)return showToast('Insira textos',true);const result=computeDiff(t1.split('\n'),t2.split('\n'));const outEl=document.getElementById('diffOut'),statsEl=document.getElementById('diffStats');let added=0,removed=0,unchanged=0,html='';result.forEach(item=>{const esc=item.line.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');if(item.type==='added'){html+=`<div class="diff-line diff-added"><span style="opacity:.5;margin-right:.5rem">+</span>${esc}</div>`;added++;}else if(item.type==='removed'){html+=`<div class="diff-line diff-removed"><span style="opacity:.5;margin-right:.5rem">-</span>${esc}</div>`;removed++;}else{html+=`<div class="diff-line diff-unchanged"><span style="opacity:.3;margin-right:.5rem"> </span>${esc}</div>`;unchanged++;}});outEl.innerHTML=html;statsEl.innerHTML=`<div style="display:flex;gap:.75rem;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:.375rem;font-size:.78rem"><span style="width:10px;height:10px;border-radius:3px;background:var(--accent);display:inline-block"></span><span style="color:var(--text-muted)">Adicionadas: <strong style="color:var(--accent)">${added}</strong></span></div><div style="display:flex;align-items:center;gap:.375rem;font-size:.78rem"><span style="width:10px;height:10px;border-radius:3px;background:var(--danger);display:inline-block"></span><span style="color:var(--text-muted)">Removidas: <strong style="color:var(--danger)">${removed}</strong></span></div><div style="display:flex;align-items:center;gap:.375rem;font-size:.78rem"><span style="width:10px;height:10px;border-radius:3px;background:var(--text-muted);display:inline-block"></span><span style="color:var(--text-muted)">Inalteradas: <strong style="color:var(--text)">${unchanged}</strong></span></div></div>`;showToast(`${added} adições, ${removed} remoções`);}
+    function computeDiff(a,b){const m=a.length,n=b.length;if(m*n>500000){const result=[];const maxLen=Math.max(m,n);for(let i=0;i<maxLen;i++){if(i<m&&i<n){if(a[i]===b[i])result.push({type:'unchanged',line:a[i]});else{result.push({type:'removed',line:a[i]});result.push({type:'added',line:b[i]});}}else if(i<m)result.push({type:'removed',line:a[i]});else result.push({type:'added',line:b[i]});}return result;}const dp=Array.from({length:m+1},()=>new Array(n+1).fill(0));for(let i=1;i<=m;i++)for(let j=1;j<=n;j++){if(a[i-1]===b[j-1])dp[i][j]=dp[i-1][j-1]+1;else dp[i][j]=Math.max(dp[i-1][j],dp[i][j-1]);}const result=[];let i=m,j=n;const stack=[];while(i>0||j>0){if(i>0&&j>0&&a[i-1]===b[j-1]){stack.push({type:'unchanged',line:a[i-1]});i--;j--;}else if(j>0&&(i===0||dp[i][j-1]>=dp[i-1][j])){stack.push({type:'added',line:b[j-1]});j--;}else{stack.push({type:'removed',line:a[i-1]});i--;}}return stack.reverse();}
+
+    /* ===== UTILITÁRIOS ===== */
+    function copyField(id){const el=document.getElementById(id);if(!el||!el.value)return showToast('Nada para copiar',true);navigator.clipboard.writeText(el.value).then(()=>showToast('Copiado')).catch(()=>{el.select();document.execCommand('copy');showToast('Copiado');});}
+    function copyText(t){navigator.clipboard.writeText(t).then(()=>showToast('Copiado')).catch(()=>showToast('Erro',true));}
+    function clearPair(i,o){const a=document.getElementById(i);if(a)a.value='';const b=document.getElementById(o);if(b)b.value='';showToast('Limpo');}
+    let toastTimeout=null;
+    function showToast(msg,isError=false){const old=document.querySelector('.toast');if(old)old.remove();if(toastTimeout)clearTimeout(toastTimeout);const t=document.createElement('div');t.className='toast'+(isError?' error':'');t.innerHTML=`<i class="fas ${isError?'fa-circle-xmark':'fa-circle-check'}" style="color:${isError?'var(--danger)':'var(--accent)'}"></i> ${msg}`;document.getElementById('toastContainer').appendChild(t);toastTimeout=setTimeout(()=>{if(t.parentNode)t.remove();},2600);}
+
+    /* ===== SIDEBAR RESIZE ===== */
+    (function(){const h=document.getElementById('resizeHandle'),s=document.getElementById('sidebar'),m=document.getElementById('mainContent');let r=false;const sv=localStorage.getItem('devtoolkit_sidebar_w');if(sv){const w=Math.min(420,Math.max(180,parseInt(sv)));s.style.width=w+'px';m.style.marginLeft=w+'px';}function start(){r=true;h.classList.add('active');document.body.style.cursor='col-resize';document.body.style.userSelect='none';}function end(){if(!r)return;r=false;h.classList.remove('active');document.body.style.cursor='';document.body.style.userSelect='';localStorage.setItem('devtoolkit_sidebar_w',s.style.width);}function move(x){if(!r)return;const w=Math.min(420,Math.max(180,x));s.style.width=w+'px';m.style.marginLeft=w+'px';}h.addEventListener('mousedown',e=>{start();e.preventDefault();});document.addEventListener('mousemove',e=>move(e.clientX));document.addEventListener('mouseup',end);h.addEventListener('touchstart',e=>{start();e.preventDefault();},{passive:false});document.addEventListener('touchmove',e=>{if(r)move(e.touches[0].clientX);},{passive:false});document.addEventListener('touchend',end);})();
+
+    /* ===== KEYBOARD ===== */
+    document.addEventListener('keydown',function(e){if(['TEXTAREA','INPUT','SELECT'].includes(e.target.tagName))return;if(e.key==='Enter'&&e.target.classList.contains('nav-item'))e.target.click();});
+
+    /* ===== INIT ===== */
+    buildNav();
+    renderPage();
+    </script>
 </body>
 </html>
