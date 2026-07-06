@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git Doje — Aprenda Git Praticando</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-primary: #08080c;
+            --bg-secondary: #0e0e16;
+            --bg-card: #121220;
+            --bg-elevated: #181830;
+            --bg-terminal: #0a0a12;
+            --border: #1e1e34;
+            --border-subtle: #161628;
+            --border-active: rgba(212,160,23,0.35);
+            --text-primary: #e4e4ec;
+            --text-secondary: #9494a8;
+            --text-muted: #55556a;
+            --gold: #D4A017;
+            --gold-light: #F0C848;
+            --gold-dim: #8B6914;
+            --gold-subtle: rgba(212,160,23,0.07);
+            --gold-glow: rgba(212,160,23,0.15);
+            --gold-glow-strong: rgba(212,160,23,0.3);
+            --red: #e54545;
+            --red-dim: rgba(229,69,69,0.12);
+            --cyan: #22d3ee;
+            --cyan-dim: rgba(34,211,238,0.1);
+            --radius: 10px;
+            --radius-sm: 6px;
+            --radius-lg: 14px;
+            --font-ui: 'Space Grotesk', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        html, body { height: 100%; }
+        body {
+            font-family: var(--font-ui);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ========== HEADER ========== */
+        header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 24px; height: 52px; flex-shrink: 0;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            z-index: 10;
+        }
+        .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; }
+        .logo-icon {
+            width: 30px; height: 30px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+            border-radius: 7px; display: flex; align-items: center; justify-content: center;
+            font-size: 14px; color: #0a0a0f;
+        }
+        .logo span { color: var(--gold); }
+        .hdr-right { display: flex; align-items: center; gap: 14px; }
+        .hdr-counter {
+            font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary);
+            background: var(--bg-card); padding: 4px 12px; border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+        .hdr-counter b { color: var(--gold); }
+        .hdr-bar { width: 140px; height: 5px; background: var(--bg-card); border-radius: 3px; overflow: hidden; border: 1px solid var(--border-subtle); }
+        .hdr-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); border-radius: 3px; transition: width .5s ease; width: 0%; }
+
+        /* ========== PAINEL DO DESAFIO — TOPO ABSOLUTO ========== */
+        .prompt-panel {
+            flex-shrink: 0; background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px; position: relative; z-index: 9;
+        }
+        .prompt-panel::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent); opacity: .5;
+        }
+        .prompt-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+        .prompt-badge {
+            font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+            color: var(--gold); background: var(--gold-subtle);
+            border: 1px solid rgba(212,160,23,0.2); padding: 3px 10px; border-radius: 4px;
+            text-transform: uppercase; letter-spacing: .6px;
+        }
+        .prompt-title { font-size: 15px; font-weight: 600; }
+        .prompt-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.55; margin-bottom: 12px; max-width: 750px; }
+        .prompt-steps { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
+        .step-chip {
+            display: flex; align-items: center; gap: 6px;
+            font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            padding: 4px 10px; border-radius: 5px; transition: all .3s;
+        }
+        .step-chip.done { color: var(--gold); border-color: var(--border-active); background: var(--gold-subtle); }
+        .step-chip .dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            border: 1.5px solid var(--text-muted); transition: all .3s; flex-shrink: 0;
+        }
+        .step-chip.done .dot { background: var(--gold); border-color: var(--gold); box-shadow: 0 0 5px var(--gold-glow-strong); }
+        .hint-btn {
+            margin-left: auto; background: none; border: 1px solid var(--border);
+            color: var(--text-muted); font-family: var(--font-ui); font-size: 11px;
+            padding: 4px 10px; border-radius: 5px; cursor: pointer; transition: all .2s;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .hint-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+        .hint-box {
+            display: none; font-size: 12px; color: var(--text-secondary);
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 10px 14px;
+            margin-top: 10px; line-height: 1.6; max-width: 750px;
+        }
+        .hint-box.open { display: block; }
+        .hint-box code {
+            font-family: var(--font-mono); font-size: 11px; color: var(--gold);
+            background: var(--gold-subtle); padding: 1px 5px; border-radius: 3px;
+        }
+
+        /* ========== LAYOUT PRINCIPAL ========== */
+        .main-area { flex: 1; display: flex; overflow: hidden; min-height: 0; }
+
+        /* ========== SIDEBAR ========== */
+        .sidebar {
+            width: 290px; flex-shrink: 0; border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; background: var(--bg-secondary); overflow: hidden;
+        }
+        .sb-section { padding: 14px 16px; border-bottom: 1px solid var(--border-subtle); }
+        .sb-section.grow { flex: 1; overflow-y: auto; min-height: 0; display: flex; flex-direction: column; }
+        .sb-title {
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: .8px; color: var(--text-muted); margin-bottom: 10px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .sb-title i { color: var(--gold-dim); font-size: 11px; }
+
+        /* Comandos */
+        .cmd-list { list-style: none; }
+        .cmd-item {
+            display: flex; align-items: baseline; gap: 6px;
+            padding: 4px 0; font-size: 11.5px; line-height: 1.4;
+        }
+        .cmd-name {
+            font-family: var(--font-mono); font-size: 10.5px; font-weight: 500;
+            color: var(--gold); white-space: nowrap; min-width: 140px; flex-shrink: 0;
+        }
+        .cmd-desc { color: var(--text-muted); font-size: 11px; }
+
+        /* Branch Graph */
+        .graph-scroll { flex: 1; overflow-y: auto; }
+        .graph-scroll::-webkit-scrollbar { width: 4px; }
+        .graph-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+        .g-node { display: flex; align-items: flex-start; gap: 10px; position: relative; padding-bottom: 16px; }
+        .g-node:not(:last-child)::before {
+            content: ''; position: absolute; left: 7px; top: 18px; bottom: 0; width: 1.5px; background: var(--border);
+        }
+        .g-dot {
+            width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border);
+            flex-shrink: 0; margin-top: 2px; position: relative; z-index: 1; transition: all .3s;
+        }
+        .g-dot.main { border-color: var(--gold); background: var(--gold-glow); }
+        .g-dot.feat { border-color: var(--cyan); background: var(--cyan-dim); }
+        .g-dot.active::after {
+            content: ''; position: absolute; left: 2px; top: 2px;
+            width: 8px; height: 8px; border-radius: 50%; background: var(--gold);
+            animation: dot-pulse 2s ease-in-out infinite;
+        }
+        @keyframes dot-pulse { 0%,100%{box-shadow:0 0 0 0 var(--gold-glow-strong)}50%{box-shadow:0 0 0 5px transparent} }
+        .g-info { flex: 1; min-width: 0; }
+        .g-hash { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+        .g-tag {
+            font-family: var(--font-mono); font-size: 9px; font-weight: 700;
+            padding: 1px 5px; border-radius: 3px; margin-left: 5px;
+        }
+        .g-tag.main { color: var(--gold); background: var(--gold-subtle); }
+        .g-tag.feat { color: var(--cyan); background: var(--cyan-dim); }
+        .g-msg { font-size: 11.5px; color: var(--text-secondary); margin-top: 2px; }
+        .g-empty { color: var(--text-muted); font-size: 11px; text-align: center; padding: 24px 8px; font-style: italic; }
+
+        /* Arquivos */
+        .f-list { list-style: none; }
+        .f-item { display: flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 11.5px; color: var(--text-secondary); padding: 3px 0; }
+        .f-item i { color: var(--gold-dim); font-size: 10px; width: 13px; text-align: center; }
+        .f-item.conflict { color: var(--red); }
+        .f-item.conflict i { color: var(--red); }
+        .f-empty { color: var(--text-muted); font-size: 11px; font-style: italic; }
+
+        /* Editor de conflito */
+        .conflict-editor { display: none; border-top: 1px solid var(--border); padding: 12px 16px; background: var(--bg-card); flex-shrink: 0; }
+        .conflict-editor.open { display: block; }
+        .ce-head { font-size: 11px; font-weight: 700; color: var(--red); margin-bottom: 3px; display: flex; align-items: center; gap: 5px; }
+        .ce-file { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); margin-bottom: 8px; }
+        .ce-ta {
+            width: 100%; height: 140px; background: var(--bg-terminal);
+            border: 1px solid var(--border); border-radius: var(--radius-sm);
+            color: var(--text-primary); font-family: var(--font-mono); font-size: 11px;
+            line-height: 1.6; padding: 8px 10px; resize: vertical; outline: none;
+            transition: border-color .2s;
+        }
+        .ce-ta:focus { border-color: var(--gold-dim); }
+        .ce-btns { display: flex; gap: 7px; margin-top: 8px; }
+        .ce-save {
+            font-family: var(--font-ui); font-size: 11px; font-weight: 700;
+            color: #0a0a0f; background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            border: none; padding: 6px 14px; border-radius: 5px; cursor: pointer; transition: all .2s;
+        }
+        .ce-save:hover { box-shadow: 0 0 14px var(--gold-glow-strong); }
+        .ce-reset {
+            font-family: var(--font-ui); font-size: 11px; color: var(--text-muted);
+            background: var(--bg-elevated); border: 1px solid var(--border);
+            padding: 6px 12px; border-radius: 5px; cursor: pointer; transition: all .2s;
+        }
+        .ce-reset:hover { border-color: var(--text-muted); }
+
+        /* ========== TERMINAL ========== */
+        .term-wrap { flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--bg-terminal); }
+
+        /* Input do terminal NO TOPO */
+        .term-input-bar {
+            display: flex; align-items: center; padding: 10px 16px;
+            background: var(--bg-secondary); border-bottom: 1px solid var(--border-subtle); flex-shrink: 0;
+        }
+        .term-prompt-label {
+            font-family: var(--font-mono); font-size: 12px; color: var(--gold); white-space: nowrap; margin-right: 2px;
+        }
+        .term-input {
+            flex: 1; background: none; border: none; outline: none;
+            font-family: var(--font-mono); font-size: 12.5px; color: var(--text-primary);
+            caret-color: var(--gold);
+        }
+        .term-input::placeholder { color: var(--text-muted); opacity: .4; }
+
+        /* Barra de dots */
+        .term-dots { display: flex; align-items: center; gap: 7px; padding: 7px 16px; background: var(--bg-secondary); border-bottom: 1px solid var(--border-subtle); flex-shrink: 0; }
+        .term-dot { width: 9px; height: 9px; border-radius: 50%; }
+        .term-dot.r { background: #e54545; }
+        .term-dot.y { background: #e8a830; }
+        .term-dot.g { background: #3dba6f; }
+        .term-dots-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-left: 6px; }
+
+        /* Output */
+        .term-out {
+            flex: 1; overflow-y: auto; padding: 14px 16px;
+            font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; color: var(--text-secondary);
+        }
+        .term-out::-webkit-scrollbar { width: 5px; }
+        .term-out::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        .t-line { white-space: pre-wrap; word-break: break-all; }
+        .t-cmd { color: var(--text-primary); }
+        .t-pr { color: var(--gold); }
+        .t-err { color: var(--red); }
+        .t-ok { color: var(--gold); }
+        .t-inf { color: var(--cyan); }
+        .t-mut { color: var(--text-muted); }
+        .t-con { color: var(--red); font-weight: 500; }
+
+        /* ========== TOAST ========== */
+        .toast-box { position: fixed; top: 60px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+        .toast {
+            font-family: var(--font-ui); font-size: 12px; padding: 10px 18px;
+            border-radius: var(--radius); box-shadow: 0 6px 24px rgba(0,0,0,.4);
+            animation: t-in .3s ease-out; display: flex; align-items: center; gap: 8px; max-width: 340px;
+        }
+        .toast.ok { background: linear-gradient(135deg,#1a1608,#1f1a0a); border: 1px solid var(--border-active); color: var(--gold-light); }
+        .toast.err { background: linear-gradient(135deg,#1a0a0a,#1f0e0e); border: 1px solid rgba(229,69,69,.3); color: var(--red); }
+        @keyframes t-in { from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)} }
+        .toast.out { animation: t-out .25s ease-in forwards; }
+        @keyframes t-out { to{opacity:0;transform:translateX(30px)} }
+
+        /* ========== MODAL ========== */
+        .modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:500; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+        .modal-bg.open { display:flex; }
+        .modal-card {
+            background:var(--bg-card); border:1px solid var(--border-active); border-radius:var(--radius-lg);
+            padding:36px 44px; text-align:center; box-shadow:0 0 50px var(--gold-glow);
+            max-width:420px; animation:m-pop .4s cubic-bezier(.34,1.56,.64,1);
+        }
+        @keyframes m-pop { from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)} }
+        .modal-icon { font-size:48px; color:var(--gold); margin-bottom:14px; filter:drop-shadow(0 0 18px var(--gold-glow-strong)); }
+        .modal-h { font-size:20px; font-weight:700; margin-bottom:6px; }
+        .modal-p { font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:20px; }
+        .modal-btn {
+            font-family:var(--font-ui); font-size:13px; font-weight:700; color:#0a0a0f;
+            background:linear-gradient(135deg,var(--gold),var(--gold-light));
+            border:none; padding:9px 24px; border-radius:7px; cursor:pointer; transition:all .2s;
+        }
+        .modal-btn:hover { box-shadow:0 0 20px var(--gold-glow-strong); }
+
+        @media(max-width:860px){ .sidebar{width:220px;} }
+        @media(max-width:680px){ .sidebar{display:none;} }
+        @media(prefers-reduced-motion:reduce){ *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;} }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="logo">
+        <div class="logo-icon"><i class="fa-brands fa-git-alt"></i></div>
+        Git <span>Doje</span>
+    </div>
+    <div class="hdr-right">
+        <div class="hdr-counter">Desafio <b id="hCur">1</b> / <b id="hTot">7</b></div>
+        <div class="hdr-bar"><div class="hdr-bar-fill" id="hBar"></div></div>
+    </div>
+</header>
+
+<!-- PAINEL DO DESAFIO — TOPO -->
+<section class="prompt-panel" id="promptPanel">
+    <div class="prompt-top">
+        <span class="prompt-badge" id="pBadge">Desafio 1</span>
+        <h2 class="prompt-title" id="pTitle"></h2>
+        <button class="hint-btn" onclick="toggleHint()"><i class="fa-regular fa-lightbulb"></i> Dica</button>
+    </div>
+    <p class="prompt-desc" id="pDesc"></p>
+    <div class="prompt-steps" id="pSteps"></div>
+    <div class="hint-box" id="pHint"></div>
+</section>
+
+<!-- MAIN -->
+<div class="main-area">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <!-- Comandos -->
+        <div class="sb-section">
+            <div class="sb-title"><i class="fa-solid fa-terminal"></i> Comandos Git</div>
+            <ul class="cmd-list">
+                <li class="cmd-item"><span class="cmd-name">git init</span><span class="cmd-desc">Inicializar repositório</span></li>
+                <li class="cmd-item"><span class="cmd-name">git add &lt;arq&gt;</span><span class="cmd-desc">Adicionar ao staging</span></li>
+                <li class="cmd-item"><span class="cmd-name">git commit -m "msg"</span><span class="cmd-desc">Criar commit</span></li>
+                <li class="cmd-item"><span class="cmd-name">git branch [nome]</span><span class="cmd-desc">Listar / criar branch</span></li>
+                <li class="cmd-item"><span class="cmd-name">git checkout &lt;branch&gt;</span><span class="cmd-desc">Mudar de branch</span></li>
+                <li class="cmd-item"><span class="cmd-name">git merge &lt;branch&gt;</span><span class="cmd-desc">Mesclar branch</span></li>
+                <li class="cmd-item"><span class="cmd-name">git rebase &lt;branch&gt;</span><span class="cmd-desc">Rebase sobre branch</span></li>
+                <li class="cmd-item"><span class="cmd-name">git status</span><span class="cmd-desc">Estado atual</span></li>
+                <li class="cmd-item"><span class="cmd-name">git log</span><span class="cmd-desc">Histórico de commits</span></li>
+                <li class="cmd-item"><span class="cmd-name">git diff</span><span class="cmd-desc">Diferenças</span></li>
+                <li class="cmd-item"><span class="cmd-name">echo "txt" &gt; arq</span><span class="cmd-desc">Criar / editar arquivo</span></li>
+                <li class="cmd-item"><span class="cmd-name">cat &lt;arq&gt;</span><span class="cmd-desc">Ver conteúdo</span></li>
+                <li class="cmd-item"><span class="cmd-name">ls</span><span class="cmd-desc">Listar arquivos</span></li>
+                <li class="cmd-item"><span class="cmd-name">clear</span><span class="cmd-desc">Limpar terminal</span></li>
+            </ul>
+        </div>
+
+        <!-- Branch Graph -->
+        <div class="sb-section grow">
+            <div class="sb-title"><i class="fa-solid fa-code-branch"></i> Branch Graph</div>
+            <div class="graph-scroll" id="graphArea"><div class="g-empty">Nenhum commit</div></div>
+        </div>
+
+        <!-- Arquivos -->
+        <div class="sb-section" style="flex-shrink:0;">
+            <div class="sb-title"><i class="fa-regular fa-folder-open"></i> Arquivos</div>
+            <ul class="f-list" id="fileList"><li class="f-empty">Nenhum arquivo</li></ul>
+        </div>
+
+        <!-- Editor de Conflito -->
+        <div class="conflict-editor" id="conflictEd">
+            <div class="ce-head"><i class="fa-solid fa-triangle-exclamation"></i> Conflito — edite e salve</div>
+            <div class="ce-file" id="ceFile"></div>
+            <textarea class="ce-ta" id="ceTa" spellcheck="false"></textarea>
+            <div class="ce-btns">
+                <button class="ce-save" onclick="saveConflict()">Salvar e Staging</button>
+                <button class="ce-reset" onclick="resetConflict()">Restaurar</button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- TERMINAL -->
+    <div class="term-wrap">
+        <!-- INPUT NO TOPO -->
+        <div class="term-input-bar">
+            <span class="term-prompt-label" id="termPr">~ $</span>
+            <input type="text" class="term-input" id="termIn" placeholder="Digite um comando git..." autocomplete="off" autofocus aria-label="Input do terminal">
+        </div>
+        <div class="term-dots">
+            <div class="term-dot r"></div><div class="term-dot y"></div><div class="term-dot g"></div>
+            <span class="term-dots-label">bash — git-doje</span>
+        </div>
+        <!-- OUTPUT -->
+        <div class="term-out" id="termOut"></div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-box" id="toastBox"></div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal">
+    <div class="modal-card">
+        <div class="modal-icon"><i class="fa-solid fa-trophy"></i></div>
+        <h2 class="modal-h">Todos os Desafios Completos</h2>
+        <p class="modal-p">Você dominou commits, branches, merges, resolução de conflitos e rebase. Parabéns!</p>
+        <button class="modal-btn" onclick="restartAll()">Reiniciar</button>
+    </div>
+</div>
+
+<script>
+/* ======================================================
+   SIMULADOR GIT
+   ====================================================== */
+class GitSim {
+    constructor(){ this.reset(); }
+    reset(){
+        this.inited=false; this.files={}; this.staged={}; this.commits=[];
+        this.branches={}; this.curBranch=null; this.HEAD=null;
+        this.inConflict=false; this.conflictFiles={}; this._hc=0;
+        this._hadConflict=false; this._conflictResolved=false;
+    }
+    _hash(){
+        const c='0123456789abcdef', b=(this._hc++).toString(16).padStart(4,'0');
+        let h=b; for(let i=h.length;i<40;i++) h+=c[Math.floor(Math.random()*c.length)]; return h;
+    }
+    init(){
+        if(this.inited) return {t:'info',s:'Repositório Git já inicializado.'};
+        this.inited=true; this.curBranch='main'; this.branches.main=null; this.HEAD=null;
+        return {t:'ok',s:'Repositório Git inicializado em /git-doje/'};
+    }
+    add(p){
+        if(!this.inited) return {t:'err',s:"fatal: não é um repositório git."};
+        if(this.inConflict){
+            if(this.conflictFiles.hasOwnProperty(p)){
+                this.staged[p]=this.files[p]; delete this.conflictFiles[p];
+                if(!Object.keys(this.conflictFiles).length) this.inConflict=false;
+                return {t:'ok',s:`Conflito em '${p}' marcado como resolvido.`};
+            }
+            return {t:'err',s:'Erro: resolva os conflitos atuais primeiro.'};
+        }
+        if(p==='.'){ for(let f in this.files) this.staged[f]=this.files[f]; const n=Object.keys(this.files).length; return {t:'ok',s:n?`Adicionou ${n} arquivo(s).`:'Nada para adicionar.'}; }
+        if(!this.files.hasOwnProperty(p)) return {t:'err',s:`fatal: pathspec '${p}' não corresponde a nenhum arquivo.`};
+        this.staged[p]=this.files[p]; return {t:'ok',s:`'${p}' adicionado ao staging.`};
+    }
+    commit(msg){
+        if(!this.inited) return {t:'err',s:"fatal: não é um repositório git."};
+        if(!msg) return {t:'err',s:"error: switch `m' requer um valor"};
+        if(!Object.keys(this.staged).length) return {t:'info',s:'Nada para commitar, árvore de trabalho limpa.'};
+        const h=this._hash(), cm={hash:h,sh:h.substring(0,7),msg,parent:this.HEAD,files:{...this.staged},branch:this.curBranch,time:new Date().toLocaleString('pt-BR')};
+        this.commits.push(cm); this.HEAD=h; this.branches[this.curBranch]=h; this.staged={}; this.inConflict=false; this.conflictFiles={};
+        return {t:'ok',s:`[${this.curBranch} ${h.substring(0,7)}] ${msg}\n  ${Object.keys(cm.files).length} arquivo(s) alterado(s).`};
+    }
+    branch(n){
+        if(!this.inited) return {t:'err',s:"fatal: não é um repositório git."};
+        if(!n){ let o=''; for(let b in this.branches) o+=(b===this.curBranch?'* ':'  ')+b+'\n'; return {t:'info',s:o.trim()||'Nenhuma branch.'}; }
+        if(this.branches.hasOwnProperty(n)) return {t:'err',s:`fatal: branch '${n}' já existe.`};
+        this.branches[n]=this.HEAD; return {t:'ok',s:`Branch '${n}' criada (a partir de ${this.curBranch}).`};
+    }
+    checkout(t){
+        if(!this.inited) return {t:'err',s:"fatal: não é um repositório git."};
+        if(this.inConflict) return {t:'err',s:'Erro: resolva os conflitos antes de mudar de branch.'};
+        if(!this.branches.hasOwnProperty(t)) return {t:'err',s:`error: pathspec '${t}' não corresponde a nenhum branch.`};
+        this.curBranch=t; this.HEAD=this.branches[t];
+        if(this.HEAD){ const c=this.commits.find(x=>x.hash===this.HEAD); if(c) this.files={...c.files}; } else this.files={};
+        this.staged={}; return {t:'ok',s:`Mudou para a branch '${t}'.`};
+    }
+    merge(bn){
+        if(!this.inited) return {t:'err',s:"fatal: não é um repositório git."};
+        if(this.inConflict) return {t:'err',s:'Erro: resolva os conflitos atuais.'};
+        if(!this.branches.hasOwnProperty(bn)) return {t:'err',s:`fatal: '${bn}' não encontrada.`};
+        if(bn===this.curBranch) return {t:'info',s:'Already up to date.'};
+        const th=this.branches[bn]; if(!th) return {t:'info',s:'Already up to date.'};
+        const tc=this.commits.find(c=>c.hash===th); if(!tc) return {t:'info',s:'Already up to date.'};
+        let cur=this.HEAD,anc=false; while(cur){if(cur===th){anc=true;break;}const c=this.commits.find(x=>x.hash===cur);cur=c?c.parent:null;}
+        if(anc) return {t:'info',s:'Already up to date.'};
+        let conflict=false,merged={...this.files},cf={};
+        for(let f in tc.files){
+            if(this.files.hasOwnProperty(f)&&this.files[f]!==tc.files[f]){
+                conflict=true; cf[f]={ours:this.files[f],theirs:tc.files[f],merged:`<<<<<<< HEAD (${this.curBranch})\n${this.files[f]}=======\n${tc.files[f]}>>>>>>> ${bn}\n`}; merged[f]=cf[f].merged;
+            } else if(!this.files.hasOwnProperty(f)){ merged[f]=tc.files[f]; }
+        }
+        if(conflict){ this.inConflict=true; this.conflictFiles=cf; this.files=merged; this.staged={}; this._hadConflict=true;
+            let o='Auto-merge falhou; conserte os conflitos.\n'; for(let f in cf) o+=`CONFLITO: Mesclagem conflitante em ${f}\n`; return {t:'con',s:o.trim()}; }
+        this.files=merged; for(let f in this.files) this.staged[f]=this.files[f];
+        return {t:'ok',s:`Merge pronto. Use 'git commit -m "Merge ${bn}"' para finalizar.`};
+    }
+    rebase(tb){
+        if(!this.inited) return {t:'err',s:"fatal: não é um repositório git."};
+        if(!this.branches.hasOwnProperty(tb)) return {t:'err',s:`fatal: '${tb}' não encontrada.`};
+        if(tb===this.curBranch) return {t:'info',s:'Nada para fazer.'};
+        const tHash=this.branches[tb]; let my=[],cur=this.HEAD; while(cur&&cur!==tHash){const c=this.commits.find(x=>x.hash===cur);if(!c)break;my.unshift(c);cur=c.parent;}
+        if(!my.length) return {t:'info',s:'Already up to date.'};
+        let base=tHash; for(let mc of my){const nh=this._hash();const nc={hash:nh,sh:nh.substring(0,7),msg:mc.msg,parent:base,files:{...mc.files},branch:this.curBranch,time:new Date().toLocaleString('pt-BR')};this.commits.push(nc);base=nh;}
+        this.HEAD=base; this.branches[this.curBranch]=base; this.files={...my[my.length-1].files}; this.staged={};
+        return {t:'ok',s:`Rebase concluído. ${my.length} commit(s) reaplicado(s) sobre '${tb}'.`};
+    }
+    status(){
+        if(!this.inited) return {t:'err',s:"fatal: não é um repositório git."};
+        let o=`On branch ${this.curBranch}\n`;
+        if(this.inConflict){ o+='\nVocê tem caminhos não mesclados.\n  (corrija e execute "git add <file>" para marcar resolução)\n\n'; for(let f in this.conflictFiles) o+=`\tambos modificados: ${f}\n`; }
+        const sk=Object.keys(this.staged);
+        if(sk.length){ o+='\nMudanças a serem commitadas:\n'; for(let f of sk) o+=`\t\tmodificado: ${f}\n`; }
+        if(!this.inConflict){ const ut=Object.keys(this.files).filter(f=>!sk.includes(f)); if(ut.length){ o+='\nArquivos não rastreados:\n  (use "git add <file>..." para incluir)\n'; for(let f of ut) o+=`\t\t${f}\n`; } }
+        if(!this.inConflict&&!sk.length&&!Object.keys(this.files).length) o+='nothing to commit, working tree clean\n';
+        else if(!this.inConflict&&!sk.length) o+='\nnothing to commit (use "git add" para rastrear)\n';
+        return {t:'info',s:o.trim()};
+    }
+    log(){
+        if(!this.inited) return {t:'err',s:"fatal: não é um repositório git."};
+        if(!this.commits.length) return {t:'info',s:'fatal: sua branch não tem nenhum commit.'};
+        let o='',cur=this.HEAD,seen=new Set();
+        while(cur&&!seen.has(cur)){seen.add(cur);const c=this.commits.find(x=>x.hash===cur);if(!c)break;
+            let r=''; if(this.branches[this.curBranch]===c.hash) r=`HEAD -> ${this.curBranch}`;
+            else{for(let b in this.branches)if(b!==this.curBranch&&this.branches[b]===c.hash)r+=(r?', ':'')+b;}
+            o+=`commit ${c.hash}\n`; if(r) o+=`  (${r})\n`; o+=`Author: Dev <dev@gitdoje.com>\nDate:   ${c.time}\n\n    ${c.msg}\n\n`; cur=c.parent;}
+        return {t:'info',s:o.trim()};
+    }
+    diff(){
+        if(!this.inited) return {t:'err',s:"fatal: não é um repositório git."};
+        let o=''; for(let f in this.staged){o+=`diff --git a/${f} b/${f}\n--- a/${f}\n+++ b/${f}\n`;for(let l of this.staged[f].split('\n'))o+=`+${l}\n`;}
+        return {t:'info',s:o.trim()||'Nenhuma diferença.'};
+    }
+    setFile(n,c){ this.files[n]=c; }
+    getFile(n){ return this.files.hasOwnProperty(n)?{t:'info',s:this.files[n]}:{t:'err',s:`cat: ${n}: não encontrado.`}; }
+    lsFiles(){ const k=Object.keys(this.files); return k.length?k.join('\n'):'(vazio)'; }
+}
+
+/* ======================================================
+   DESAFIOS
+   ====================================================== */
+const sim=new GitSim();
+let curCh=0, chDone=false, cmdHist=[], histIdx=-1;
+
+const challenges=[
+    {
+        badge:'Desafio 1', title:'Primeiro Commit',
+        desc:'Inicialize um repositório Git, crie o arquivo README.md e faça seu primeiro commit.',
+        hint:'Use <code>git init</code>, depois <code>echo "# Meu Projeto" > README.md</code>, <code>git add README.md</code> e <code>git commit -m "Commit inicial"</code>.',
+        steps:[
+            {text:'git init',ck:()=>sim.inited},
+            {text:'Criar README.md',ck:()=>sim.files.hasOwnProperty('README.md')},
+            {text:'git add README.md',ck:()=>sim.staged.hasOwnProperty('README.md')||sim.commits.some(c=>c.files.hasOwnProperty('README.md'))},
+            {text:'Primeiro commit',ck:()=>sim.commits.length>=1},
+        ],
+        setup(){sim.reset();}
+    },
+    {
+        badge:'Desafio 2', title:'Trabalhando com Branches',
+        desc:'Crie uma branch "feature/login", mude para ela, crie login.js e faça um commit. Branches isolam funcionalidades.',
+        hint:'<code>git branch feature/login</code>, <code>git checkout feature/login</code>, <code>echo "function login() {}" > login.js</code>, <code>git add .</code>, <code>git commit -m "Adiciona login"</code>.',
+        steps:[
+            {text:'Criar branch',ck:()=>sim.branches.hasOwnProperty('feature/login')},
+            {text:'Mudar de branch',ck:()=>sim.curBranch==='feature/login'},
+            {text:'Criar login.js',ck:()=>sim.files.hasOwnProperty('login.js')},
+            {text:'Commit na branch',ck:()=>sim.commits.some(c=>c.files.hasOwnProperty('login.js')&&c.branch==='feature/login')},
+        ],
+        setup(){sim.reset();sim.init();sim.setFile('README.md','# Meu Projeto');sim.staged['README.md']=sim.files['README.md'];sim.commit('Commit inicial');}
+    },
+    {
+        badge:'Desafio 3', title:'Merge Simples',
+        desc:'Volte para main e integre feature/login. Merge limpo sem conflitos.',
+        hint:'<code>git checkout main</code>, <code>git merge feature/login</code>, <code>git commit -m "Merge feature/login"</code>.',
+        steps:[
+            {text:'Voltar para main',ck:()=>sim.curBranch==='main'},
+            {text:'Merge feature/login',ck:()=>sim.staged.length>0||sim.commits.some(c=>c.msg.toLowerCase().includes('merge')&&c.branch==='main')},
+            {text:'Commitar merge',ck:()=>sim.commits.some(c=>c.msg.toLowerCase().includes('merge')&&c.branch==='main')},
+        ],
+        setup(){sim.reset();sim.init();sim.setFile('README.md','# Meu Projeto');sim.staged['README.md']=sim.files['README.md'];sim.commit('Commit inicial');sim.branch('feature/login');sim.checkout('feature/login');sim.setFile('login.js','function login() {\n  // TODO\n}');sim.staged['login.js']=sim.files['login.js'];sim.commit('Adiciona login');sim.checkout('main');}
+    },
+    {
+        badge:'Desafio 4', title:'Conflito Básico de Merge',
+        desc:'Ambas as branches (main e feature/header) modificaram o index.html. Ao mesclar, um conflito vai ocorrer. Resolva no editor lateral e finalize.',
+        hint:'<code>git merge feature/header</code> para gerar o conflito. Abra o editor no painel esquerdo, remova os marcadores <<<<<<<, =======, >>>>>>>, combine o conteúdo, clique "Salvar e Staging". Depois <code>git add index.html</code> e <code>git commit -m "Resolve conflito"</code>.',
+        steps:[
+            {text:'Executar merge (gerar conflito)',ck:()=>sim._hadConflict===true},
+            {text:'Editar e salvar arquivo',ck:()=>sim._conflictResolved===true},
+            {text:'git add index.html',ck:()=>!sim.inConflict&&sim._conflictResolved===true},
+            {text:'Commitar resolução',ck:()=>!sim.inConflict&&sim.commits.some(c=>(c.msg.toLowerCase().includes('resolve')||c.msg.toLowerCase().includes('conflito')))},
+        ],
+        setup(){
+            sim.reset(); sim._hadConflict=false; sim._conflictResolved=false; sim.init();
+            sim.setFile('index.html','<h1>Bem-vindo</h1>\n<p>Conteúdo</p>');
+            sim.staged['index.html']=sim.files['index.html']; sim.commit('Adiciona index.html');
+            sim.branch('feature/header'); sim.checkout('feature/header');
+            sim.setFile('index.html','<h1>Bem-vindo</h1>\n<header>\n  <nav>Menu</nav>\n</header>\n<p>Conteúdo</p>');
+            sim.staged['index.html']=sim.files['index.html']; sim.commit('Adiciona header');
+            sim.checkout('main');
+            sim.setFile('index.html','<h1>Bem-vindo</h1>\n<footer>\n  Rodapé\n</footer>\n<p>Conteúdo</p>');
+            sim.staged['index.html']=sim.files['index.html']; sim.commit('Adiciona footer');
+        }
+    },
+    {
+        badge:'Desafio 5', title:'Conflito com Múltiplos Arquivos',
+        desc:'Duas branches modificaram tanto utils.js quanto config.json. O merge gera conflitos em dois arquivos. Resolva cada um.',
+        hint:'<code>git merge feature/utils</code>. Dois conflitos aparecem. Resolva o primeiro no editor (salve), depois <code>git add</code> o arquivo resolvido, resolva o segundo, salve, <code>git add</code>, e finalmente <code>git commit -m "Resolve conflitos"</code>.',
+        steps:[
+            {text:'Executar merge (2 conflitos)',ck:()=>sim._hadConflict===true&&Object.keys(sim.conflictFiles).length>=0},
+            {text:'Resolver primeiro arquivo',ck:()=>sim._conflictResolved===true},
+            {text:'git add (todos resolvidos)',ck:()=>!sim.inConflict&&sim._conflictResolved===true},
+            {text:'Commitar resolução',ck:()=>!sim.inConflict&&sim.commits.some(c=>c.msg.toLowerCase().includes('resolve')||c.msg.toLowerCase().includes('conflito'))},
+        ],
+        setup(){
+            sim.reset(); sim._hadConflict=false; sim._conflictResolved=false; sim.init();
+            sim.setFile('utils.js','function helper() {\n  return true;\n}');
+            sim.setFile('config.json','{\n  "theme": "light"\n}');
+            sim.staged['utils.js']=sim.files['utils.js']; sim.staged['config.json']=sim.files['config.json'];
+            sim.commit('Setup inicial');
+            sim.branch('feature/utils'); sim.checkout('feature/utils');
+            sim.setFile('utils.js','function helper() {\n  return false;\n}\nfunction format() {\n  return "ok";\n}');
+            sim.setFile('config.json','{\n  "theme": "dark",\n  "lang": "pt"\n}');
+            sim.staged['utils.js']=sim.files['utils.js']; sim.staged['config.json']=sim.files['config.json'];
+            sim.commit('Melhora utils e config');
+            sim.checkout('main');
+            sim.setFile('utils.js','function helper() {\n  return null;\n}\n// TODO: melhorar');
+            sim.setFile('config.json','{\n  "theme": "light",\n  "debug": true\n}');
+            sim.staged['utils.js']=sim.files['utils.js']; sim.staged['config.json']=sim.files['config.json'];
+            sim.commit('Adiciona debug e ajusta helper');
+        }
+    },
+    {
+        badge:'Desafio 6', title:'Conflito Seguido de Rebase',
+        desc:'Após resolver um conflito de merge, use rebase para reorganizar o histórico da branch feature/api sobre main, mantendo tudo linear.',
+        hint:'Primeiro resolva o conflito (<code>git merge feature/api</code>, edite, salve, <code>git add</code>, <code>git commit</code>). Depois crie uma nova branch, mude para ela e use <code>git rebase main</code> para linearizar.',
+        steps:[
+            {text:'Resolver conflito de merge',ck:()=>!sim.inConflict&&sim.commits.some(c=>c.msg.toLowerCase().includes('resolve')||c.msg.toLowerCase().includes('conflito'))},
+            {text:'Criar branch feature/fix',ck:()=>sim.branches.hasOwnProperty('feature/fix')},
+            {text:'Mudar para feature/fix',ck:()=>sim.curBranch==='feature/fix'},
+            {text:'Fazer commit na nova branch',ck:()=>sim.commits.some(c=>c.branch==='feature/fix')},
+            {text:'Rebase sobre main',ck:()=>{const fc=sim.commits.filter(c=>c.branch==='feature/fix');if(!fc.length)return false;const p=fc[0].parent;return p===sim.branches['main'];}},
+        ],
+        setup(){
+            sim.reset(); sim._hadConflict=false; sim._conflictResolved=false; sim.init();
+            sim.setFile('app.js','// App principal\nconsole.log("start");');
+            sim.setFile('styles.css','body { margin: 0; }');
+            sim.staged['app.js']=sim.files['app.js']; sim.staged['styles.css']=sim.files['styles.css'];
+            sim.commit('Setup do projeto');
+            sim.branch('feature/api'); sim.checkout('feature/api');
+            sim.setFile('app.js','// App principal\nconsole.log("start");\n// API module\nconst api = "/v1";');
+            sim.setFile('styles.css','body { margin: 0; }\n.container { max-width: 1200px; }');
+            sim.staged['app.js']=sim.files['app.js']; sim.staged['styles.css']=sim.files['styles.css'];
+            sim.commit('Adiciona módulo API');
+            sim.checkout('main');
+            sim.setFile('app.js','// App principal\nconsole.log("start");\n// Auth module\nconst auth = null;');
+            sim.setFile('styles.css','body { margin: 0; font-family: sans-serif; }');
+            sim.staged['app.js']=sim.files['app.js']; sim.staged['styles.css']=sim.files['styles.css'];
+            sim.commit('Adiciona módulo Auth');
+        }
+    },
+    {
+        badge:'Desafio 7', title:'Rebase de Branch Limpa',
+        desc:'Crie uma branch feature/tests, faça commits nela, e use rebase para colocá-la linearmente sobre main.',
+        hint:'<code>git branch feature/tests</code>, <code>git checkout feature/tests</code>, crie arquivos e commite. Depois <code>git rebase main</code>.',
+        steps:[
+            {text:'Criar feature/tests',ck:()=>sim.branches.hasOwnProperty('feature/tests')},
+            {text:'Mudar de branch',ck:()=>sim.curBranch==='feature/tests'},
+            {text:'Fazer commit',ck:()=>sim.commits.filter(c=>c.branch==='feature/tests').length>=1},
+            {text:'Rebase sobre main',ck:()=>{const fc=sim.commits.filter(c=>c.branch==='feature/tests');if(!fc.length)return false;let p=fc[0].parent,seen=new Set();while(p&&!seen.has(p)){seen.add(p);if(p===sim.branches['main'])return true;const pc=sim.commits.find(x=>x.hash===p);p=pc?pc.parent:null;}return false;}},
+        ],
+        setup(){sim.reset();sim.init();sim.setFile('index.html','<h1>App</h1>');sim.staged['index.html']=sim.files['index.html'];sim.commit('Commit inicial');sim.setFile('app.js','console.log("app");');sim.staged['app.js']=sim.files['app.js'];sim.commit('Adiciona app.js');}
+    }
+];
+
+/* ======================================================
+   UI
+   ====================================================== */
+const $=id=>document.getElementById(id);
+const termOut=$('termOut'), termIn=$('termIn'), termPr=$('termPr');
+const graphArea=$('graphArea'), fileList=$('fileList');
+const conflictEd=$('conflictEd'), ceFile=$('ceFile'), ceTa=$('ceTa');
+
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function addLine(html){
+    const d=document.createElement('div');d.className='t-line';d.innerHTML=html;
+    termOut.appendChild(d);termOut.scrollTop=termOut.scrollHeight;
+}
+function addCmd(cmd){
+    const br=sim.inited?` (${sim.curBranch})`:'';
+    addLine(`<span class="t-pr">~${br} $</span> <span class="t-cmd">${esc(cmd)}</span>`);
+}
+function addRes(r){
+    const cls=r.t==='err'?'t-err':r.t==='ok'?'t-ok':r.t==='con'?'t-con':'t-inf';
+    for(const l of r.s.split('\n')) addLine(`<span class="${cls}">${esc(l)}</span>`);
+}
+function addPlain(t){ addLine(`<span class="t-mut">${esc(t)}</span>`); }
+
+/* ======================================================
+   PARSE & EXECUTE
+   ====================================================== */
+function parse(raw){
+    const t=raw.trim(); if(!t) return null;
+    let m;
+    if((m=t.match(/^echo\s+["'](.+?)["']\s*>\s*(\S+)$/))) return {c:'echo',content:m[1],file:m[2]};
+    if((m=t.match(/^git\s+commit\s+-m\s+["'](.+?)["']$/))) return {c:'commit',msg:m[1]};
+    if((m=t.match(/^git\s+add\s+(.+)$/))) return {c:'add',p:m[1].trim()};
+    if((m=t.match(/^git\s+branch\s*(.*)$/))) return {c:'branch',n:m[1].trim()||null};
+    if((m=t.match(/^git\s+checkout\s+(\S+)$/))) return {c:'checkout',t:m[1]};
+    if((m=t.match(/^git\s+merge\s+(\S+)$/))) return {c:'merge',b:m[1]};
+    if((m=t.match(/^git\s+rebase\s+(\S+)$/))) return {c:'rebase',t:m[1]};
+    if(t==='git init') return {c:'init'};
+    if(t==='git status') return {c:'status'};
+    if(t==='git log') return {c:'log'};
+    if(t==='git diff') return {c:'diff'};
+    if((m=t.match(/^cat\s+(\S+)$/))) return {c:'cat',f:m[1]};
+    if(t==='ls') return {c:'ls'};
+    if(t==='clear') return {c:'clear'};
+    if(t==='help') return {c:'help'};
+    return {c:'?',raw:t};
+}
+
+function exec(raw){
+    const p=parse(raw); if(!p) return;
+    addCmd(raw); cmdHist.push(raw); histIdx=-1;
+    let r;
+    switch(p.c){
+        case 'init': r=sim.init(); break;
+        case 'add': r=sim.add(p.p); break;
+        case 'commit': r=sim.commit(p.msg); break;
+        case 'branch': r=sim.branch(p.n); break;
+        case 'checkout': r=sim.checkout(p.t); break;
+        case 'merge': r=sim.merge(p.b); if(r.t==='con'&&sim._hadConflict!==undefined) sim._hadConflict=true; break;
+        case 'rebase': r=sim.rebase(p.t); break;
+        case 'status': r=sim.status(); break;
+        case 'log': r=sim.log(); break;
+        case 'diff': r=sim.diff(); break;
+        case 'echo': sim.setFile(p.file,p.content); r={t:'ok',s:`Arquivo '${p.file}' criado/atualizado.`}; break;
+        case 'cat': r=sim.getFile(p.f); break;
+        case 'ls': r={t:'info',s:sim.lsFiles()}; break;
+        case 'clear': termOut.innerHTML=''; updateUI(); return;
+        case 'help': r={t:'info',s:`Comandos Git disponíveis:\n  git init                 Inicializa repositório\n  git add <arquivo|.>      Adiciona ao staging\n  git commit -m "msg"      Cria commit\n  git branch [nome]        Lista / cria branch\n  git checkout <branch>    Muda de branch\n  git merge <branch>       Mescla branch (pode gerar conflito)\n  git rebase <branch>      Rebase sobre branch\n  git status               Estado atual\n  git log                  Histórico\n  git diff                 Diferenças\n  echo "txt" > arquivo     Cria/edita arquivo\n  cat <arquivo>            Mostra conteúdo\n  ls                       Lista arquivos\n  clear                    Limpa terminal`}; break;
+        default: r={t:'err',s:`comando não encontrado: ${p.raw}`};
+    }
+    addRes(r); updateUI(); checkProgress();
+}
+
+/* ======================================================
+   CHALLENGE
+   ====================================================== */
+function loadCh(i){
+    curCh=i; chDone=false;
+    const ch=challenges[i]; ch.setup();
+    $('pBadge').textContent=ch.badge;
+    $('pTitle').textContent=ch.title;
+    $('pDesc').textContent=ch.desc;
+    $('pHint').innerHTML=ch.hint;
+    $('pHint').classList.remove('open');
+    $('hCur').textContent=i+1;
+    $('hTot').textContent=challenges.length;
+    $('hBar').style.width=(i/challenges.length*100)+'%';
+    const stepsEl=$('pSteps'); stepsEl.innerHTML='';
+    ch.steps.forEach((s,j)=>{const d=document.createElement('div');d.className='step-chip';d.id='step-'+j;d.innerHTML=`<span class="dot"></span>${esc(s.text)}`;stepsEl.appendChild(d);});
+    termOut.innerHTML='';
+    addPlain(`── ${ch.badge}: ${ch.title} ──`);
+    addPlain(ch.desc); addPlain('');
+    updateUI(); termIn.focus();
+}
+
+function checkProgress(){
+    if(chDone) return;
+    const ch=challenges[curCh]; let all=true;
+    ch.steps.forEach((s,i)=>{const el=$('step-'+i);if(!el)return;const d=s.ck();if(d)el.classList.add('done');else all=false;});
+    if(all){
+        chDone=true; $('hBar').style.width=((curCh+1)/challenges.length*100)+'%';
+        toast('ok',`<i class="fa-solid fa-check"></i> ${ch.badge} concluído!`);
+        if(curCh<challenges.length-1) setTimeout(()=>loadCh(curCh+1),1800);
+        else setTimeout(()=>$('modal').classList.add('open'),1500);
+    }
+}
+
+/* ======================================================
+   UPDATE UI
+   ====================================================== */
+function updateUI(){
+    termPr.textContent=sim.inited?`~ (${sim.curBranch}) $`:'~ $';
+    renderGraph(); renderFiles();
+    if(sim.inConflict&&Object.keys(sim.conflictFiles).length){
+        const fn=Object.keys(sim.conflictFiles)[0];
+        conflictEd.classList.add('open'); ceFile.textContent=fn; ceTa.value=sim.files[fn]||'';
+    } else { conflictEd.classList.remove('open'); }
+}
+
+function renderGraph(){
+    if(!sim.commits.length){graphArea.innerHTML='<div class="g-empty">Nenhum commit</div>';return;}
+    const ord=[],seen=new Set(); let cur=sim.HEAD;
+    while(cur&&!seen.has(cur)){seen.add(cur);const c=sim.commits.find(x=>x.hash===cur);if(!c)break;ord.push(c);cur=c.parent;}
+    for(const c of sim.commits) if(!seen.has(c.hash)){ord.push(c);seen.add(c.hash);}
+    let h='';
+    for(const c of ord){
+        const isH=c.hash===sim.HEAD, brs=[];
+        for(let b in sim.branches) if(sim.branches[b]===c.hash) brs.push(b);
+        const isM=brs.includes('main'), isF=brs.some(b=>b!=='main');
+        const dc=isM?'main':isF?'feat':'', hc=isH?'active':'';
+        h+=`<div class="g-node"><div class="g-dot ${dc} ${hc}"></div><div class="g-info"><div><span class="g-hash">${c.sh}</span>`;
+        for(const b of brs){const tc=b==='main'?'main':'feat';h+=`<span class="g-tag ${tc}">${b}${isH&&b===sim.curBranch?' *':''}</span>`;}
+        h+=`</div><div class="g-msg">${esc(c.msg)}</div></div></div>`;
+    }
+    graphArea.innerHTML=h;
+}
+
+function renderFiles(){
+    const ks=Object.keys(sim.files);
+    if(!ks.length){fileList.innerHTML='<li class="f-empty">Nenhum arquivo</li>';return;}
+    let h='';
+    for(const f of ks){const ic=sim.conflictFiles.hasOwnProperty(f);h+=`<li class="f-item${ic?' conflict':''}"><i class="${ic?'fa-solid fa-triangle-exclamation':'fa-regular fa-file-code'}"></i>${esc(f)}</li>`;}
+    fileList.innerHTML=h;
+}
+
+/* ======================================================
+   CONFLICT EDITOR
+   ====================================================== */
+function saveConflict(){
+    if(!sim.inConflict) return;
+    const fn=Object.keys(sim.conflictFiles)[0]; if(!fn) return;
+    const v=ceTa.value;
+    if(v.includes('<<<<<<<')||v.includes('>>>>>>>')){toast('err','<i class="fa-solid fa-xmark"></i> Remova todos os marcadores de conflito.');return;}
+    sim.files[fn]=v; sim.staged[fn]=v; delete sim.conflictFiles[fn];
+    if(!Object.keys(sim.conflictFiles).length){sim.inConflict=false;sim._conflictResolved=true;}
+    addCmd(`# editor: salvou "${fn}" e staging`);
+    addRes({t:'ok',s:`'${fn}' salvo e adicionado ao staging.`});
+    toast('ok','<i class="fa-solid fa-check"></i> Conflito resolvido! Faça o commit.');
+    updateUI(); checkProgress();
+}
+function resetConflict(){
+    const fn=Object.keys(sim.conflictFiles)[0];
+    if(fn&&sim.conflictFiles[fn]) ceTa.value=sim.conflictFiles[fn].merged;
+}
+
+/* ======================================================
+   TOAST & HELPERS
+   ====================================================== */
+function toast(type,html){
+    const t=document.createElement('div');t.className=`toast ${type}`;t.innerHTML=html;
+    $('toastBox').appendChild(t);setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),250);},2500);
+}
+function toggleHint(){$('pHint').classList.toggle('open');}
+function restartAll(){$('modal').classList.remove('open');loadCh(0);}
+
+/* ======================================================
+   EVENTS
+   ====================================================== */
+termIn.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();const v=termIn.value;termIn.value='';exec(v);}
+    else if(e.key==='ArrowUp'){e.preventDefault();if(cmdHist.length&&histIdx<cmdHist.length-1){histIdx++;termIn.value=cmdHist[cmdHist.length-1-histIdx];}}
+    else if(e.key==='ArrowDown'){e.preventDefault();if(histIdx>0){histIdx--;termIn.value=cmdHist[cmdHist.length-1-histIdx];}else{histIdx=-1;termIn.value='';}}
+    else if(e.key==='l'&&e.ctrlKey){e.preventDefault();termOut.innerHTML='';updateUI();}
+});
+document.querySelector('.term-wrap').addEventListener('click',e=>{if(e.target!==termIn)termIn.focus();});
+
+/* ======================================================
+   INIT
+   ====================================================== */
+loadCh(0);
+</script>
+</body>
+</html>
