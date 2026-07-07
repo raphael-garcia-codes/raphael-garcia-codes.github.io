@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Git Doje — Aprenda Git Praticando</title>
+    <title>Git Learning — Aprenda Git Praticando</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
@@ -161,7 +161,7 @@
 <body>
 
 <header>
-    <div class="logo"><div class="logo-icon"><i class="fa-brands fa-git-alt"></i></div>Git <span>Doje</span></div>
+    <div class="logo"><div class="logo-icon"><i class="fa-brands fa-git-alt"></i></div>Git <span>Learning</span></div>
     <div class="hdr-r">
         <div class="hdr-ct">Desafio <b id="hC">1</b> / <b id="hT">9</b></div>
         <div class="hdr-bar"><div class="hdr-fill" id="hB"></div></div>
@@ -228,7 +228,7 @@
             <span class="t-pr" id="tPr">~ $</span>
             <input type="text" class="t-in" id="tIn" placeholder="Digite um comando git..." autocomplete="off" autofocus aria-label="Terminal">
         </div>
-        <div class="t-dots"><div class="t-dot r"></div><div class="t-dot y"></div><div class="t-dot g"></div><span class="t-dots-l">bash — git-doje</span></div>
+        <div class="t-dots"><div class="t-dot r"></div><div class="t-dot y"></div><div class="t-dot g"></div><span class="t-dots-l">bash — git-learning</span></div>
         <div class="t-out" id="tOut"></div>
     </div>
 </div>
@@ -269,7 +269,7 @@ class GitSim{
         const f1={'README.md':'# Projeto Clonado\n\nRepositório de exemplo.\n\n## Começando\n\n```bash\nnpm install\nnpm start\n```'};
         this.commits.push({hash:h1,sh:h1.substring(0,7),msg:'Commit inicial',parent:null,files:{...f1},branch:'main',time:'01/01/2025 10:00:00'});
         const h2=this._h();
-        const f2={...f1,'app.js':'// Aplicação principal\nconst app = {\n  name: "git-doje",\n  version: "1.0.0"\n};\n\nconsole.log(app.name);'};
+        const f2={...f1,'app.js':'// Aplicação principal\nconst app = {\n  name: "git-learning",\n  version: "1.0.0"\n};\n\nconsole.log(app.name);'};
         this.commits.push({hash:h2,sh:h2.substring(0,7),msg:'Adiciona app.js com configuração',parent:h1,files:{...f2},branch:'main',time:'01/01/2025 11:30:00'});
         this.HEAD=h2;this.branches.main=h2;this.files={...f2};
         this.remotePushed={main:h2};this._remoteCommits=[h1,h2];
@@ -316,7 +316,7 @@ class GitSim{
         return{t:'ok',s:out.trim()};
     }
 
-    init(){if(this.inited)return{t:'info',s:'Repositório Git já inicializado.'};this.inited=true;this.curBranch='main';this.branches.main=null;this.HEAD=null;return{t:'ok',s:'Repositório Git inicializado em /git-doje/'}}
+    init(){if(this.inited)return{t:'info',s:'Repositório Git já inicializado.'};this.inited=true;this.curBranch='main';this.branches.main=null;this.HEAD=null;return{t:'ok',s:'Repositório Git inicializado em /git-learning/'}}
     add(p){
         if(!this.inited)return{t:'err',s:"fatal: não é um repositório git."};
         if(this.inConflict){
@@ -393,7 +393,7 @@ class GitSim{
         let o='',cur=this.HEAD,seen=new Set();
         while(cur&&!seen.has(cur)){seen.add(cur);const c=this.commits.find(x=>x.hash===cur);if(!c)break;
             let r='';if(this.branches[this.curBranch]===c.hash)r=`HEAD -> ${this.curBranch}`;else{for(let b in this.branches)if(b!==this.curBranch&&this.branches[b]===c.hash)r+=(r?', ':'')+b}
-            o+=`commit ${c.hash}\n`;if(r)o+=`  (${r})\n`;o+=`Author: Dev <dev@gitdoje.com>\nDate:   ${c.time}\n\n    ${c.msg}\n\n`;cur=c.parent}
+            o+=`commit ${c.hash}\n`;if(r)o+=`  (${r})\n`;o+=`Author: Dev <dev@gitlearning.com>\nDate:   ${c.time}\n\n    ${c.msg}\n\n`;cur=c.parent}
         return{t:'info',s:o.trim()};
     }
     diff(){if(!this.inited)return{t:'err',s:"fatal: não é um repositório git."};let o='';for(let f in this.staged){o+=`diff --git a/${f} b/${f}\n--- a/${f}\n+++ b/${f}\n`;for(let l of this.staged[f].split('\n'))o+=`+${l}\n`}return{t:'info',s:o.trim()||'Nenhuma diferença.'}}
@@ -751,3 +751,4 @@ loadCh(0);
 </script>
 </body>
 </html>
+

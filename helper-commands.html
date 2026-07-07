@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Helper Commands — Revista de Referência Rápida</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    ::selection { background: #CCF32F; color: #000000; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: #d4d4d4; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #a3a3a3; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(204, 243, 47, 0.1); }
+      50% { box-shadow: 0 0 40px rgba(204, 243, 47, 0.25); }
+    }
+
+    .animate-float { animation: float 6s ease-in-out infinite; }
+    .animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+
+    .article-card { opacity: 0; transform: translateY(30px); transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+    .article-card.visible { opacity: 1; transform: translateY(0); }
+
+    .code-block {
+      background: #0A0A0A;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+    }
+    .code-block::before {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      height: 40px;
+      background: rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      z-index: 1;
+    }
+    .code-dots {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      gap: 6px;
+      padding: 12px 16px;
+    }
+    .code-dots span {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+    .code-content {
+      padding: 16px 20px 20px 20px;
+      overflow-x: auto;
+    }
+    .code-content code {
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: 13px;
+      line-height: 2;
+      color: #e5e5e5;
+      white-space: pre;
+    }
+    .code-content .comment { color: #737373; }
+    .code-content .command { color: #CCF32F; }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .toc-item {
+      counter-increment: toc;
+      position: relative;
+      padding-left: 3rem;
+    }
+    .toc-item::before {
+      content: counter(toc, decimal-leading-zero);
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-size: 14px;
+      font-weight: 700;
+      color: #CCF32F;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      z-index: 10;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #a3a3a3;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .copy-btn:hover { background: #CCF32F; color: #000; border-color: #CCF32F; }
+    .copy-btn.copied { background: #22c55e; color: #fff; border-color: #22c55e; }
+
+    .sidebar-nav {
+      position: fixed;
+      left: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sidebar-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #e5e5e5;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+    }
+    .sidebar-dot.active {
+      background: #CCF32F;
+      box-shadow: 0 0 10px rgba(204,243,47,0.5);
+      transform: scale(1.3);
+    }
+    .sidebar-dot:hover { background: #CCF32F; transform: scale(1.2); }
+    .sidebar-dot .tooltip {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #171717;
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .sidebar-dot:hover .tooltip { opacity: 1; }
+
+    .issue-badge {
+      background: linear-gradient(135deg, #CCF32F, #a8cc00);
+      color: #000;
+      font-weight: 700;
+      font-size: 11px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .search-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 15vh;
+    }
+    .search-overlay.open { display: flex; }
+    .search-box {
+      background: #171717;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      width: 90%;
+      max-width: 600px;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    }
+    .search-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-size: 18px;
+      padding: 20px 24px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .search-input::placeholder { color: #737373; }
+    .search-results { max-height: 400px; overflow-y: auto; border-top: 1px solid rgba(255,255,255,0.08); }
+    .search-result-item {
+      padding: 14px 24px;
+      cursor: pointer;
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .search-result-item:hover { background: rgba(204,243,47,0.08); }
+
+    @media (max-width: 1023px) {
+      .sidebar-nav { display: none; }
+    }
+  </style>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: '#CCF32F',
+            'brand-hover': '#BCE325',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-white text-neutral-900">
+
+  <!-- Sidebar Navigation Dots -->
+  <nav class="sidebar-nav" id="sidebarNav">
+    <div class="sidebar-dot active" data-target="hero"><span class="tooltip">Capa</span></div>
+    <div class="sidebar-dot" data-target="toc"><span class="tooltip">Sumário</span></div>
+    <div class="sidebar-dot" data-target="git"><span class="tooltip">Git</span></div>
+    <div class="sidebar-dot" data-target="docker"><span class="tooltip">Docker</span></div>
+    <div class="sidebar-dot" data-target="linux"><span class="tooltip">Linux</span></div>
+    <div class="sidebar-dot" data-target="npm"><span class="tooltip">NPM</span></div>
+    <div class="sidebar-dot" data-target="ssh"><span class="tooltip">SSH</span></div>
+    <div class="sidebar-dot" data-target="openssl"><span class="tooltip">OpenSSL</span></div>
+    <div class="sidebar-dot" data-target="kubernetes"><span class="tooltip">Kubernetes</span></div>
+    <div class="sidebar-dot" data-target="helm"><span class="tooltip">Helm</span></div>
+    <div class="sidebar-dot" data-target="network"><span class="tooltip">Rede</span></div>
+    <div class="sidebar-dot" data-target="regex"><span class="tooltip">Regex</span></div>
+    <div class="sidebar-dot" data-target="python"><span class="tooltip">Python</span></div>
+    <div class="sidebar-dot" data-target="vscode"><span class="tooltip">VS Code</span></div>
+  </nav>
+
+  <!-- Search Overlay -->
+  <div class="search-overlay" id="searchOverlay">
+    <div class="search-box">
+      <div class="flex items-center px-6 pt-5 gap-3">
+        <i data-lucide="search" class="w-5 h-5 text-neutral-500"></i>
+        <input type="text" class="search-input" id="searchInput" placeholder="Buscar comando ou artigo..." autocomplete="off">
+        <kbd class="text-xs text-neutral-500 border border-neutral-700 rounded-lg px-2 py-1 font-mono shrink-0">ESC</kbd>
+      </div>
+      <div class="search-results" id="searchResults"></div>
+    </div>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-neutral-100">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="#hero" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+        <div class="w-8 h-8 bg-brand rounded-full flex items-center justify-center">
+          <i data-lucide="terminal" class="w-4 h-4 text-black"></i>
+        </div>
+        <span class="font-semibold text-lg tracking-tight">helper<span class="text-brand">.</span>commands</span>
+      </a>
+      <div class="hidden md:flex items-center gap-8">
+        <a href="#toc" class="text-sm text-neutral-500 hover:text-neutral-900 transition-colors">Sumário</a>
+        <a href="https://github.com/raphael-garcia-codes/helper-commands" target="_blank" class="text-sm text-neutral-500 hover:text-neutral-900 transition-colors flex items-center gap-1.5">
+          <i data-lucide="github" class="w-4 h-4"></i> Repo
+        </a>
+        <button onclick="openSearch()" class="flex items-center gap-2 text-sm text-neutral-400 border border-neutral-200 rounded-xl px-3 py-2 hover:border-neutral-300 transition-colors">
+          <i data-lucide="search" class="w-3.5 h-3.5"></i>
+          Buscar...
+          <kbd class="text-[10px] text-neutral-400 border border-neutral-200 rounded px-1.5 py-0.5 ml-4">⌘K</kbd>
+        </button>
+      </div>
+      <button onclick="openSearch()" class="md:hidden p-2">
+        <i data-lucide="search" class="w-5 h-5 text-neutral-500"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ==================== HERO / CAPA ==================== -->
+  <section id="hero" class="relative overflow-hidden bg-black text-white">
+    <div class="absolute inset-0">
+      <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(rgba(204,243,47,0.3) 1px, transparent 1px); background-size: 32px 32px;"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full" style="background: radial-gradient(circle, rgba(204,243,47,0.12) 0%, transparent 70%);"></div>
+    </div>
+    <div class="relative max-w-7xl mx-auto px-6 py-20 md:py-32">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <div class="flex items-center gap-3 mb-8">
+            <span class="issue-badge">Edição #01</span>
+            <span class="text-neutral-500 text-sm">2025 · Referência Rápida</span>
+          </div>
+          <h1 class="text-5xl md:text-7xl font-medium tracking-tight leading-[1.1] mb-6">
+            Helper<br>
+            <span class="text-brand">Commands</span>
+          </h1>
+          <p class="text-lg text-neutral-400 leading-relaxed max-w-md mb-10">
+            Seu guia definitivo de comandos essenciais para o dia a dia do desenvolvedor. 
+            Do Git ao Helm — tudo em um só lugar.
+          </p>
+          <div class="flex flex-wrap gap-4">
+            <a href="#toc" class="inline-flex items-center gap-2 bg-brand text-black font-medium px-7 py-3.5 rounded-full hover:bg-brand-hover hover:scale-105 transition-all duration-150">
+              Começar a ler
+              <i data-lucide="arrow-down" class="w-4 h-4"></i>
+            </a>
+            <a href="https://github.com/raphael-garcia-codes/helper-commands" target="_blank" class="inline-flex items-center gap-2 border border-neutral-700 text-white font-medium px-7 py-3.5 rounded-full hover:bg-white/5 transition-all duration-150">
+              <i data-lucide="github" class="w-4 h-4"></i>
+              Ver no GitHub
+            </a>
+          </div>
+          <div class="flex items-center gap-8 mt-12 pt-8 border-t border-neutral-800">
+            <div>
+              <div class="text-2xl font-semibold text-brand">13</div>
+              <div class="text-xs text-neutral-500 mt-1">Artigos</div>
+            </div>
+            <div>
+              <div class="text-2xl font-semibold text-brand">140+</div>
+              <div class="text-xs text-neutral-500 mt-1">Comandos</div>
+            </div>
+            <div>
+              <div class="text-2xl font-semibold text-brand">∞</div>
+              <div class="text-xs text-neutral-500 mt-1">Utilidade</div>
+            </div>
+          </div>
+        </div>
+        <div class="hidden lg:flex justify-center">
+          <div class="relative animate-float">
+            <div class="code-block w-[420px] animate-pulse-glow">
+              <div class="code-dots">
+                <span class="bg-red-500"></span>
+                <span class="bg-yellow-500"></span>
+                <span class="bg-green-500"></span>
+              </div>
+              <div class="code-content" style="padding-top:8px;">
+<code><span class="comment"># Seu próximo comando favorito</span>
+<span class="command">$</span> openssl s_client -connect google.com:443
+
+<span class="output">CONNECTED(00000003)</span>
+<span class="output">subject=CN = google.com</span>
+<span class="output">issuer=CN = GTS CA 1C3</span>
+<span class="output">Verify return code: 0 (ok)</span>
+
+<span class="comment"># Simples. Poderoso. Essencial.</span></code>
+              </div>
+            </div>
+            <div class="absolute -top-4 -right-4 bg-brand text-black text-xs font-bold px-3 py-1.5 rounded-full rotate-12">
+              NOVO!
+            </div>
+            <div class="absolute -bottom-3 -left-6 bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs px-3 py-2 rounded-xl -rotate-6">
+              ⌘K para buscar
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="relative h-16 bg-white" style="clip-path: ellipse(55% 100% at 50% 100%);"></div>
+  </section>
+
+  <!-- ==================== SUMÁRIO ==================== -->
+  <section id="toc" class="py-20 px-6">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-16">
+        <span class="tag bg-brand/10 text-black mb-4">Sumário</span>
+        <h2 class="text-3xl md:text-5xl font-medium tracking-tight mt-4">Índice de Artigos</h2>
+        <p class="text-neutral-500 mt-4 text-lg">Navegue por cada seção da revista</p>
+      </div>
+      <div class="grid md:grid-cols-2 gap-x-12 gap-y-6" style="counter-reset: toc;">
+        <a href="#git" class="toc-item group py-3 border-b border-neutral-100 hover:border-brand/30 transition-colors">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-medium group-hover:text-brand transition-colors">Git Essentials</h3>
+              <p class="text-sm text-neutral-400 mt-0.5">Controle de versão e colaboração</p>
+            </div>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-neutral-300 group-hover:text-brand group-hover:translate-x-1 transition-all"></i>
+          </div>
+        </a>
+        <a href="#docker" class="toc-item group py-3 border-b border-neutral-100 hover:border-brand/30 transition-colors">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-medium group-hover:text-brand transition-colors">Docker & Containers</h3>
+              <p class="text-sm text-neutral-400 mt-0.5">Build, ship e run</p>
+            </div>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-neutral-300 group-hover:text-brand group-hover:translate-x-1 transition-all"></i>
+          </div>
+        </a>
+        <a href="#linux" class="toc-item group py-3 border-b border-neutral-100 hover:border-brand/30 transition-colors">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-medium group-hover:text-brand transition-colors">Linux Terminal</h3>
+              <p class="text-sm text-neutral-400 mt-0.5">Comandos do dia a dia no shell</p>
+            </div>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-neutral-300 group-hover:text-brand group-hover:translate-x-1 transition-all"></i>
+          </div>
+        </a>
+        <a href="#npm" class="toc-item group py-3 border-b border-neutral-100 hover:border-brand/30 transition-colors">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-medium group-hover:text-brand transition-colors">NPM & Pacotes</h3>
+              <p class="text-sm text-neutral-400 mt-0.5">Gerenciamento de dependências</p>
+            </div>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-neutral-300 group-hover:text-brand group-hover:translate-x-1 transition-all"></i>
+          </div>
+        </a>
+        <a href="#ssh" class="toc-item group py-3 border-b border-neutral-100 hover:border-brand/30 transition-colors">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-medium group-hover:text-brand transition-colors">SSH & Segurança</h3>
+              <p class="text-sm text-neutral-400 mt-0.5">Túneis, chaves e configuração</p>
+            </div>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-neutral-300 group-hover:text-brand group-hover:translate-x-1 transition-all"></i>
+          </div>
+        </a>
+        <a href="#openssl" class="toc-item group py-3 border-b border-neutral-100 hover:border-brand/30 transition-colors">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-medium group-hover:text-brand transition-colors">OpenSSL</h3>
+              <p class="text-sm text-neutral-400 mt-0.5">Certificados, chaves e criptografia</p>
+            </div>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-neutral-300 group-hover:text-brand group-hover:translate-x-1 transition-all"></i>
+          </div>
+        </a>
+        <a href="#kubernetes" class="toc-item group py-3 border-b border-neutral-100 hover:border-brand/30 transition-colors">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-medium group-hover:text-brand transition-colors">Kubernetes</h3>
+              <p class="text-sm text-neutral-400 mt-0.5">Orquestração de containers</p>
+            </div>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-neutral-300 group-hover:text-brand group-hover:translate-x-1 transition-all"></i>
+          </div>
+        </a>
+        <a href="#helm" class="toc-item group py-3 border-b border-neutral-100 hover:border-brand/30 transition-colors">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-medium group-hover:text-brand transition-colors">Helm</h3>
+              <p class="text-sm text-neutral-400 mt-0.5">Package manager para Kubernetes</p>
+            </div>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-neutral-300 group-hover:text-brand group-hover:translate-x-1 transition-all"></i>
+          </div>
+        </a>
+        <a href="#network" class="toc-item group py-3 border-b border-neutral-100 hover:border-brand/30 transition-colors">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-medium group-hover:text-brand transition-colors">Rede & DNS</h3>
+              <p class="text-sm text-neutral-400 mt-0.5">Diagnóstico e troubleshooting</p>
+            </div>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-neutral-300 group-hover:text-brand group-hover:translate-x-1 transition-all"></i>
+          </div>
+        </a>
+        <a href="#regex" class="toc-item group py-3 border-b border-neutral-100 hover:border-brand/30 transition-colors">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-medium group-hover:text-brand transition-colors">Expressões Regulares</h3>
+              <p class="text-sm text-neutral-400 mt-0.5">Padrões poderosos de busca</p>
+            </div>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-neutral-300 group-hover:text-brand group-hover:translate-x-1 transition-all"></i>
+          </div>
+        </a>
+        <a href="#python" class="toc-item group py-3 border-b border-neutral-100 hover:border-brand/30 transition-colors">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-medium group-hover:text-brand transition-colors">Python CLI</h3>
+              <p class="text-sm text-neutral-400 mt-0.5">Virtualenv, pip e utilitários</p>
+            </div>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-neutral-300 group-hover:text-brand group-hover:translate-x-1 transition-all"></i>
+          </div>
+        </a>
+        <a href="#vscode" class="toc-item group py-3 border-b border-neutral-100 hover:border-brand/30 transition-colors">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-medium group-hover:text-brand transition-colors">VS Code Tips</h3>
+              <p class="text-sm text-neutral-400 mt-0.5">Atalhos e extensões essenciais</p>
+            </div>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-neutral-300 group-hover:text-brand group-hover:translate-x-1 transition-all"></i>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== GIT ==================== -->
+  <section id="git" class="py-20 px-6 bg-neutral-50">
+    <div class="max-w-7xl mx-auto">
+      <article class="article-card">
+        <div class="grid lg:grid-cols-5 gap-12 items-start">
+          <div class="lg:col-span-2">
+            <div class="sticky top-28">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="tag bg-orange-100 text-orange-700">git.md</span>
+                <span class="tag bg-neutral-200 text-neutral-600">Intermediário</span>
+              </div>
+              <h2 class="text-3xl md:text-4xl font-medium tracking-tight mb-4">Git Essentials</h2>
+              <p class="text-neutral-500 leading-relaxed mb-6">Comandos fundamentais de Git que todo desenvolvedor precisa ter na ponta dos dedos.</p>
+              <div class="flex items-center gap-3 text-sm text-neutral-400">
+                <div class="flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5"></i> 8 min</div>
+                <span>·</span>
+                <div class="flex items-center gap-1.5"><i data-lucide="hash" class="w-3.5 h-3.5"></i> 15 comandos</div>
+              </div>
+            </div>
+          </div>
+          <div class="lg:col-span-3">
+            <div class="code-block relative">
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+              <div class="code-dots"><span class="bg-red-500"></span><span class="bg-yellow-500"></span><span class="bg-green-500"></span></div>
+              <div class="code-content"><code><span class="comment"># Branch & Merge</span>
+<span class="command">$</span> git checkout -b feature/nova-func
+<span class="command">$</span> git branch -v
+<span class="command">$</span> git merge --no-ff feature/nova-func
+<span class="command">$</span> git branch -d feature/nova-func
+<span class="command">$</span> git push origin --delete feature/nova-func
+
+<span class="comment"># Log & Histórico</span>
+<span class="command">$</span> git log --oneline --graph --all --decorate
+<span class="command">$</span> git log -p -- src/components/Header.tsx
+<span class="command">$</span> git blame -L 10,30 src/utils/helpers.ts
+<span class="command">$</span> git diff main...feature/xyz --stat
+
+<span class="comment"># Undo & Fix</span>
+<span class="command">$</span> git reset --soft HEAD~1
+<span class="command">$</span> git reset --hard HEAD~1
+<span class="command">$</span> git commit --amend -m "Nova mensagem"
+<span class="command">$</span> git revert a3f29d1
+<span class="command">$</span> git stash
+<span class="command">$</span> git stash pop
+
+<span class="comment"># Rebase & Cherry-pick</span>
+<span class="command">$</span> git rebase -i HEAD~3
+<span class="command">$</span> git cherry-pick a3f29d1
+<span class="command">$</span> git rebase --abort</code></div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ==================== DOCKER ==================== -->
+  <section id="docker" class="py-20 px-6">
+    <div class="max-w-7xl mx-auto">
+      <article class="article-card">
+        <div class="grid lg:grid-cols-5 gap-12 items-start">
+          <div class="lg:col-span-2">
+            <div class="sticky top-28">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="tag bg-blue-100 text-blue-700">docker.md</span>
+                <span class="tag bg-neutral-200 text-neutral-600">Intermediário</span>
+              </div>
+              <h2 class="text-3xl md:text-4xl font-medium tracking-tight mb-4">Docker & Containers</h2>
+              <p class="text-neutral-500 leading-relaxed mb-6">Do build ao deploy — comandos essenciais para gerenciar containers, imagens, redes e volumes.</p>
+              <div class="flex items-center gap-3 text-sm text-neutral-400">
+                <div class="flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5"></i> 7 min</div>
+                <span>·</span>
+                <div class="flex items-center gap-1.5"><i data-lucide="hash" class="w-3.5 h-3.5"></i> 14 comandos</div>
+              </div>
+            </div>
+          </div>
+          <div class="lg:col-span-3">
+            <div class="code-block relative">
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+              <div class="code-dots"><span class="bg-red-500"></span><span class="bg-yellow-500"></span><span class="bg-green-500"></span></div>
+              <div class="code-content"><code><span class="comment"># Imagens & Containers</span>
+<span class="command">$</span> docker build -t meu-app:v1 --no-cache .
+<span class="command">$</span> docker run -d -p 3000:3000 --name meu-app meu-app:v1
+<span class="command">$</span> docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+<span class="command">$</span> docker exec -it meu-app /bin/bash
+<span class="command">$</span> docker logs -f --tail 100 meu-app
+<span class="command">$</span> docker stop $(docker ps -q) && docker rm $(docker ps -aq)
+
+<span class="comment"># Volumes & Redes</span>
+<span class="command">$</span> docker volume create meu-volume
+<span class="command">$</span> docker run -d -v meu-volume:/app/data meu-app
+<span class="command">$</span> docker network create --driver bridge minha-rede
+<span class="command">$</span> docker network connect minha-rede meu-app
+<span class="command">$</span> docker compose up -d --build
+<span class="command">$</span> docker compose down -v
+
+<span class="comment"># Limpeza & Diagnóstico</span>
+<span class="command">$</span> docker system df
+<span class="command">$</span> docker system prune -a --volumes -f
+<span class="command">$</span> docker inspect meu-app | jq '.[0].NetworkSettings.IPAddress'
+<span class="command">$</span> docker cp meu-app:/app/logs.txt ./logs/</code></div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ==================== LINUX ==================== -->
+  <section id="linux" class="py-20 px-6 bg-neutral-50">
+    <div class="max-w-7xl mx-auto">
+      <article class="article-card">
+        <div class="grid lg:grid-cols-5 gap-12 items-start">
+          <div class="lg:col-span-2">
+            <div class="sticky top-28">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="tag bg-yellow-100 text-yellow-800">linux.md</span>
+                <span class="tag bg-green-100 text-green-700">Básico</span>
+              </div>
+              <h2 class="text-3xl md:text-4xl font-medium tracking-tight mb-4">Linux Terminal</h2>
+              <p class="text-neutral-500 leading-relaxed mb-6">Os comandos que você usa todos os dias no terminal Linux. Navegação, arquivos, processos e permissões.</p>
+              <div class="flex items-center gap-3 text-sm text-neutral-400">
+                <div class="flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5"></i> 10 min</div>
+                <span>·</span>
+                <div class="flex items-center gap-1.5"><i data-lucide="hash" class="w-3.5 h-3.5"></i> 18 comandos</div>
+              </div>
+            </div>
+          </div>
+          <div class="lg:col-span-3">
+            <div class="code-block relative">
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+              <div class="code-dots"><span class="bg-red-500"></span><span class="bg-yellow-500"></span><span class="bg-green-500"></span></div>
+              <div class="code-content"><code><span class="comment"># Navegação & Arquivos</span>
+<span class="command">$</span> ls -lah
+<span class="command">$</span> tree -L 2 -I 'node_modules|.git'
+<span class="command">$</span> find . -name "*.tsx" -type f
+<span class="command">$</span> grep -rn "TODO" src/ --include="*.{ts,tsx}"
+<span class="command">$</span> df -h /
+<span class="command">$</span> du -sh * | sort -rh | head -10
+
+<span class="comment"># Processos & Memória</span>
+<span class="command">$</span> htop
+<span class="command">$</span> pkill -f "node server.js"
+<span class="command">$</span> lsof -i :3000
+<span class="command">$</span> ss -tlnp | grep 3000
+<span class="command">$</span> free -h
+<span class="command">$</span> history | tail -20
+
+<span class="comment"># Permissões & Download</span>
+<span class="command">$</span> chmod 755 script.sh
+<span class="command">$</span> chown user:group arquivo.txt
+<span class="command">$</span> wget -qO arquivo.zip https://exemplo.com/arquivo.zip
+<span class="command">$</span> curl -L -o arquivo.tar.gz https://exemplo.com/file.tar.gz
+<span class="command">$</span> tar -xzf arquivo.tar.gz</code></div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ==================== NPM ==================== -->
+  <section id="npm" class="py-20 px-6">
+    <div class="max-w-7xl mx-auto">
+      <article class="article-card">
+        <div class="grid lg:grid-cols-5 gap-12 items-start">
+          <div class="lg:col-span-2">
+            <div class="sticky top-28">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="tag bg-red-100 text-red-700">npm.md</span>
+                <span class="tag bg-green-100 text-green-700">Básico</span>
+              </div>
+              <h2 class="text-3xl md:text-4xl font-medium tracking-tight mb-4">NPM & Pacotes</h2>
+              <p class="text-neutral-500 leading-relaxed mb-6">Gerenciamento de dependências, scripts, versionamento semântico e saúde do package.json.</p>
+              <div class="flex items-center gap-3 text-sm text-neutral-400">
+                <div class="flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5"></i> 5 min</div>
+                <span>·</span>
+                <div class="flex items-center gap-1.5"><i data-lucide="hash" class="w-3.5 h-3.5"></i> 12 comandos</div>
+              </div>
+            </div>
+          </div>
+          <div class="lg:col-span-3">
+            <div class="code-block relative">
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+              <div class="code-dots"><span class="bg-red-500"></span><span class="bg-yellow-500"></span><span class="bg-green-500"></span></div>
+              <div class="code-content"><code><span class="comment"># Iniciar & Instalar</span>
+<span class="command">$</span> npm init -y
+<span class="command">$</span> npm install express
+<span class="command">$</span> npm install -D typescript @types/node
+<span class="command">$</span> npm install react@^18.2.0
+
+<span class="comment"># Gerenciar</span>
+<span class="command">$</span> npm outdated
+<span class="command">$</span> npm update
+<span class="command">$</span> npm audit --production
+<span class="command">$</span> npm audit fix
+<span class="command">$</span> npm cache clean --force
+<span class="command">$</span> npm list --depth=0
+<span class="command">$</span> npm info eslint version
+
+<span class="comment"># Scripts</span>
+<span class="command">$</span> npm run dev
+<span class="command">$</span> npm run</code></div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ==================== SSH ==================== -->
+  <section id="ssh" class="py-20 px-6 bg-neutral-50">
+    <div class="max-w-7xl mx-auto">
+      <article class="article-card">
+        <div class="grid lg:grid-cols-5 gap-12 items-start">
+          <div class="lg:col-span-2">
+            <div class="sticky top-28">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="tag bg-purple-100 text-purple-700">ssh.md</span>
+                <span class="tag bg-neutral-200 text-neutral-600">Avançado</span>
+              </div>
+              <h2 class="text-3xl md:text-4xl font-medium tracking-tight mb-4">SSH & Segurança</h2>
+              <p class="text-neutral-500 leading-relaxed mb-6">Geração de chaves, configuração do config file, túneis SSH e acesso remoto seguro.</p>
+              <div class="flex items-center gap-3 text-sm text-neutral-400">
+                <div class="flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5"></i> 6 min</div>
+                <span>·</span>
+                <div class="flex items-center gap-1.5"><i data-lucide="hash" class="w-3.5 h-3.5"></i> 8 comandos</div>
+              </div>
+            </div>
+          </div>
+          <div class="lg:col-span-3">
+            <div class="code-block relative">
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+              <div class="code-dots"><span class="bg-red-500"></span><span class="bg-yellow-500"></span><span class="bg-green-500"></span></div>
+              <div class="code-content"><code><span class="comment"># Chaves</span>
+<span class="command">$</span> ssh-keygen -t ed25519 -C "seu@email.com"
+<span class="command">$</span> ssh-copy-id -i ~/.ssh/id_ed25519.pub user@server
+
+<span class="comment"># Conexão</span>
+<span class="command">$</span> ssh prod
+<span class="command">$</span> ssh -v user@server
+
+<span class="comment"># Túneis</span>
+<span class="command">$</span> ssh -L 8080:localhost:3000 user@server
+<span class="command">$</span> ssh -R 8080:localhost:3000 user@server
+<span class="command">$</span> ssh -D 1080 -N user@server</code></div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ==================== OPENSSL ==================== -->
+  <section id="openssl" class="py-20 px-6">
+    <div class="max-w-7xl mx-auto">
+      <article class="article-card">
+        <div class="grid lg:grid-cols-5 gap-12 items-start">
+          <div class="lg:col-span-2">
+            <div class="sticky top-28">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="tag bg-amber-100 text-amber-800">openssl.md</span>
+                <span class="tag bg-red-100 text-red-700">Avançado</span>
+              </div>
+              <h2 class="text-3xl md:text-4xl font-medium tracking-tight mb-4">OpenSSL</h2>
+              <p class="text-neutral-500 leading-relaxed mb-6">Gerar chaves, criar CSRs, inspecionar certificados, verificar conexões TLS e converter formatos.</p>
+              <div class="flex items-center gap-3 text-sm text-neutral-400">
+                <div class="flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5"></i> 7 min</div>
+                <span>·</span>
+                <div class="flex items-center gap-1.5"><i data-lucide="hash" class="w-3.5 h-3.5"></i> 16 comandos</div>
+              </div>
+              <div class="mt-8 p-4 bg-neutral-50 rounded-2xl border border-neutral-200">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-3">Dica rápida</h4>
+                <p class="text-sm text-neutral-600 leading-relaxed">
+                  Use <code class="bg-neutral-100 px-1.5 py-0.5 rounded text-xs font-mono">| openssl x509 -noout -dates</code> para extrair rapidamente as datas de validade de qualquer certificado.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="lg:col-span-3">
+            <div class="code-block relative">
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+              <div class="code-dots"><span class="bg-red-500"></span><span class="bg-yellow-500"></span><span class="bg-green-500"></span></div>
+              <div class="code-content"><code><span class="comment"># Gerar chaves</span>
+<span class="command">$</span> openssl genrsa -out privkey.pem 2048
+<span class="command">$</span> openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256 -out ec-key.pem
+<span class="command">$</span> openssl rsa -in privkey.pem -pubout -out pubkey.pem
+
+<span class="comment"># Criar CSR</span>
+<span class="command">$</span> openssl req -new -key privkey.pem -out request.csr
+<span class="command">$</span> openssl req -new -key privkey.pem -out request.csr -subj "/CN=meudominio.com/O=MinhaOrg/C=BR"
+
+<span class="comment"># Gerar certificado auto-assinado</span>
+<span class="command">$</span> openssl req -x509 -new -nodes -key privkey.pem -sha256 -days 365 -out cert.pem
+
+<span class="comment"># Inspecionar certificado</span>
+<span class="command">$</span> openssl x509 -in cert.pem -text -noout
+<span class="command">$</span> openssl x509 -in cert.pem -noout -dates
+<span class="command">$</span> openssl x509 -in cert.pem -noout -subject -issuer
+<span class="command">$</span> openssl req -in request.csr -text -noout
+
+<span class="comment"># Verificar conexão TLS</span>
+<span class="command">$</span> openssl s_client -connect google.com:443 -servername google.com
+<span class="command">$</span> echo | openssl s_client -connect google.com:443 2>/dev/null | openssl x509 -noout -dates
+
+<span class="comment"># Converter formatos</span>
+<span class="command">$</span> openssl x509 -in cert.pem -outform DER -out cert.der
+<span class="command">$</span> openssl x509 -in cert.der -inform DER -outform PEM -out cert.pem
+<span class="command">$</span> openssl pkcs12 -export -out bundle.pfx -inkey privkey.pem -in cert.pem
+
+<span class="comment"># Hash & Encode</span>
+<span class="command">$</span> openssl dgst -sha256 arquivo.txt
+<span class="command">$</span> echo -n "texto" | openssl base64
+<span class="command">$</span> echo "c2V1IHRleHRv" | openssl base64 -d</code></div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ==================== KUBERNETES ==================== -->
+  <section id="kubernetes" class="py-20 px-6 bg-neutral-50">
+    <div class="max-w-7xl mx-auto">
+      <article class="article-card">
+        <div class="grid lg:grid-cols-5 gap-12 items-start">
+          <div class="lg:col-span-2">
+            <div class="sticky top-28">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="tag bg-indigo-100 text-indigo-700">kubernetes.md</span>
+                <span class="tag bg-red-100 text-red-700">Avançado</span>
+              </div>
+              <h2 class="text-3xl md:text-4xl font-medium tracking-tight mb-4">Kubernetes</h2>
+              <p class="text-neutral-500 leading-relaxed mb-6">Comandos kubectl essenciais para inspectar, debugar e gerenciar recursos em clusters.</p>
+              <div class="flex items-center gap-3 text-sm text-neutral-400">
+                <div class="flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5"></i> 8 min</div>
+                <span>·</span>
+                <div class="flex items-center gap-1.5"><i data-lucide="hash" class="w-3.5 h-3.5"></i> 11 comandos</div>
+              </div>
+            </div>
+          </div>
+          <div class="lg:col-span-3">
+            <div class="code-block relative">
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+              <div class="code-dots"><span class="bg-red-500"></span><span class="bg-yellow-500"></span><span class="bg-green-500"></span></div>
+              <div class="code-content"><code><span class="command">$</span> kubectl get pods -A
+<span class="command">$</span> kubectl describe pod <pod> -n production
+<span class="command">$</span> kubectl logs <pod> --tail=100 -f
+<span class="command">$</span> kubectl exec -it <pod> -- sh
+<span class="command">$</span> kubectl port-forward svc/app 8080:80
+<span class="command">$</span> kubectl apply -f k8s/deployment.yaml
+<span class="command">$</span> kubectl rollout restart deployment/app
+<span class="command">$</span> kubectl rollout status deployment/app
+<span class="command">$</span> kubectl get events --sort-by=.metadata.creationTimestamp
+<span class="command">$</span> kubectl top pods -n production --sort-by=memory
+<span class="command">$</span> kubectl config current-context</code></div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ==================== HELM ==================== -->
+  <section id="helm" class="py-20 px-6">
+    <div class="max-w-7xl mx-auto">
+      <article class="article-card">
+        <div class="grid lg:grid-cols-5 gap-12 items-start">
+          <div class="lg:col-span-2">
+            <div class="sticky top-28">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="tag bg-sky-100 text-sky-700">helm.md</span>
+                <span class="tag bg-neutral-200 text-neutral-600">Intermediário</span>
+              </div>
+              <h2 class="text-3xl md:text-4xl font-medium tracking-tight mb-4">Helm</h2>
+              <p class="text-neutral-500 leading-relaxed mb-6">O gerenciador de pacotes do Kubernetes. Repositórios, installs, upgrades, rollback e debug de charts.</p>
+              <div class="flex items-center gap-3 text-sm text-neutral-400">
+                <div class="flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5"></i> 7 min</div>
+                <span>·</span>
+                <div class="flex items-center gap-1.5"><i data-lucide="hash" class="w-3.5 h-3.5"></i> 16 comandos</div>
+              </div>
+              <div class="mt-8 p-4 bg-neutral-50 rounded-2xl border border-neutral-200">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-3">Dica rápida</h4>
+                <p class="text-sm text-neutral-600 leading-relaxed">
+                  Use <code class="bg-neutral-100 px-1.5 py-0.5 rounded text-xs font-mono">helm template</code> antes de instalar para validar os manifestos sem aplicar nada no cluster.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="lg:col-span-3">
+            <div class="code-block relative">
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+              <div class="code-dots"><span class="bg-red-500"></span><span class="bg-yellow-500"></span><span class="bg-green-500"></span></div>
+              <div class="code-content"><code><span class="comment"># Repositórios</span>
+<span class="command">$</span> helm repo add bitnami https://charts.bitnami.com/bitnami
+<span class="command">$</span> helm repo update
+<span class="command">$</span> helm repo list
+
+<span class="comment"># Buscar & Inspecionar</span>
+<span class="command">$</span> helm search repo nginx
+<span class="command">$</span> helm show values bitnami/nginx
+<span class="command">$</span> helm show readme bitnami/nginx
+
+<span class="comment"># Instalar & Gerenciar</span>
+<span class="command">$</span> helm install my-app bitnami/nginx -n production -f values.yaml
+<span class="command">$</span> helm upgrade my-app bitnami/nginx -n production -f values.yaml
+<span class="command">$</span> helm uninstall my-app -n production
+<span class="command">$</span> helm list -A
+<span class="command">$</span> helm status my-app -n production
+
+<span class="comment"># Rollback & Histórico</span>
+<span class="command">$</span> helm history my-app -n production
+<span class="command">$</span> helm rollback my-app 1 -n production
+
+<span class="comment"># Debug & Template</span>
+<span class="command">$</span> helm lint ./my-chart
+<span class="command">$</span> helm template my-app ./my-chart -f values.yaml
+<span class="command">$</span> helm diff upgrade my-app ./my-chart -n production
+
+<span class="comment"># Criar & Empacotar Chart</span>
+<span class="command">$</span> helm create my-chart
+<span class="command">$</span> helm package ./my-chart
+<span class="command">$</span> helm pull bitnami/nginx --untar</code></div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ==================== REDE ==================== -->
+  <section id="network" class="py-20 px-6 bg-neutral-50">
+    <div class="max-w-7xl mx-auto">
+      <article class="article-card">
+        <div class="grid lg:grid-cols-5 gap-12 items-start">
+          <div class="lg:col-span-2">
+            <div class="sticky top-28">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="tag bg-cyan-100 text-cyan-700">network.md</span>
+                <span class="tag bg-neutral-200 text-neutral-600">Intermediário</span>
+              </div>
+              <h2 class="text-3xl md:text-4xl font-medium tracking-tight mb-4">Rede & DNS</h2>
+              <p class="text-neutral-500 leading-relaxed mb-6">Diagnosticar problemas de rede, verificar DNS, portas e conexões pelo terminal.</p>
+              <div class="flex items-center gap-3 text-sm text-neutral-400">
+                <div class="flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5"></i> 5 min</div>
+                <span>·</span>
+                <div class="flex items-center gap-1.5"><i data-lucide="hash" class="w-3.5 h-3.5"></i> 10 comandos</div>
+              </div>
+            </div>
+          </div>
+          <div class="lg:col-span-3">
+            <div class="code-block relative">
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+              <div class="code-dots"><span class="bg-red-500"></span><span class="bg-yellow-500"></span><span class="bg-green-500"></span></div>
+              <div class="code-content"><code><span class="comment"># Conectividade</span>
+<span class="command">$</span> ping -c 4 google.com
+<span class="command">$</span> traceroute google.com
+<span class="command">$</span> mtr -r google.com
+<span class="command">$</span> nc -zv localhost 3000
+
+<span class="comment"># DNS</span>
+<span class="command">$</span> dig google.com +short
+<span class="command">$</span> nslookup -type=MX gmail.com
+
+<span class="comment"># Portas & IP</span>
+<span class="command">$</span> ss -tlnp
+<span class="command">$</span> netstat -tlnp
+<span class="command">$</span> curl ifconfig.me
+<span class="command">$</span> ip neigh show</code></div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ==================== REGEX ==================== -->
+  <section id="regex" class="py-20 px-6">
+    <div class="max-w-7xl mx-auto">
+      <article class="article-card">
+        <div class="grid lg:grid-cols-5 gap-12 items-start">
+          <div class="lg:col-span-2">
+            <div class="sticky top-28">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="tag bg-emerald-100 text-emerald-700">regex.md</span>
+                <span class="tag bg-red-100 text-red-700">Avançado</span>
+              </div>
+              <h2 class="text-3xl md:text-4xl font-medium tracking-tight mb-4">Expressões Regulares</h2>
+              <p class="text-neutral-500 leading-relaxed mb-6">Padrões de regex prontos para copiar e colar. Email, URL, CPF, telefone e mais.</p>
+              <div class="flex items-center gap-3 text-sm text-neutral-400">
+                <div class="flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5"></i> 4 min</div>
+                <span>·</span>
+                <div class="flex items-center gap-1.5"><i data-lucide="hash" class="w-3.5 h-3.5"></i> 8 padrões</div>
+              </div>
+            </div>
+          </div>
+          <div class="lg:col-span-3">
+            <div class="code-block relative">
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+              <div class="code-dots"><span class="bg-red-500"></span><span class="bg-yellow-500"></span><span class="bg-green-500"></span></div>
+              <div class="code-content"><code><span class="comment"># Email</span>
+<span class="command">/</span>^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$<span class="command">/</span>
+
+<span class="comment"># URL</span>
+<span class="command">/</span>https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)<span class="command">/</span>
+
+<span class="comment"># CPF</span>
+<span class="command">/</span>^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$<span class="command">/</span>
+
+<span class="comment"># Telefone BR</span>
+<span class="command">/</span>^(?:\(\d{2}\)\s?)?\d{4,5}-?\d{4}$<span class="command">/</span>
+
+<span class="comment"># Senha forte</span>
+<span class="command">/</span>^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$<span class="command">/</span>
+
+<span class="comment"># Hex color</span>
+<span class="command">/</span>^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$<span class="command">/</span>
+
+<span class="comment"># IPv4</span>
+<span class="command">/</span>^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$<span class="command">/</span>
+
+<span class="comment"># UUID v4</span>
+<span class="command">/</span>^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$<span class="command">/i</span></code></div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ==================== PYTHON ==================== -->
+  <section id="python" class="py-20 px-6 bg-neutral-50">
+    <div class="max-w-7xl mx-auto">
+      <article class="article-card">
+        <div class="grid lg:grid-cols-5 gap-12 items-start">
+          <div class="lg:col-span-2">
+            <div class="sticky top-28">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="tag bg-green-100 text-green-700">python.md</span>
+                <span class="tag bg-green-100 text-green-700">Básico</span>
+              </div>
+              <h2 class="text-3xl md:text-4xl font-medium tracking-tight mb-4">Python CLI</h2>
+              <p class="text-neutral-500 leading-relaxed mb-6">Virtualenv, pip, pytest e comandos úteis do ecossistema Python no terminal.</p>
+              <div class="flex items-center gap-3 text-sm text-neutral-400">
+                <div class="flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5"></i> 5 min</div>
+                <span>·</span>
+                <div class="flex items-center gap-1.5"><i data-lucide="hash" class="w-3.5 h-3.5"></i> 10 comandos</div>
+              </div>
+            </div>
+          </div>
+          <div class="lg:col-span-3">
+            <div class="code-block relative">
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+              <div class="code-dots"><span class="bg-red-500"></span><span class="bg-yellow-500"></span><span class="bg-green-500"></span></div>
+              <div class="code-content"><code><span class="comment"># Virtualenv</span>
+<span class="command">$</span> python3 -m venv .venv
+<span class="command">$</span> source .venv/bin/activate
+<span class="command">$</span> pip install -r requirements.txt
+<span class="command">$</span> pip freeze > requirements.txt
+
+<span class="comment"># Desenvolvimento</span>
+<span class="command">$</span> pytest --cov=src --cov-report=html
+<span class="command">$</span> python3 -m http.server 8000
+<span class="command">$</span> black src/ --line-length=100
+<span class="command">$</span> ruff check src/
+
+<span class="comment"># Gerenciar</span>
+<span class="command">$</span> pip list --format=columns
+<span class="command">$</span> pip install --upgrade pip</code></div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ==================== VSCODE ==================== -->
+  <section id="vscode" class="py-20 px-6">
+    <div class="max-w-7xl mx-auto">
+      <article class="article-card">
+        <div class="grid lg:grid-cols-5 gap-12 items-start">
+          <div class="lg:col-span-2">
+            <div class="sticky top-28">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="tag bg-blue-100 text-blue-700">vscode.md</span>
+                <span class="tag bg-green-100 text-green-700">Básico</span>
+              </div>
+              <h2 class="text-3xl md:text-4xl font-medium tracking-tight mb-4">VS Code Tips</h2>
+              <p class="text-neutral-500 leading-relaxed mb-6">Atalhos de teclado e extensões que vão acelerar seu fluxo no VS Code.</p>
+              <div class="flex items-center gap-3 text-sm text-neutral-400">
+                <div class="flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5"></i> 4 min</div>
+                <span>·</span>
+                <div class="flex items-center gap-1.5"><i data-lucide="hash" class="w-3.5 h-3.5"></i> 15 atalhos</div>
+              </div>
+            </div>
+          </div>
+          <div class="lg:col-span-3 space-y-6">
+            <h3 class="text-xl font-medium mb-4 flex items-center gap-2">
+              <i data-lucide="keyboard" class="w-5 h-5 text-brand"></i>
+              Atalhos Essenciais
+            </h3>
+            <div class="grid gap-3">
+              <div class="flex items-center justify-between p-4 bg-neutral-50 rounded-2xl border border-neutral-200 hover:border-brand/30 transition-colors">
+                <span class="text-sm text-neutral-600">Command Palette</span>
+                <div class="flex gap-1"><kbd class="bg-white border border-neutral-200 rounded-lg px-2.5 py-1 text-xs font-mono">⌘</kbd><kbd class="bg-white border border-neutral-200 rounded-lg px-2.5 py-1 text-xs font-mono">Shift</kbd><kbd class="bg-white border border-neutral-200 rounded-lg px-2.5 py-1 text-xs font-mono">P</kbd></div>
+              </div>
+              <div class="flex items-center justify-between p-4 bg-neutral-50 rounded-2xl border border-neutral-200 hover:border-brand/30 transition-colors">
+                <span class="text-sm text-neutral-600">Quick Open (arquivo)</span>
+                <div class="flex gap-1"><kbd class="bg-white border border-neutral-200 rounded-lg px-2.5 py-1 text-xs font-mono">⌘</kbd><kbd class="bg-white border border-neutral-200 rounded-lg px-2.5 py-1 text-xs font-mono">P</kbd></div>
+              </div>
+              <div class="flex items-center justify-between p-4 bg-neutral-50 rounded-2xl border border-neutral-200 hover:border-brand/30 transition-colors">
+                <span class="text-sm text-neutral-600">Terminal</span>
+                <div class="flex gap-1"><kbd class="bg-white border border-neutral-200 rounded-lg px-2.5 py-1 text-xs font-mono">⌘</kbd><kbd class="bg-white border border-neutral-200 rounded-lg px-2.5 py-1 text-xs font-mono">`</kbd></div>
+              </div>
+              <div class="flex items-center justify-between p-4 bg-neutral-50 rounded-2xl border border-neutral-200 hover:border-brand/30 transition-colors">
+                <span class="text-sm text-neutral-600">Multi-cursor</span>
+                <div class="flex gap-1"><kbd class="bg-white border border-neutral-200 rounded-lg px-2.5 py-1 text-xs font-mono">⌥</kbd><kbd class="bg-white border border-neutral-200 rounded-lg px-2.5 py-1 text-xs font-mono">Click</kbd></div>
+              </div>
+              <div class="flex items-center justify-between p-4 bg-neutral-50 rounded-2xl border border-neutral-200 hover:border-brand/30 transition-colors">
+                <span class="text-sm text-neutral-600">Selecionar todas as ocorrências</span>
+                <div class="flex gap-1"><kbd class="bg-white border border-neutral-200 rounded-lg px-2.5 py-1 text-xs font-mono">⌘</kbd><kbd class="bg-white border border-neutral-200 rounded-lg px-2.5 py-1 text-xs font-mono">Shift</kbd><kbd class="bg-white border border-neutral-200 rounded-lg px-2.5 py-1 text-xs font-mono">L</kbd></div>
+              </div>
+              <div class="flex items-center justify-between p-4 bg-neutral-50 rounded-2xl border border-neutral-200 hover:border-brand/30 transition-colors">
+                <span class="text-sm text-neutral-600">Mover linha</span>
+                <div class="flex gap-1"><kbd class="bg-white border border-neutral-200 rounded-lg px-2.5 py-1 text-xs font-mono">⌥</kbd><kbd class="bg-white border border-neutral-200 rounded-lg px-2.5 py-1 text-xs font-mono">↑</kbd><kbd class="bg-white border border-neutral-200 rounded-lg px-2.5 py-1 text-xs font-mono">↓</kbd></div>
+              </div>
+              <div class="flex items-center justify-between p-4 bg-neutral-50 rounded-2xl border border-neutral-200 hover:border-brand/30 transition-colors">
+                <span class="text-sm text-neutral-600">Duplicar linha</span>
+                <div class="flex gap-1"><kbd class="bg-white border border-neutral-200 rounded-lg px-2.5 py-1 text-xs font-mono">Shift</kbd><kbd class="bg-white border border-neutral-200 rounded-lg px-2.5 py-1 text-xs font-mono">⌥</kbd><kbd class="bg-white border border-neutral-200 rounded-lg px-2.5 py-1 text-xs font-mono">↓</kbd></div>
+              </div>
+              <div class="flex items-center justify-between p-4 bg-neutral-50 rounded-2xl border border-neutral-200 hover:border-brand/30 transition-colors">
+                <span class="text-sm text-neutral-600">Toggle sidebar</span>
+                <div class="flex gap-1"><kbd class="bg-white border border-neutral-200 rounded-lg px-2.5 py-1 text-xs font-mono">⌘</kbd><kbd class="bg-white border border-neutral-200 rounded-lg px-2.5 py-1 text-xs font-mono">B</kbd></div>
+              </div>
+            </div>
+
+            <h3 class="text-xl font-medium mb-4 pt-4 flex items-center gap-2">
+              <i data-lucide="puzzle" class="w-5 h-5 text-brand"></i>
+              Extensões via CLI
+            </h3>
+            <div class="code-block relative">
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+              <div class="code-dots"><span class="bg-red-500"></span><span class="bg-yellow-500"></span><span class="bg-green-500"></span></div>
+              <div class="code-content"><code><span class="comment"># Instalar extensões</span>
+<span class="command">$</span> code --install-extension esbenp.prettier-vscode
+<span class="command">$</span> code --install-extension dbaeumer.vscode-eslint
+<span class="command">$</span> code --install-extension bradlc.vscode-tailwindcss
+<span class="command">$</span> code --install-extension charliermarsh.ruff
+<span class="command">$</span> code --install-extension ms-python.python
+
+<span class="comment"># Listar instaladas</span>
+<span class="command">$</span> code --list-extensions</code></div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-black text-white py-16 px-6">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid md:grid-cols-3 gap-12 mb-12">
+        <div>
+          <a href="#hero" class="flex items-center gap-3 mb-4 hover:opacity-80 transition-opacity">
+            <div class="w-8 h-8 bg-brand rounded-full flex items-center justify-center">
+              <i data-lucide="terminal" class="w-4 h-4 text-black"></i>
+            </div>
+            <span class="font-semibold text-lg">helper<span class="text-brand">.</span>commands</span>
+          </a>
+          <p class="text-neutral-500 text-sm leading-relaxed">
+            Uma revista digital de referência rápida para comandos essenciais do dia a dia do desenvolvedor.
+          </p>
+        </div>
+        <div>
+          <h4 class="font-medium mb-4 text-sm uppercase tracking-wider text-neutral-400">Navegação</h4>
+          <div class="grid grid-cols-2 gap-x-6 gap-y-2">
+            <a href="#git" class="text-sm text-neutral-500 hover:text-brand transition-colors">Git</a>
+            <a href="#docker" class="text-sm text-neutral-500 hover:text-brand transition-colors">Docker</a>
+            <a href="#linux" class="text-sm text-neutral-500 hover:text-brand transition-colors">Linux</a>
+            <a href="#npm" class="text-sm text-neutral-500 hover:text-brand transition-colors">NPM</a>
+            <a href="#ssh" class="text-sm text-neutral-500 hover:text-brand transition-colors">SSH</a>
+            <a href="#openssl" class="text-sm text-neutral-500 hover:text-brand transition-colors">OpenSSL</a>
+            <a href="#kubernetes" class="text-sm text-neutral-500 hover:text-brand transition-colors">Kubernetes</a>
+            <a href="#helm" class="text-sm text-neutral-500 hover:text-brand transition-colors">Helm</a>
+            <a href="#network" class="text-sm text-neutral-500 hover:text-brand transition-colors">Rede</a>
+            <a href="#regex" class="text-sm text-neutral-500 hover:text-brand transition-colors">Regex</a>
+            <a href="#python" class="text-sm text-neutral-500 hover:text-brand transition-colors">Python</a>
+            <a href="#vscode" class="text-sm text-neutral-500 hover:text-brand transition-colors">VS Code</a>
+          </div>
+        </div>
+        <div>
+          <h4 class="font-medium mb-4 text-sm uppercase tracking-wider text-neutral-400">Recurso</h4>
+          <a href="https://github.com/raphael-garcia-codes/helper-commands" target="_blank" class="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-brand transition-colors mb-3">
+            <i data-lucide="github" class="w-4 h-4"></i> Repositório no GitHub
+          </a>
+          <p class="text-xs text-neutral-600 mt-4">
+            Conteúdo gerado a partir dos arquivos .md do repositório helper-commands.
+          </p>
+        </div>
+      </div>
+      <div class="border-t border-neutral-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <p class="text-xs text-neutral-600">© 2025 helper.commands — por Raphael Garcia</p>
+        <div class="flex items-center gap-1 text-xs text-neutral-600">
+          Feito com <span class="text-brand mx-1">♥</span> e muito <code class="bg-neutral-900 px-1.5 py-0.5 rounded text-brand font-mono">Ctrl+C / Ctrl+V</code>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back to top -->
+  <button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" class="fixed bottom-8 right-8 w-12 h-12 bg-black text-white rounded-full shadow-2xl flex items-center justify-center opacity-0 translate-y-4 transition-all duration-300 hover:bg-brand hover:text-black z-50">
+    <i data-lucide="arrow-up" class="w-5 h-5"></i>
+  </button>
+
+  <script>
+    lucide.createIcons();
+
+    function copyCode(btn) {
+      const block = btn.closest('.code-block');
+      const code = block.querySelector('code').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        btn.textContent = 'Copiado!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copiar';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+    document.querySelectorAll('.article-card').forEach(card => observer.observe(card));
+
+    const sections = document.querySelectorAll('section[id]');
+    const dots = document.querySelectorAll('.sidebar-dot');
+
+    dots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        const target = document.getElementById(dot.dataset.target);
+        if (target) target.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(section => {
+        const top = section.offsetTop - 200;
+        if (window.scrollY >= top) current = section.id;
+      });
+      dots.forEach(dot => {
+        dot.classList.toggle('active', dot.dataset.target === current);
+      });
+
+      const btn = document.getElementById('backToTop');
+      if (window.scrollY > 600) {
+        btn.style.opacity = '1';
+        btn.style.transform = 'translateY(0)';
+      } else {
+        btn.style.opacity = '0';
+        btn.style.transform = 'translateY(1rem)';
+      }
+    });
+
+    const searchData = [
+      { title: 'Git Essentials', section: 'git', tags: ['git', 'commit', 'branch', 'merge', 'rebase', 'stash', 'log', 'blame', 'cherry-pick'] },
+      { title: 'Docker & Containers', section: 'docker', tags: ['docker', 'build', 'run', 'compose', 'volume', 'network', 'container', 'prune'] },
+      { title: 'Linux Terminal', section: 'linux', tags: ['linux', 'ls', 'grep', 'find', 'chmod', 'chown', 'htop', 'tar', 'wget', 'curl', 'du', 'df'] },
+      { title: 'NPM & Pacotes', section: 'npm', tags: ['npm', 'install', 'init', 'audit', 'update', 'outdated', 'cache', 'package'] },
+      { title: 'SSH & Segurança', section: 'ssh', tags: ['ssh', 'keygen', 'tunnel', 'proxy', 'config', 'chave', 'túnel'] },
+      { title: 'OpenSSL', section: 'openssl', tags: ['openssl', 'certificado', 'csr', 'chave', 'tls', 'ssl', 'pem', 'pfx', 'base64', 'hash'] },
+      { title: 'Kubernetes', section: 'kubernetes', tags: ['kubernetes', 'k8s', 'kubectl', 'pod', 'deployment', 'rollout', 'port-forward', 'logs'] },
+      { title: 'Helm', section: 'helm', tags: ['helm', 'chart', 'install', 'upgrade', 'rollback', 'repo', 'template', 'lint', 'values'] },
+      { title: 'Rede & DNS', section: 'network', tags: ['dns', 'ping', 'dig', 'netstat', 'nc', 'traceroute', 'ip', 'curl'] },
+      { title: 'Expressões Regulares', section: 'regex', tags: ['regex', 'email', 'cpf', 'url', 'senha', 'ipv4', 'uuid', 'telefone'] },
+      { title: 'Python CLI', section: 'python', tags: ['python', 'pip', 'venv', 'virtualenv', 'pytest', 'black', 'ruff', 'http.server'] },
+      { title: 'VS Code Tips', section: 'vscode', tags: ['vscode', 'atalho', 'extensão', 'prettier', 'eslint', 'terminal', 'shortcut'] },
+    ];
+
+    function openSearch() {
+      document.getElementById('searchOverlay').classList.add('open');
+      setTimeout(() => document.getElementById('searchInput').focus(), 100);
+    }
+    function closeSearch() {
+      document.getElementById('searchOverlay').classList.remove('open');
+      document.getElementById('searchInput').value = '';
+      document.getElementById('searchResults').innerHTML = '';
+    }
+
+    document.getElementById('searchOverlay').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeSearch();
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      const results = document.getElementById('searchResults');
+      if (!q) { results.innerHTML = ''; return; }
+
+      const matches = searchData.filter(item =>
+        item.title.toLowerCase().includes(q) ||
+        item.tags.some(t => t.includes(q))
+      );
+
+      if (matches.length === 0) {
+        results.innerHTML = '<div class="p-6 text-center text-neutral-500 text-sm">Nenhum resultado encontrado</div>';
+        return;
+      }
+
+      results.innerHTML = matches.map(item => `
+        <div class="search-result-item" onclick="closeSearch(); document.getElementById('${item.section}').scrollIntoView({behavior:'smooth'})">
+          <div class="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center shrink-0">
+            <i data-lucide="file-text" class="w-4 h-4 text-brand"></i>
+          </div>
+          <div>
+            <div class="text-sm font-medium text-white">${item.title}</div>
+            <div class="text-xs text-neutral-500 mt-0.5">${item.tags.slice(0, 4).join(' · ')}</div>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        openSearch();
+      }
+      if (e.key === 'Escape') closeSearch();
+    });
+  </script>
+</body>
+</html>
