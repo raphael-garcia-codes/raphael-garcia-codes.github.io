@@ -537,6 +537,16 @@
 <span class="command">$</span> git rebase -i HEAD~3
 <span class="command">$</span> git cherry-pick a3f29d1
 <span class="command">$</span> git rebase --abort</code></div>
+
+<span class="comment"># Example</span>
+<span class="command">$</span> git branch
+<span class="command">$</span> git checkout main
+<span class="command">$</span> git restore .
+<span class="command">$</span> git pull origin main
+<span class="command">$</span> git checkout -b fix-new-branch
+<span class="command">$</span> git add .
+<span class="command">$</span> git commit -m "Text"
+<span class="command">$</span> git push orgin fix-new-branch</code></div>
             </div>
           </div>
         </div>
@@ -834,8 +844,9 @@
               <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
               <div class="code-dots"><span class="bg-red-500"></span><span class="bg-yellow-500"></span><span class="bg-green-500"></span></div>
               <div class="code-content"><code><span class="command">$</span> kubectl get pods -A
-<span class="command">$</span> kubectl describe pod <pod> -n production
-<span class="command">$</span> kubectl logs <pod> --tail=100 -f
+<span class="command">$</span> kubectl describe pod <pod> -n <namesapce>
+<span class="command">$</span> kubectl logs <pod> -n <namesapce> --tail=100 
+<span class="command">$</span> kubectl logs <pod> -n <namesapce> --previous
 <span class="command">$</span> kubectl exec -it <pod> -- sh
 <span class="command">$</span> kubectl port-forward svc/app 8080:80
 <span class="command">$</span> kubectl apply -f k8s/deployment.yaml
