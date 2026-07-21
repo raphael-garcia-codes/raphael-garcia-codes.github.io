@@ -1,255 +1,206 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="image/curriculo.png">
-    <title>Currículo - Raphael Garcia</title>
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #34495e;
-            --accent-color: #2980b9;
-            --text-color: #333333;
-            --bg-color: #f4f7f6;
-            --white: #ffffff;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background-color: var(--white);
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-
-        header {
-            border-bottom: 2px solid var(--accent-color);
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-        }
-
-        h1 {
-            color: var(--primary-color);
-            margin: 0 0 10px 0;
-            font-size: 2.5em;
-        }
-
-        .contact-info {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            color: var(--secondary-color);
-            font-size: 0.95em;
-        }
-
-        h2 {
-            color: var(--primary-color);
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
-            margin-top: 30px;
-        }
-
-        .job-card {
-            margin-bottom: 25px;
-        }
-
-        .job-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-
-        .job-title {
-            font-weight: bold;
-            font-size: 1.1em;
-            color: var(--accent-color);
-        }
-
-        .company-name {
-            font-weight: bold;
-            color: var(--secondary-color);
-        }
-
-        .job-date {
-            font-size: 0.9em;
-            color: #7f8c8d;
-        }
-
-        ul {
-            padding-left: 20px;
-            margin-top: 5px;
-        }
-
-        li {
-            margin-bottom: 8px;
-        }
-
-        .skills-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        /* Estilos para o botão do DevToolKit */
-        .btn-toolkit {
-            display: inline-block;
-            background-color: var(--accent-color);
-            color: var(--white);
-            padding: 12px 25px;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            margin-top: 15px;
-            transition: background-color 0.3s ease;
-        }
-
-        .btn-toolkit:hover {
-            background-color: var(--primary-color);
-        }
-
-        .projects-section {
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 30px;
-            border-top: 2px solid var(--accent-color);
-        }
-
-        @media (max-width: 600px) {
-            .skills-grid {
-                grid-template-columns: 1fr;
-            }
-            .job-header {
-                flex-direction: column;
-            }
-        }
-    </style>
+<title>Raphael Garcia - Currículo</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="image/curriculo.png">
+<link rel="stylesheet" href="css/w3.css">
+<link rel="stylesheet" href="css/fonts-roboto.css">
+<link rel="stylesheet" href="css/font-awesome-4.7.0.css">
+<style>
+html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif}
+.portfolio-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 0 16px;
+}
+.portfolio-links a {
+  min-width: 190px;
+  text-align: center;
+}
+</style>
 </head>
-<body>
+<body class="w3-light-grey">
 
-<div class="container">
-    <header>
-        <h1>Raphael Garcia</h1>
-        <div class="contact-info">
-            <span>Brasileiro, 25 anos - Solteiro</span>
-            <span>Rua Maria Alice Ancies, 65, Imirim, São Paulo - SP</span>
-            <span>Cel: 11 5701-1179</span>
-            <span>Email: raphael.garcia.sp@gmail.com</span>
+<!-- Page Container -->
+<div class="w3-content w3-margin-top" style="max-width:1400px;">
+
+  <!-- The Grid -->
+  <div class="w3-row-padding">
+
+    <!-- Left Column -->
+    <div class="w3-third">
+
+      <div class="w3-white w3-text-grey w3-card-4">
+        <div class="w3-display-container">
+          <img src="image/perfil.png" style="width:100%" alt="Foto de Raphael Garcia">
+          <div class="w3-display-bottomleft w3-container w3-text-black">
+            <h2>Raphael Garcia</h2>
+          </div>
         </div>
-    </header>
+        <div class="w3-container">
+          <p><i class="fa fa-briefcase fa-fw w3-margin-right w3-large w3-text-teal"></i>Tech Lead / Arquiteto de Sistemas</p>
+          <p><i class="fa fa-home fa-fw w3-margin-right w3-large w3-text-teal"></i>Imirim, São Paulo - SP</p>
+          <p><i class="fa fa-envelope fa-fw w3-margin-right w3-large w3-text-teal"></i>raphael.garcia.sp@gmail.com</p>
+          <p><i class="fa fa-phone fa-fw w3-margin-right w3-large w3-text-teal"></i>(11) 95701-1179</p>
+          <hr>
 
-    <section>
-        <h2>Qualificações e Habilidades</h2>
-        <ul>
-            <li>Possuo um perfil objetivo e estrategista, de comunicação clara e grande capacidade de trabalhar em equipe.</li>
-            <li>Experiência na área de desenvolvimento de sistemas, operação e infraestrutura em empresas de grande porte nos seguimentos Financeiro, Comercial e Telecomunicações.</li>
-            <li>Experiência na análise e reestruturação de rotinas para o ambiente de produção em plataformas distribuídas, criando, implantando, documentando e executando cargas de processamento.</li>
-            <li>Habilidades em organização, criatividade, administração de tempo, atenção, análise de problemas e capacidade de aprender a me tornar um profissional autodidata.</li>
-            <li>Seis anos de experiência no mercado Financeiro e de Telecomunicações.</li>
-            <li>Conhecimentos sólidos do negócio nas áreas de Seguros e Billing (arrecadação e cobrança).</li>
-            <li>Implantação de grandes projetos no mercado Financeiro, como o Descasamento de Base entre Corretora e Seguradora.</li>
-            <li>Implantação de grandes projetos de telecomunicações, incluindo Histórico Fácil, SMP11 Anatel e normas FEBRABAN.</li>
-        </ul>
-    </section>
-
-    <section>
-        <h2>Experiência Profissional</h2>
-
-        <div class="job-card">
-            <div class="job-header">
-                <div>
-                    <span class="company-name">TELVENT GLOBAL SERVICE (Outsourcing SANTANDER)</span>
-                    <br>
-                    <span class="job-title">Consultor de Sistemas Sr</span>
-                </div>
-                <span class="job-date">Dezembro de 2010 até os dias atuais</span>
+          <p class="w3-large"><b><i class="fa fa-asterisk fa-fw w3-margin-right w3-text-teal"></i>Competências</b></p>
+          <p>Liderança Técnica &amp; Gestão de Times</p>
+          <div class="w3-light-grey w3-round-xlarge w3-small">
+            <div class="w3-container w3-center w3-round-xlarge w3-teal" style="width:95%">95%</div>
+          </div>
+          <p>Arquitetura de Soluções</p>
+          <div class="w3-light-grey w3-round-xlarge w3-small">
+            <div class="w3-container w3-center w3-round-xlarge w3-teal" style="width:90%">
+              <div class="w3-center w3-text-white">90%</div>
             </div>
-            <ul>
-                <li>Atuação no Sistema de Seguros e Financeira, realizando gestão de projetos, análise funcional e elaboração de especificações.</li>
-                <li>Desenvolvimento e manutenção utilizando Forms 6i, Reports 6.0, PL/SQL e Oracle Designer 6i.</li>
-                <li>Atividades realizadas nos módulos de Pagamento de Comissões, Sinistros, Contabilidade, Emissão de Propostas e Cobrança.</li>
-            </ul>
+          </div>
+          <p>Open Finance / Open Banking</p>
+          <div class="w3-light-grey w3-round-xlarge w3-small">
+            <div class="w3-container w3-center w3-round-xlarge w3-teal" style="width:85%">85%</div>
+          </div>
+          <p>Oracle / PL-SQL / Banco de Dados</p>
+          <div class="w3-light-grey w3-round-xlarge w3-small">
+            <div class="w3-container w3-center w3-round-xlarge w3-teal" style="width:90%">90%</div>
+          </div>
+          <p>Observabilidade (Grafana, Dynatrace, Kibana)</p>
+          <div class="w3-light-grey w3-round-xlarge w3-small">
+            <div class="w3-container w3-center w3-round-xlarge w3-teal" style="width:80%">80%</div>
+          </div>
+          <br>
+
+          <p class="w3-large w3-text-theme"><b><i class="fa fa-globe fa-fw w3-margin-right w3-text-teal"></i>Idiomas</b></p>
+          <p>Português</p>
+          <div class="w3-light-grey w3-round-xlarge">
+            <div class="w3-round-xlarge w3-teal" style="height:24px;width:100%"></div>
+          </div>
+          <p>Inglês (nível intermediário, em andamento)</p>
+          <div class="w3-light-grey w3-round-xlarge">
+            <div class="w3-round-xlarge w3-teal" style="height:24px;width:50%"></div>
+          </div>
+          <br>
+
+          <p class="w3-large w3-text-theme"><b><i class="fa fa-info-circle fa-fw w3-margin-right w3-text-teal"></i>Dados Pessoais</b></p>
+          <p>Brasileiro, 39 anos, Casado</p>
+          <br>
         </div>
+      </div><br>
 
-        <div class="job-card">
-            <div class="job-header">
-                <div>
-                    <span class="company-name">DBA ENJOY YOUR BUSINESS (Outsourcing VIVO)</span>
-                    <br>
-                    <span class="job-title">Analista de Sistemas Sr</span>
-                </div>
-                <span class="job-date">Fevereiro de 2008 até Dezembro de 2010</span>
-            </div>
-            <ul>
-                <li>Atuação no sistema de faturamento pós-pago (BILLING), responsável por relatórios usando regras de negócio complexas.</li>
-                <li>Identificação de melhorias de performance em storage procedures, packages e functions aplicando polimorfismo nos scripts SQL e shellscript's schedulados no Control-M.</li>
-                <li>Suporte de 3º nível realizando análise de chamados e problemas.</li>
-            </ul>
+    <!-- End Left Column -->
+    </div>
+
+    <!-- Right Column -->
+    <div class="w3-twothird">
+
+      <div class="w3-container w3-card w3-white w3-margin-bottom">
+        <h2 class="w3-text-grey w3-padding-16"><i class="fa fa-suitcase fa-fw w3-margin-right w3-xxlarge w3-text-teal"></i>Experiência Profissional</h2>
+
+        <div class="w3-container">
+          <h5 class="w3-opacity"><b>Tech Manager / Neon Pagamentos</b></h5>
+          <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>Abr 2022 - <span class="w3-tag w3-teal w3-round">Atual</span></h6>
+          <p>Responsável pelo time técnico, com gestão direta de 5 pessoas, elaboração de OKRs junto ao time de produto e garantia das entregas dentro dos KPIs da área. Gestão de incidentes, problemas, mudanças e demandas, em parceria com Suporte, Desenvolvimento, Processos e Arquitetura. Principais realizações: certificações de segurança e conformidade Open Finance (OpenID e Raidiam API 2.0 Fase 3), dashboards de observabilidade (Grafana, Dynatrace, Zabbix, Kibana/ELK) e migrações tecnológicas (Bitbucket → GitHub, Redis 5 → 6, RabbitMQ → Amazon MQ).</p>
+          <hr>
         </div>
-
-        <div class="job-card">
-            <div class="job-header">
-                <div>
-                    <span class="company-name">TIVIT TERCERIZAO (Outsourcing OESP)</span>
-                    <br>
-                    <span class="job-title">Analista de Produção</span>
-                </div>
-                <span class="job-date">Maio de 2007 até Fevereiro de 2008</span>
-            </div>
-            <ul>
-                <li>Criação, schedulagem, monitoração e tratamentos de erros via Control-M/for sap e Workload.</li>
-                <li>Tratamento de erro de shellscripts, batchs e jobs no sap.</li>
-                <li>Garantia de qualidade dos produtos e insumos dos sistemas.</li>
-                <li>Criação de relatórios operacionais e análise de dados para decisões preventivas e corretivas.</li>
-                <li>Suporte operacional e abertura de chamados para áreas internas.</li>
-            </ul>
+        <div class="w3-container">
+          <h5 class="w3-opacity"><b>Arquiteto / Empréstimo Sim (Fintech Santander)</b></h5>
+          <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>Dez 2020 - Abr 2022</h6>
+          <p>Desenho de soluções técnicas para demandas corporativas, condução do fluxo de mudanças junto à governança e garantia das entregas em cada sprint no modelo ágil Scrum. Principais realizações: implantação da jornada de transmissão Open Finance Fase 2, implantação do produto Empréstimo com Garantia FGTS e ajustes na jornada mobile do Crédito Pessoal Auto.</p>
+          <hr>
         </div>
-
-        <div class="job-card">
-            <div class="job-header">
-                <div>
-                    <span class="company-name">CHIPTEK (Outsourcing VIVO)</span>
-                    <br>
-                    <span class="job-title">Operador de Computador</span>
-                </div>
-                <span class="job-date">Janeiro de 2006 até Maio de 2007</span>
-            </div>
-            <ul>
-                <li>Controle de versão, operacionalização de jobs, liberação de ativos e monitoramento.</li>
-                <li>Monitoramento de backup e restore (netbackup).</li>
-            </ul>
+        <div class="w3-container">
+          <h5 class="w3-opacity"><b>Consultor de Sistemas Sr / Banco Santander</b></h5>
+          <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>Dez 2016 - Dez 2020</h6>
+          <p>Responsável pelo fluxo de implantação dos produtos da seguradora, pelo tempo de processamento batch na malha Control-M e pela escalabilidade dos produtos. Principais realizações: implantação dos produtos Prestamista e SCP (Seguro Cartão Protegido), migração do sistema contábil para SAP Converged, migração da base para Oracle 11g e reestruturação da Apólice Específica.</p>
+          <hr>
         </div>
-    </section>
+        <div class="w3-container">
+          <h5 class="w3-opacity"><b>Consultor de Sistemas Sr / Telvent Global Service (Outsourcing Santander)</b></h5>
+          <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>Dez 2010 - Abr 2016</h6>
+          <p>Atuação nos sistemas de Seguros e Financeira, com gestão de projetos, análise funcional e especificações técnicas (DFD), utilizando Forms 6i, Reports 6.0, PL/SQL e Oracle Designer 6i, em módulos como Pagamento de Comissões, Sinistros, Contabilidade, Emissão de Propostas e Cobrança.</p>
+          <hr>
+        </div>
+        <div class="w3-container">
+          <h5 class="w3-opacity"><b>Analista de Sistemas Sr / DBA Enjoy Your Business (Outsourcing Vivo)</b></h5>
+          <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>Fev 2008 - Dez 2010</h6>
+          <p>Atuação no sistema de faturamento pós-pago (Billing), com criação e melhoria de relatórios, aplicação de regras de negócio (abertura, bloqueio e expiração de contas, ajustes, ciclos de faturamento) e ganhos de performance em stored procedures e scripts SQL agendados no Control-M.</p>
+          <hr>
+        </div>
+        <div class="w3-container">
+          <h5 class="w3-opacity"><b>Analista de Produção PL / Tivit Terceirização (Outsourcing OESP)</b></h5>
+          <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>Mai 2007 - Fev 2008</h6>
+          <p>Criação, agendamento, monitoração e tratamento de erros via Control-M for SAP e Workload, garantia da qualidade dos produtos gerados e criação de relatórios operacionais de performance, erros e paradas, com suporte às áreas clientes.</p>
+          <hr>
+        </div>
+        <div class="w3-container">
+          <h5 class="w3-opacity"><b>Analista de Produção Jr / Chiptek (Outsourcing Vivo)</b></h5>
+          <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>Jan 2006 - Mai 2007</h6>
+          <p>Controle de versão, operacionalização de jobs e monitoramento de backup (NetBackup, Legato, Data Protector). Acompanhamento da malha Control-M nos sistemas de faturamento, Data Warehouse, pré-pago, pós-pago e front office, com monitoramento dos ciclos de faturamento via Control-M e RVS.</p>
+          <hr>
+        </div>
+        <div class="w3-container">
+          <h5 class="w3-opacity"><b>Estagiário - Suporte Técnico 1º Nível / Master Autolocadora</b></h5>
+          <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>Jan 2004 - Jan 2006</h6>
+          <p>Início de carreira em suporte técnico de 1º nível.</p><br>
+        </div>
+      </div>
 
-    <!-- INÍCIO DA SESSÃO DO DEVTOOLKIT -->
-    <section class="projects-section">
-        <h2 style="border: none; margin-top: 0; padding-bottom: 0;">Meus Projetos</h2>
-        <p>Conheça também meu kit de ferramentas voltado para desenvolvedores:</p>
-        <a href="dev-tool-kit.html" target="_blank" class="btn-toolkit">
-            Acessar Dev Tool Kit
-        </a>
-        <a href="helper-commands.html" target="_blank" class="btn-toolkit">
-            Acessar Helper Commands
-        </a>
-        <a href="git-learning.html" target="_blank" class="btn-toolkit">
-            Acessar Git Learning
-        </a>
-    </section>
-    <!-- FIM DA SESSÃO DO DEVTOOLKIT -->
+      <div class="w3-container w3-card w3-white">
+        <h2 class="w3-text-grey w3-padding-16"><i class="fa fa-certificate fa-fw w3-margin-right w3-xxlarge w3-text-teal"></i>Formação e Treinamentos</h2>
+        <div class="w3-container">
+          <h5 class="w3-opacity"><b>Universidade Bandeirantes de São Paulo</b></h5>
+          <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>Graduação</h6>
+          <p>Tecnologia em Processamento de Dados</p>
+          <hr>
+        </div>
+        <div class="w3-container">
+          <h5 class="w3-opacity"><b>Universidade Nove de Julho</b></h5>
+          <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>Pós-Graduação</h6>
+          <p>Gerenciamento de Banco de Dados</p>
+          <hr>
+        </div>
+        <div class="w3-container">
+          <h5 class="w3-opacity"><b>PSM-I - Professional Scrum Master</b></h5>
+          <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>2019</h6>
+          <p>Certificação em gestão ágil de projetos</p>
+          <hr>
+        </div>
+        <div class="w3-container">
+          <p><b>Outros treinamentos técnicos:</b> Atita Treinamentos (2016) · CSS3 (2014) · Fundamentos ITIL de Gerenciamento Tecnológico (2010) · PT9 - Performance Tuning Oracle 9i (2008) · AD9B e AD9A - Administração de Banco de Dados Oracle 9i (2007) · PO9 - Desenvolvimento de Objetos com PL/SQL e Procedure Builder (2007) · OR9 - Introdução ao Oracle SQL e Extensões (2007) · Connect Direct, Connect Enterprise e Control Center - Sterling Commerce (2006) · Control-M Basics - BMC Software (2006)</p><br>
+        </div>
+      </div>
 
+      <div class="w3-container w3-card w3-white w3-margin-top w3-margin-bottom">
+        <h2 class="w3-text-grey w3-padding-16"><i class="fa fa-code fa-fw w3-margin-right w3-xxlarge w3-text-teal"></i>Meus Projetos</h2>
+        <p class="w3-center">Conheça também meu kit de ferramentas voltado para desenvolvedores:</p>
+        <div class="portfolio-links">
+          <a href="dev-tool-kit.html" target="_blank" rel="noopener noreferrer" class="w3-button w3-teal w3-round">
+            <i class="fa fa-wrench"></i>&nbsp; Dev Tool Kit
+          </a>
+          <a href="helper-commands.html" target="_blank" rel="noopener noreferrer" class="w3-button w3-teal w3-round">
+            <i class="fa fa-terminal"></i>&nbsp; Helper Commands
+          </a>
+          <a href="git-learning.html" target="_blank" rel="noopener noreferrer" class="w3-button w3-teal w3-round">
+            <i class="fa fa-git"></i>&nbsp; Git Learning
+          </a>
+        </div>
+      </div>
+
+    <!-- End Right Column -->
+    </div>
+
+  <!-- End Grid -->
+  </div>
+
+  <!-- End Page Container -->
 </div>
+
+<footer class="w3-container w3-teal w3-center w3-margin-top">
+  <p>Raphael Garcia &copy; 2026</p>
+</footer>
 
 </body>
 </html>
