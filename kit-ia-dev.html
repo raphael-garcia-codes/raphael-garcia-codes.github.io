@@ -445,6 +445,27 @@
   .dialog-close:hover{ color: var(--text); border-color: var(--amber); }
   .dialog-meta{ padding: 12px 22px 0; color: var(--text-dim); font-family: var(--mono); font-size: 11px; }
   .dialog-prompt{ margin: 14px 22px 22px; padding: 16px; white-space: pre-wrap; overflow: auto; max-height: 500px; background: #11141a; border: 1px solid var(--border); border-radius: 7px; font: 13px/1.65 var(--mono); color: var(--text); }
+  .mistakes-grid{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .mistake-card{ border: 1px solid var(--border); background: var(--surface); border-radius: 8px; padding: 18px; }
+  .mistake-card:hover{ border-color: var(--border-strong); }
+  .mistake-number{ display: block; margin-bottom: 8px; color: var(--amber); font: 600 12px var(--mono); }
+  .mistake-card h3{ margin: 0 0 7px; font-size: 15px; color: var(--text); }
+  .mistake-card p{ margin: 0; color: var(--text-dim); font-size: 13px; }
+  .recommendations{ margin-top: 22px; border: 1px solid var(--border); border-left: 3px solid var(--teal); background: var(--surface); border-radius: 8px; padding: 20px 22px; }
+  .recommendations h3{ margin: 0 0 12px; color: var(--teal); font-size: 15px; }
+  .recommendations ul{ margin: 0; padding-left: 22px; color: var(--text-dim); }
+  .recommendations li{ margin: 7px 0; }
+  .print-note{ color: var(--amber); font: 12px var(--mono); }
+  @media (max-width: 720px){ .mistakes-grid{ grid-template-columns: 1fr; } }
+  @media print{
+    header.topbar, #backToTop, .hero, #skills, #matriz-situacao, #matriz-projeto, #arquivos, #comandos, #troubleshooting, #prompts, footer{ display: none !important; }
+    body{ background: #fff; color: #111; }
+    main{ max-width: none; padding: 0; }
+    #nao-fazer{ display: block !important; }
+    .mistakes-grid{ grid-template-columns: repeat(2, 1fr); }
+    .mistake-card, .recommendations{ background: #fff; border-color: #bbb; }
+    .mistake-card h3, .mistake-card p, .recommendations ul{ color: #111; }
+  }
 
   footer{
     border-top: 1px solid var(--border);
@@ -491,13 +512,14 @@
     <div class="brand">kit-ia-dev<span class="cursor" aria-hidden="true"></span></div>
     <nav class="navpills" id="navpills" aria-label="Navegação do dashboard">
       <span class="nav-indicator" id="navIndicator" aria-hidden="true"></span>
-      <a href="#skills" data-target="skills">As 10 skills</a>
+      <a href="#skills" data-target="skills">Skills</a>
       <a href="#matriz-situacao" data-target="matriz-situacao">O que fazer agora</a>
       <a href="#matriz-projeto" data-target="matriz-projeto">Tipo de projeto</a>
       <a href="#arquivos" data-target="arquivos">Arquivos do kit</a>
-      <a href="#comandos" data-target="comandos">Comandos úteis</a>
-      <a href="#troubleshooting" data-target="troubleshooting">Problemas comuns</a>
+      <a href="#comandos" data-target="comandos">Comandos</a>
+      <a href="#troubleshooting" data-target="troubleshooting">Problemas</a>
       <a href="#prompts" data-target="prompts">Prompts IA</a>
+      <a href="#nao-fazer" data-target="nao-fazer">Erros</a>
     </nav>
     <button class="search-hint-btn" id="searchHintBtn" type="button">
       <span class="label">Buscar</span><kbd>/</kbd>
@@ -704,6 +726,23 @@
         <thead><tr><th>Prompt</th><th>Categoria</th><th>Tipo de projeto</th><th>Quando usar</th><th></th></tr></thead>
         <tbody id="promptsBody"><tr><td colspan="5" class="prompt-empty">carregando prompts...</td></tr></tbody>
       </table>
+    </div>
+  </section>
+
+  <section id="nao-fazer">
+    <div class="section-head reveal"><span class="num">08</span><h2>10 erros que fazem a IA gerar código ruim</h2></div>
+    <p class="section-sub reveal"><span class="print-note">1 página · imprimível · cole ao lado do teclado</span><br>Cada erro abaixo é uma causa real de código genérico, inconsistente ou inseguro — não apenas estilo de escrita: são comportamentos que mudam o resultado. Confira antes de pedir algo grande para a IA.</p>
+    <div class="mistakes-grid">
+      <article class="mistake-card reveal"><span class="mistake-number">01</span><h3>Não ter nenhum arquivo de contexto</h3><p>Toda sessão nova começa do zero — sem stack, convenções ou regras de negócio, a IA improvisa e você reexplica tudo de novo.</p></article>
+      <article class="mistake-card reveal"><span class="mistake-number">02</span><h3>Arquivo de contexto gigante e genérico</h3><p>Acima de aproximadamente 200 linhas, a precisão cai mesmo com a informação presente. Um arquivo genérico gerado automaticamente tende a sair pior do que não ter nenhum.</p></article>
+      <article class="mistake-card reveal"><span class="mistake-number">03</span><h3>Pedir sem contexto específico</h3><p>“Cria uma função que faça X” sem dizer stack, convenção ou onde isso encaixa no projeto real.</p></article>
+      <article class="mistake-card reveal"><span class="mistake-number">04</span><h3>Regra de negócio crítica não documentada</h3><p>A IA não tem como adivinhar o que “nunca pode dar errado” no seu domínio específico.</p></article>
+      <article class="mistake-card reveal"><span class="mistake-number">05</span><h3>Aceitar o código sem revisão</h3><p>Tratar a resposta da IA como pronta por padrão, sem checar se ela realmente resolveu o problema certo.</p></article>
+      <article class="mistake-card reveal"><span class="mistake-number">06</span><h3>Não dar à IA meios de verificar o próprio trabalho</h3><p>Sem teste automatizado ou hook de validação rodando, a IA não tem como confirmar se o que gerou realmente funciona — e não se autocorrige.</p></article>
+      <article class="mistake-card reveal"><span class="mistake-number">07</span><h3>Deixar a IA inventar convenção própria</h3><p>Sem padrão escrito, cada sessão decide nomenclatura e estrutura de um jeito diferente.</p></article>
+      <article class="mistake-card reveal"><span class="mistake-number">08</span><h3>Pular o planejamento em mudanças grandes</h3><p>Ir direto para o código numa feature não trivial costuma gerar retrabalho quando a abordagem não era a certa.</p></article>
+      <article class="mistake-card reveal"><span class="mistake-number">09</span><h3>Confiar em conhecimento desatualizado</h3><p>Regra antiga no seu contexto ou sugestão de API que a IA aprendeu antes do corte de treinamento — até 38% das sugestões usam algo já depreciado.</p></article>
+      <article class="mistake-card reveal"><span class="mistake-number">10</span><h3>Instalar skills/prompts de terceiros sem revisar</h3><p>Cerca de 1 em cada 3 skills públicas disponíveis hoje tem alguma falha de segurança real (Snyk, 2026).</p></article>
     </div>
   </section>
 
